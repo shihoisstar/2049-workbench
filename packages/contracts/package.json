@@ -1,0 +1,17 @@
+{
+  "name": "@wb/contracts",
+  "version": "0.1.0",
+  "private": true,
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "eslint .",
+    "test": "cd dist && node --test",
+    "contract-diff": "node dist/contract-diff.js",
+    "contract:snapshot": "tsc -p tsconfig.json && node dist/contract-diff.js --write"
+  },
+  "dependencies": { "zod": "^3.23.8" },
+  "devDependencies": { "typescript": "^5.6.0", "@types/node": "^22.0.0" }
+}

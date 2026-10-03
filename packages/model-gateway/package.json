@@ -1,0 +1,14 @@
+{
+  "name": "@wb/model-gateway",
+  "version": "0.1.0",
+  "private": true,
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "eslint .",
+    "test": "echo 'model-gateway: tests land with T2.1'"
+  },
+  "devDependencies": { "typescript": "^5.6.0" }
+}

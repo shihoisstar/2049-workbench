@@ -1,0 +1,53 @@
+# 仅本地开发依赖;生产用托管服务(参照 2049-agent 运维文档)。
+# postgres:业务表(Drizzle,T1.2)| redis:BullMQ 队列(INF-03)| minio:视频/素材对象存储。
+# 密码仅供本地,勿用于任何共享环境。
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: wb
+      POSTGRES_PASSWORD: wb_dev_only
+      POSTGRES_DB: workbench
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U wb -d workbench"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  minio:
+    image: minio/minio:latest
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: wb
+      MINIO_ROOT_PASSWORD: wb_dev_only
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - miniodata:/data
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  pgdata:
+  redisdata:
+  miniodata:

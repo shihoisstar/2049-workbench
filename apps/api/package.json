@@ -1,0 +1,16 @@
+{
+  "name": "@wb/api",
+  "version": "0.1.0",
+  "private": true,
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "eslint .",
+    "test": "echo 'api: tests land with T1.1'",
+    "dev": "echo 'api dev stub: T1.1 落地真实服务框架后替换'"
+  },
+  "dependencies": { "@wb/contracts": "workspace:*" },
+  "devDependencies": { "typescript": "^5.6.0" }
+}
