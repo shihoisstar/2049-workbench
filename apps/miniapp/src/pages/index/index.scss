@@ -1,0 +1,171 @@
+@import '../../styles/tokens.scss';
+
+.index-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  padding: 0 $wb-space-4 $wb-space-6;
+  background: $wb-color-bg;
+}
+
+.index-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: $wb-space-4 0;
+}
+
+.index-brand {
+  font-size: $wb-font-md;
+  font-weight: 700;
+  color: $wb-color-ink;
+  letter-spacing: 0.5px;
+}
+
+.index-hero {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: $wb-space-6 $wb-space-5;
+  border-radius: $wb-radius-lg;
+  background: linear-gradient(160deg, #26262c 0%, #141418 100%);
+  overflow: hidden;
+}
+
+.index-hero-glow {
+  position: absolute;
+  top: -80px;
+  right: -56px;
+  width: 220px;
+  height: 220px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(250, 44, 25, 0.5), transparent 70%);
+}
+
+.index-hero-title {
+  position: relative;
+  font-size: $wb-font-xl;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.index-hero-sub {
+  position: relative;
+  margin-top: $wb-space-2;
+  font-size: $wb-font-base;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.index-hero-pill {
+  position: relative;
+  margin-top: $wb-space-3;
+  padding: $wb-space-1 $wb-space-3;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.index-hero-pill-text {
+  font-size: $wb-font-sm;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.index-hero-btn {
+  position: relative;
+  width: 100%;
+  margin-top: $wb-space-5;
+}
+
+.index-section-title {
+  margin: $wb-space-5 0 $wb-space-3;
+  font-size: $wb-font-md;
+  font-weight: 600;
+  color: $wb-color-ink;
+}
+
+.index-feature {
+  display: flex;
+  align-items: center;
+  padding: $wb-space-3 $wb-space-4;
+  margin-bottom: $wb-space-2;
+  border-radius: $wb-radius-md;
+  background: $wb-color-card;
+}
+
+.index-feature-mark {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  margin-right: $wb-space-3;
+  border-radius: $wb-radius-sm;
+  background: rgba(250, 44, 25, 0.08);
+}
+
+.index-feature-mark-text {
+  font-size: $wb-font-md;
+  font-weight: 600;
+  color: $wb-color-primary;
+}
+
+.index-feature-body {
+  display: flex;
+  flex-direction: column;
+}
+
+.index-feature-title {
+  font-size: $wb-font-base;
+  font-weight: 600;
+  color: $wb-color-ink;
+}
+
+.index-feature-desc {
+  margin-top: 2px;
+  font-size: $wb-font-sm;
+  color: $wb-color-ink-2;
+}
+
+.index-quota {
+  margin-top: $wb-space-4;
+  padding: $wb-space-4;
+  border-radius: $wb-radius-md;
+  background: $wb-color-card;
+}
+
+.index-quota-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: $wb-space-3;
+}
+
+.index-quota-label {
+  font-size: $wb-font-base;
+  font-weight: 600;
+  color: $wb-color-ink;
+}
+
+.index-quota-value {
+  font-size: $wb-font-sm;
+  color: $wb-color-primary;
+  font-weight: 600;
+}
+
+.index-quota-note {
+  display: block;
+  margin-top: $wb-space-2;
+  font-size: $wb-font-xs;
+  color: $wb-color-ink-3;
+}
+
+.index-footer {
+  display: flex;
+  justify-content: center;
+  margin-top: $wb-space-6;
+}
+
+.index-footer-text {
+  font-size: $wb-font-xs;
+  color: $wb-color-ink-3;
+}

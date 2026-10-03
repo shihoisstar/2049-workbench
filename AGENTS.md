@@ -8,7 +8,7 @@
 | --- | --- |
 | `apps/api` @wb/api | 后端服务(框架随 T1.1 落地) |
 | `apps/admin` @wb/admin | 运营后台(后续工单) |
-| `apps/miniapp` `apps/h5` | Taro 双端前端(T0.2 初始化,当前空目录) |
+| `apps/miniapp` @wb/miniapp | Taro 双端前端:**一码双出** `dist/weapp`+`dist/h5`(无独立 H5 工程) |
 | `packages/contracts` @wb/contracts | **契约唯一事实源**:Zod schema + 统一错误码;双端类型由这里生成,禁止手抄 |
 | `packages/domain` @wb/domain | 领域模型与状态机(INF-02/INF-03 落点) |
 | `packages/model-gateway` @wb/model-gateway | 模型网关(T2.1 自 2049-agent 瘦身移植) |

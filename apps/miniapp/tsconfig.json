@@ -1,0 +1,9 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "allowUmdGlobalAccess": true,
+    "types": ["@tarojs/taro", "@types/webpack-env", "@types/node"]
+  },
+  "include": ["src", "config", "global.d.ts"]
+}

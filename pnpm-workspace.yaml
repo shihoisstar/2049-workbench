@@ -1,3 +1,16 @@
 packages:
   - "apps/*"
   - "packages/*"
+# pnpm v11 构建脚本策略(单一声明处,勿在 package.json 重复)。
+# @nutui/nutui-react-taro=false:其 postinstall 经查执行 @jmfe/npm-usage-stats-tool
+# ("latest" 浮动依赖的装机遥测,execSync+吞错)。NutUI 出干净稳定版前不放行,
+# 详见 apps/miniapp/AGENTS.md。其余为 Taro 工具链原生二进制,必需。
+allowBuilds:
+  '@nutui/nutui-react-taro': false
+  '@parcel/watcher': true
+  '@swc/core': true
+  '@tarojs/binding': true
+  '@tarojs/cli': true
+  core-js: true
+  core-js-pure: true
+  esbuild: true

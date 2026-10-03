@@ -7,4 +7,17 @@ export default tseslint.config(
   { ignores: ['**/dist/**', '**/node_modules/**', '**/*.mjs'] },
   js.configs.recommended,
   ...tseslint.configs.recommended,
+  {
+    // Node CJS 配置文件(babel.config.js 等)的内置全局
+    files: ['**/*.js', '**/*.cjs'],
+    languageOptions: {
+      globals: {
+        module: 'readonly',
+        process: 'readonly',
+        require: 'readonly',
+        console: 'readonly',
+        __dirname: 'readonly',
+      },
+    },
+  },
 );

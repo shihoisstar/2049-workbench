@@ -1,0 +1,29 @@
+// Design tokens —— ADR-0004「UI = 组件库拼装」第 1 步:主色 / 8px 网格 / 圆角 / 字号阶梯。
+// 主色沿用 NutUI 默认品牌红:组件零覆写、全站一致;品牌色定稿后只改这里。
+$wb-color-primary: #fa2c19;
+$wb-color-ink: #1a1a1a;
+$wb-color-ink-2: #6b7280;
+$wb-color-ink-3: #9ca3af;
+$wb-color-bg: #f5f6f7;
+$wb-color-card: #ffffff;
+
+// 8px 网格(4px 半格)
+$wb-space-1: 4px;
+$wb-space-2: 8px;
+$wb-space-3: 12px;
+$wb-space-4: 16px;
+$wb-space-5: 20px;
+$wb-space-6: 24px;
+
+// 圆角阶梯
+$wb-radius-sm: 8px;
+$wb-radius-md: 12px;
+$wb-radius-lg: 16px;
+
+// 字号阶梯(375 设计基准)
+$wb-font-xs: 11px;
+$wb-font-sm: 12px;
+$wb-font-base: 14px;
+$wb-font-md: 16px;
+$wb-font-lg: 20px;
+$wb-font-xl: 26px;

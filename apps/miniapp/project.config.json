@@ -1,0 +1,15 @@
+{
+  "miniprogramRoot": "dist/weapp/",
+  "srcMiniprogramRoot": "dist/weapp/",
+  "projectname": "2049chupian",
+  "description": "2049出片 Taro 双端壳(T0.2)",
+  "appid": "touristappid",
+  "setting": {
+    "es6": false,
+    "postcss": false,
+    "minified": false,
+    "urlCheck": true
+  },
+  "compileType": "miniprogram",
+  "libVersion": "3.7.12"
+}
