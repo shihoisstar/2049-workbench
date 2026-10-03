@@ -1,4 +1,4 @@
-import { integer, pgTable, text, timestamp, uniqueIndex, uuid } from 'drizzle-orm/pg-core';
+import { boolean, integer, pgTable, text, timestamp, uniqueIndex, uuid } from 'drizzle-orm/pg-core';
 
 /**
  * 用户表(INF-01 / T1.1)。
@@ -44,7 +44,7 @@ export const creditLogs = pgTable(
   (t) => [uniqueIndex('credit_logs_billing_key_type_uq').on(t.billingKey, t.type)],
 );
 
-/** 用量成本账本(三账本之二):模型成本核算,与余额账本经 billingKey 关联。支付账本随 T1.4。 */
+/** 用量成本账本(三账本之二):模型成本核算,与余额账本经 billingKey 关联。 */
 export const usageLogs = pgTable('usage_logs', {
   id: uuid('id').primaryKey().defaultRandom(),
   userId: uuid('user_id')
@@ -54,6 +54,33 @@ export const usageLogs = pgTable('usage_logs', {
   model: text('model').notNull(),
   estimatedCostCents: integer('estimated_cost_cents').notNull(),
   actualCostCents: integer('actual_cost_cents'),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+});
+
+/** 充值档位(T1.4;定价 placeholder,随 BIZ-01/02 成本推演校准;seed 进迁移幂等插入)。 */
+export const creditPackages = pgTable('credit_packages', {
+  id: text('id').primaryKey(),
+  label: text('label').notNull(),
+  credits: integer('credits').notNull(),
+  priceCents: integer('price_cents').notNull(),
+  active: boolean('active').notNull().default(true),
+  sortOrder: integer('sort_order').notNull().default(0),
+});
+
+/** 订单(三账本之三:支付单据;微信回调明细/退款随商户号接入)。 */
+export const orders = pgTable('orders', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  userId: uuid('user_id')
+    .notNull()
+    .references(() => users.id),
+  packageId: text('package_id')
+    .notNull()
+    .references(() => creditPackages.id),
+  credits: integer('credits').notNull(),
+  priceCents: integer('price_cents').notNull(),
+  status: text('status').notNull().default('created'),
+  transactionId: text('transaction_id'),
+  paidAt: timestamp('paid_at', { withTimezone: true }),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 });
 

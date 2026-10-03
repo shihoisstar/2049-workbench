@@ -4,4 +4,12 @@ export type { ErrorCodeValue } from './errors';
 export { HealthResponse } from './health';
 export { GuestLoginRequest, GuestSession } from './auth';
 export { WalletEntry, WalletSummary } from './wallet';
+export {
+  CreateOrderRequest,
+  OrderStatus,
+  StoreOrder,
+  StoreOrders,
+  StorePackage,
+  StorePackages,
+} from './store';
 export { buildOpenApiDocument, endpointList } from './openapi';

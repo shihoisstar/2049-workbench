@@ -5,7 +5,9 @@ import fjwt from '@fastify/jwt';
 import { createDb } from './db';
 import { registerAuthRoutes } from './routes/auth';
 import { registerHealthRoutes } from './routes/health';
+import { registerStoreRoutes } from './routes/store';
 import { registerWalletRoutes } from './routes/wallet';
+import { StoreService } from './store';
 import { WalletService } from './wallet';
 
 export interface AppOptions {
@@ -29,6 +31,7 @@ export function buildApp(opts: AppOptions): FastifyInstance {
   registerHealthRoutes(app);
   registerAuthRoutes(app, db, wallet);
   registerWalletRoutes(app, wallet);
+  registerStoreRoutes(app, new StoreService(db, wallet));
 
   return app;
 }

@@ -10,3 +10,6 @@ export function createDb(databaseUrl: string) {
 }
 
 export type Db = ReturnType<typeof createDb>['db'];
+
+/** 事务句柄类型,从 Db 推导(避免手写泛型与实际 schema 漂移)。 */
+export type Tx = Parameters<Parameters<Db['transaction']>[0]>[0];

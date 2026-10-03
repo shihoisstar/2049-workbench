@@ -5,6 +5,7 @@ import { zodToJsonSchema } from 'zod-to-json-schema';
 import { GuestLoginRequest, GuestSession } from './auth';
 import { ErrorBody } from './errors';
 import { HealthResponse } from './health';
+import { CreateOrderRequest, StoreOrder, StoreOrders, StorePackages } from './store';
 import { WalletSummary } from './wallet';
 import { API_VERSION } from './version';
 
@@ -83,12 +84,69 @@ export function buildOpenApiDocument() {
           },
         },
       },
+      '/v1/store/packages': {
+        get: {
+          summary: '充值档位列表(T1.4)',
+          responses: {
+            '200': {
+              description: '档位',
+              content: { 'application/json': { schema: ref('StorePackages') } },
+            },
+          },
+        },
+      },
+      '/v1/store/orders': {
+        post: {
+          summary: '创建充值订单(T1.4;微信支付参数随商户号接入,当前阻塞墙)',
+          security: [{ bearerAuth: [] }],
+          requestBody: {
+            required: true,
+            content: { 'application/json': { schema: ref('CreateOrderRequest') } },
+          },
+          responses: {
+            '201': {
+              description: '订单已创建',
+              content: { 'application/json': { schema: ref('StoreOrder') } },
+            },
+            '401': {
+              description: '未登录',
+              content: { 'application/json': { schema: ref('ErrorBody') } },
+            },
+          },
+        },
+        get: {
+          summary: '我的订单列表(T1.4)',
+          security: [{ bearerAuth: [] }],
+          responses: {
+            '200': {
+              description: '订单',
+              content: { 'application/json': { schema: ref('StoreOrders') } },
+            },
+          },
+        },
+      },
+      '/v1/store/orders/{id}/dev-pay': {
+        post: {
+          summary: 'DEV-ONLY:模拟支付回调(NODE_ENV=production 时 404;真实微信回调随商户号)',
+          security: [{ bearerAuth: [] }],
+          responses: {
+            '200': {
+              description: '订单已支付并入账',
+              content: { 'application/json': { schema: ref('StoreOrder') } },
+            },
+          },
+        },
+      },
     },
     components: {
       securitySchemes: {
         bearerAuth: { type: 'http', scheme: 'bearer', bearerFormat: 'JWT' },
       },
       schemas: {
+        StorePackages: zodToJsonSchema(StorePackages, { target: 'openApi3' }),
+        CreateOrderRequest: zodToJsonSchema(CreateOrderRequest, { target: 'openApi3' }),
+        StoreOrder: zodToJsonSchema(StoreOrder, { target: 'openApi3' }),
+        StoreOrders: zodToJsonSchema(StoreOrders, { target: 'openApi3' }),
         WalletSummary: zodToJsonSchema(WalletSummary, { target: 'openApi3' }),
         HealthResponse: zodToJsonSchema(HealthResponse, { target: 'openApi3' }),
         ErrorBody: zodToJsonSchema(ErrorBody, { target: 'openApi3' }),

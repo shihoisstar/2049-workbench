@@ -8,6 +8,13 @@
       "when": 1791040921084,
       "tag": "0000_great_vulture",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1791042928276,
+      "tag": "0001_perpetual_dagger",
+      "breakpoints": true
     }
   ]
 }

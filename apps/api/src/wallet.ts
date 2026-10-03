@@ -2,11 +2,8 @@ import { and, desc, eq, sum } from 'drizzle-orm';
 import { ErrorCode } from '@wb/contracts';
 import { canHold, settleAdjustment } from '@wb/domain';
 
-import type { Db } from './db';
+import type { Db, Tx } from './db';
 import { creditLogs, usageLogs, wallets } from './schema';
-
-/** 事务句柄类型,从 Db 推导(避免手写泛型与实际 schema 漂移)。 */
-type Tx = Parameters<Parameters<Db['transaction']>[0]>[0];
 
 export type WalletEntry = {
   billingKey: string;
@@ -26,15 +23,18 @@ export class WalletService {
 
   /** 发放(注册赠送/充值入账)。幂等:同 billingKey 重复调用返回 false。 */
   async grant(userId: string, amount: number, billingKey: string, remark?: string): Promise<boolean> {
+    return this.db.transaction((tx) => this.grantTx(tx, userId, amount, billingKey, remark));
+  }
+
+  /** 跨服务事务内入账(如订单支付:订单置 paid 与积分入账同一事务)。幂等同 grant。 */
+  async grantTx(tx: Tx, userId: string, amount: number, billingKey: string, remark?: string): Promise<boolean> {
     if (amount <= 0) throw new Error('grant amount must be positive');
-    return this.db.transaction(async (tx) => {
-      const dup = await this.findEntry(tx, userId, billingKey, 'grant');
-      if (dup) return false;
-      const inserted = await this.insertEntry(tx, userId, { billingKey, type: 'grant', amount, remark });
-      if (!inserted) return false;
-      await this.applyBalance(tx, userId, amount);
-      return true;
-    });
+    const dup = await this.findEntry(tx, userId, billingKey, 'grant');
+    if (dup) return false;
+    const inserted = await this.insertEntry(tx, userId, { billingKey, type: 'grant', amount, remark });
+    if (!inserted) return false;
+    await this.applyBalance(tx, userId, amount);
+    return true;
   }
 
   /** 冻结(生成前,估算上限)。余额不足抛 INSUFFICIENT_CREDITS;重复 billingKey 幂等返回(已冻结)。 */

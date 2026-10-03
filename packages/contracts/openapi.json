@@ -122,6 +122,107 @@
           }
         }
       }
+    },
+    "/v1/store/packages": {
+      "get": {
+        "summary": "充值档位列表(T1.4)",
+        "responses": {
+          "200": {
+            "description": "档位",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StorePackages"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/store/orders": {
+      "post": {
+        "summary": "创建充值订单(T1.4;微信支付参数随商户号接入,当前阻塞墙)",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateOrderRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "订单已创建",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StoreOrder"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "未登录",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "summary": "我的订单列表(T1.4)",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "订单",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StoreOrders"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/store/orders/{id}/dev-pay": {
+      "post": {
+        "summary": "DEV-ONLY:模拟支付回调(NODE_ENV=production 时 404;真实微信回调随商户号)",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "订单已支付并入账",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StoreOrder"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -133,6 +234,153 @@
       }
     },
     "schemas": {
+      "StorePackages": {
+        "type": "object",
+        "properties": {
+          "packages": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "label": {
+                  "type": "string"
+                },
+                "credits": {
+                  "type": "integer",
+                  "exclusiveMinimum": true,
+                  "minimum": 0
+                },
+                "priceCents": {
+                  "type": "integer",
+                  "exclusiveMinimum": true,
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "id",
+                "label",
+                "credits",
+                "priceCents"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "packages"
+        ],
+        "additionalProperties": false
+      },
+      "CreateOrderRequest": {
+        "type": "object",
+        "properties": {
+          "packageId": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "packageId"
+        ],
+        "additionalProperties": false
+      },
+      "StoreOrder": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "packageId": {
+            "type": "string"
+          },
+          "credits": {
+            "type": "integer",
+            "exclusiveMinimum": true,
+            "minimum": 0
+          },
+          "priceCents": {
+            "type": "integer",
+            "exclusiveMinimum": true,
+            "minimum": 0
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "created",
+              "paid",
+              "closed"
+            ]
+          },
+          "createdAt": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "packageId",
+          "credits",
+          "priceCents",
+          "status",
+          "createdAt"
+        ],
+        "additionalProperties": false
+      },
+      "StoreOrders": {
+        "type": "object",
+        "properties": {
+          "orders": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "packageId": {
+                  "type": "string"
+                },
+                "credits": {
+                  "type": "integer",
+                  "exclusiveMinimum": true,
+                  "minimum": 0
+                },
+                "priceCents": {
+                  "type": "integer",
+                  "exclusiveMinimum": true,
+                  "minimum": 0
+                },
+                "status": {
+                  "type": "string",
+                  "enum": [
+                    "created",
+                    "paid",
+                    "closed"
+                  ]
+                },
+                "createdAt": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "packageId",
+                "credits",
+                "priceCents",
+                "status",
+                "createdAt"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "orders"
+        ],
+        "additionalProperties": false
+      },
       "WalletSummary": {
         "type": "object",
         "properties": {
