@@ -8,6 +8,15 @@ export default tseslint.config(
   js.configs.recommended,
   ...tseslint.configs.recommended,
   {
+    rules: {
+      // 桩函数/预留参数用 _ 前缀豁免(工程约定)
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
+      ],
+    },
+  },
+  {
     // Node CJS 配置文件(babel.config.js 等)的内置全局
     files: ['**/*.js', '**/*.cjs'],
     languageOptions: {

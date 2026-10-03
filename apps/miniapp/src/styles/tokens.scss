@@ -1,11 +1,23 @@
-// Design tokens —— ADR-0004「UI = 组件库拼装」第 1 步:主色 / 8px 网格 / 圆角 / 字号阶梯。
-// 主色沿用 NutUI 默认品牌红:组件零覆写、全站一致;品牌色定稿后只改这里。
-$wb-color-primary: #fa2c19;
+// Design tokens —— v1 基线:黑红商业化(2026-10-03 负责人定调,参考其提供的 v2 截图)。
+// 黑红 = 营销/金融类经典"促销力 + 高级感"配色;与 NutUI 默认品牌红天然一致,组件零覆写。
+// 布局/交互仍对标竞品截图(ADR-0004);视觉走自有体系,换肤只改本文件。
+$wb-color-primary: #e8112d;
+$wb-color-primary-gradient: linear-gradient(90deg, #ff4d5e 0%, #d90429 100%);
+
+// 中性色
 $wb-color-ink: #1a1a1a;
-$wb-color-ink-2: #6b7280;
-$wb-color-ink-3: #9ca3af;
-$wb-color-bg: #f5f6f7;
+$wb-color-ink-2: #999999;
+$wb-color-ink-3: #b0b0b0;
+$wb-color-bg: #f2f3f5;
 $wb-color-card: #ffffff;
+$wb-color-border: #e5e5e5;
+
+// Hero 暗卡:近黑对角渐变 + 右上暗红光晕
+$wb-hero-gradient: linear-gradient(135deg, #0d0d0f 0%, #1a1a1e 100%);
+$wb-hero-glow: rgba(139, 0, 18, 0.55);
+
+// 图标块:浅粉底 + 品牌红字
+$wb-mark-bg: #ffe9eb;
 
 // 8px 网格(4px 半格)
 $wb-space-1: 4px;

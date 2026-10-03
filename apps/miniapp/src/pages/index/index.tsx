@@ -1,6 +1,6 @@
 import { View, Text } from '@tarojs/components';
 import { showToast } from '@tarojs/taro';
-import { Button, Progress, Tag } from '@nutui/nutui-react-taro';
+import { Progress, Tag } from '@nutui/nutui-react-taro';
 
 import './index.scss';
 
@@ -10,13 +10,16 @@ const FEATURES = [
   { key: 'credit', mark: '积', title: '积分透明', desc: '生成前估算,失败即时退积分' },
 ];
 
-/** T0.2 验收页:NutUI 组件拼装 + design tokens(ADR-0004:UI=组装,不自研组件)。 */
+/**
+ * T0.2 验收壳页 —— 视觉:自有黑红商业化体系(tokens.scss v1 基线);
+ * 布局/交互对标 docs/对标APP截图(ADR-0004)。真实交互随 T1.3-T3.2 逐屏落地。
+ */
 export default function Index() {
   return (
     <View className="index-page">
       <View className="index-header">
         <Text className="index-brand">2049出片</Text>
-        <Tag>工程壳</Tag>
+        <Tag>工具内测</Tag>
       </View>
 
       <View className="index-hero">
@@ -26,13 +29,12 @@ export default function Index() {
         <View className="index-hero-pill">
           <Text className="index-hero-pill-text">新用户免费 1 条 480P 预览</Text>
         </View>
-        <Button
-          type="primary"
+        <View
           className="index-hero-btn"
           onClick={() => showToast({ title: '生成流水线随 M2 上线', icon: 'none' })}
         >
-          免费开始创作
-        </Button>
+          <Text className="index-hero-btn-text">免费开始创作</Text>
+        </View>
       </View>
 
       <Text className="index-section-title">今天能做什么</Text>

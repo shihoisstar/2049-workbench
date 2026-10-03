@@ -1,0 +1,178 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "2049出片 API",
+    "version": "v1",
+    "description": "契约唯一事实源 @wb/contracts 生成;禁止手改 openapi.json。"
+  },
+  "servers": [
+    {
+      "url": "/",
+      "description": "相对路径,按部署环境替换"
+    }
+  ],
+  "paths": {
+    "/healthz": {
+      "get": {
+        "summary": "存活探测(LB / CI)",
+        "responses": {
+          "200": {
+            "description": "健康",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/auth/guest": {
+      "post": {
+        "summary": "游客登录(鉴权骨架,实现随 T1.1)",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GuestLoginRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "会话签发",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GuestSession"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "鉴权失败",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "HealthResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "ok",
+              "degraded"
+            ]
+          },
+          "apiVersion": {
+            "type": "string",
+            "enum": [
+              "v1"
+            ]
+          },
+          "uptimeSec": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "status",
+          "apiVersion",
+          "uptimeSec"
+        ],
+        "additionalProperties": false
+      },
+      "ErrorBody": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "number",
+            "enum": [
+              1000,
+              1001,
+              1002,
+              1003,
+              2001,
+              2002,
+              2003,
+              3001,
+              3002,
+              3003,
+              3004,
+              4001,
+              4002,
+              4003,
+              5001,
+              5002
+            ]
+          },
+          "message": {
+            "type": "string"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "details": {}
+        },
+        "required": [
+          "code",
+          "message"
+        ],
+        "additionalProperties": false
+      },
+      "GuestLoginRequest": {
+        "type": "object",
+        "properties": {
+          "deviceId": {
+            "type": "string",
+            "minLength": 8,
+            "maxLength": 64
+          }
+        },
+        "required": [
+          "deviceId"
+        ],
+        "additionalProperties": false
+      },
+      "GuestSession": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string",
+            "minLength": 1
+          },
+          "userId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "expiresInSec": {
+            "type": "integer",
+            "exclusiveMinimum": true,
+            "minimum": 0
+          }
+        },
+        "required": [
+          "token",
+          "userId",
+          "expiresInSec"
+        ],
+        "additionalProperties": false
+      }
+    }
+  }
+}

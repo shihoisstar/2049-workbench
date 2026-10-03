@@ -1,6 +1,8 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { GuestLoginRequest, GuestSession } from './auth';
 import { API_VERSION, ErrorBody, ErrorCode, HealthResponse } from './index';
+import { endpointList } from './openapi';
 
 /**
  * 契约快照门禁:把本包对外契约序列化为规范 JSON,与 contract-snapshot.json 比对。
@@ -31,6 +33,9 @@ const snapshot = stable({
   errorBodyFields: Object.keys(ErrorBody.shape).sort(),
   healthFields: Object.keys(HealthResponse.shape).sort(),
   healthStatuses: enumOptions(HealthResponse.shape.status),
+  authRequestFields: Object.keys(GuestLoginRequest.shape).sort(),
+  authSessionFields: Object.keys(GuestSession.shape).sort(),
+  endpoints: endpointList(),
 });
 
 if (process.argv[2] === '--write') {

@@ -6,3 +6,5 @@
 import { API_VERSION } from '@wb/contracts';
 
 export const API_ENTRY_STUB = { apiVersion: API_VERSION } as const;
+
+export { healthResponse } from './health';

@@ -22,6 +22,7 @@
   letter-spacing: 0.5px;
 }
 
+/* Hero:近黑对角渐变 + 右上暗红光晕(高级感锚点) */
 .index-hero {
   position: relative;
   display: flex;
@@ -29,7 +30,7 @@
   align-items: flex-start;
   padding: $wb-space-6 $wb-space-5;
   border-radius: $wb-radius-lg;
-  background: linear-gradient(160deg, #26262c 0%, #141418 100%);
+  background: $wb-hero-gradient;
   overflow: hidden;
 }
 
@@ -40,7 +41,7 @@
   width: 220px;
   height: 220px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(250, 44, 25, 0.5), transparent 70%);
+  background: radial-gradient(circle, $wb-hero-glow, transparent 70%);
 }
 
 .index-hero-title {
@@ -70,10 +71,24 @@
   color: rgba(255, 255, 255, 0.85);
 }
 
+/* CTA:红色渐变胶囊 + 轻投影 */
 .index-hero-btn {
   position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: 100%;
   margin-top: $wb-space-5;
+  padding: $wb-space-3 0;
+  border-radius: 999px;
+  background: $wb-color-primary-gradient;
+  box-shadow: 0 8px 20px rgba(217, 4, 41, 0.32);
+}
+
+.index-hero-btn-text {
+  font-size: $wb-font-md;
+  font-weight: 700;
+  color: #ffffff;
 }
 
 .index-section-title {
@@ -83,6 +98,7 @@
   color: $wb-color-ink;
 }
 
+/* 功能列表:白卡 + 细描边 */
 .index-feature {
   display: flex;
   align-items: center;
@@ -90,6 +106,7 @@
   margin-bottom: $wb-space-2;
   border-radius: $wb-radius-md;
   background: $wb-color-card;
+  border: 1px solid $wb-color-border;
 }
 
 .index-feature-mark {
@@ -100,7 +117,7 @@
   height: 40px;
   margin-right: $wb-space-3;
   border-radius: $wb-radius-sm;
-  background: rgba(250, 44, 25, 0.08);
+  background: $wb-mark-bg;
 }
 
 .index-feature-mark-text {
@@ -131,6 +148,7 @@
   padding: $wb-space-4;
   border-radius: $wb-radius-md;
   background: $wb-color-card;
+  border: 1px solid $wb-color-border;
 }
 
 .index-quota-row {
@@ -148,8 +166,8 @@
 
 .index-quota-value {
   font-size: $wb-font-sm;
-  color: $wb-color-primary;
   font-weight: 600;
+  color: $wb-color-primary;
 }
 
 .index-quota-note {
