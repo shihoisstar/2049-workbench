@@ -91,6 +91,19 @@
   color: #ffffff;
 }
 
+.index-hero-link {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  margin-top: $wb-space-3;
+}
+
+.index-hero-link-text {
+  font-size: $wb-font-sm;
+  color: rgba(255, 255, 255, 0.6);
+}
+
 .index-section-title {
   margin: $wb-space-5 0 $wb-space-3;
   font-size: $wb-font-md;

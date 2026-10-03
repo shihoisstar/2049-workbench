@@ -1,5 +1,5 @@
 import { View, Text } from '@tarojs/components';
-import { showToast } from '@tarojs/taro';
+import Taro, { showToast } from '@tarojs/taro';
 import { Progress, Tag } from '@nutui/nutui-react-taro';
 
 import './index.scss';
@@ -34,6 +34,9 @@ export default function Index() {
           onClick={() => showToast({ title: '生成流水线随 M2 上线', icon: 'none' })}
         >
           <Text className="index-hero-btn-text">免费开始创作</Text>
+        </View>
+        <View className="index-hero-link" onClick={() => Taro.navigateTo({ url: '/pages/mine/index' })}>
+          <Text className="index-hero-link-text">我的积分与明细 ›</Text>
         </View>
       </View>
 

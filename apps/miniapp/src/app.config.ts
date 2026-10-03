@@ -1,9 +1,9 @@
 export default defineAppConfig({
-  pages: ['pages/index/index'],
+  pages: ['pages/index/index', 'pages/mine/index'],
   window: {
     navigationBarTitleText: '2049出片',
     navigationBarBackgroundColor: '#ffffff',
     navigationBarTextStyle: 'black',
-    backgroundColor: '#f5f6f7',
+    backgroundColor: '#f2f3f5',
   },
 });

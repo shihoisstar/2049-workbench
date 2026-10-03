@@ -4,14 +4,18 @@ import { ErrorCode, GuestLoginRequest, type GuestSession } from '@wb/contracts';
 
 import type { Db } from '../db';
 import { users } from '../schema';
+import type { WalletService } from '../wallet';
 
 /** 会话有效期:游客态 7 天,过期前端静默重登(契约注释)。 */
 const SESSION_TTL_SEC = 7 * 24 * 3600;
 
+/** 注册赠送积分(BIZ-05「新用户 1 条 480P」的额度形态;换算随 T1.4 定价校准)。 */
+const SIGNUP_GRANT = 10;
+
 export { requireAuth } from './auth-route-shared';
 import { requireAuth } from './auth-route-shared';
 
-export function registerAuthRoutes(app: FastifyInstance, db: Db) {
+export function registerAuthRoutes(app: FastifyInstance, db: Db, wallet: WalletService) {
   app.post<{ Body: unknown }>('/v1/auth/guest', async (req, reply) => {
     const parsed = GuestLoginRequest.safeParse(req.body);
     if (!parsed.success) {
@@ -21,6 +25,9 @@ export function registerAuthRoutes(app: FastifyInstance, db: Db) {
 
     const existing = await db.select().from(users).where(eq(users.deviceId, deviceId)).limit(1);
     const user = existing[0] ?? (await db.insert(users).values({ deviceId }).returning())[0];
+
+    // 注册即赠:幂等键按用户域,重复登录不重复发放
+    await wallet.grant(user.id, SIGNUP_GRANT, `signup-grant:${user.id}`, '注册赠送(1 条 480P 预览)');
 
     const token = app.jwt.sign({ sub: user.id }, { expiresIn: SESSION_TTL_SEC });
     return { token, userId: user.id, expiresInSec: SESSION_TTL_SEC } satisfies GuestSession;

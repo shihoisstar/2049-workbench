@@ -1,0 +1,208 @@
+@import '../../styles/tokens.scss';
+
+.mine-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  padding: $wb-space-4;
+  background: $wb-color-bg;
+}
+
+.mine-card {
+  padding: $wb-space-5 $wb-space-4;
+  border-radius: $wb-radius-lg;
+  background: $wb-color-card;
+  border: 1px solid $wb-color-border;
+}
+
+.mine-head {
+  display: flex;
+  align-items: center;
+}
+
+.mine-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: $wb-color-primary;
+}
+
+.mine-avatar-text {
+  font-size: $wb-font-md;
+  color: #ffffff;
+}
+
+.mine-head-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  margin-left: $wb-space-3;
+}
+
+.mine-name {
+  font-size: $wb-font-md;
+  font-weight: 700;
+  color: $wb-color-ink;
+}
+
+.mine-sub {
+  margin-top: 2px;
+  font-size: $wb-font-xs;
+  color: $wb-color-ink-3;
+}
+
+.mine-balance {
+  display: flex;
+  align-items: baseline;
+  margin-top: $wb-space-5;
+}
+
+.mine-balance-num {
+  font-size: 40px;
+  font-weight: 800;
+  color: $wb-color-ink;
+  letter-spacing: 1px;
+}
+
+.mine-balance-unit {
+  margin-left: $wb-space-2;
+  font-size: $wb-font-base;
+  color: $wb-color-ink-2;
+}
+
+.mine-balance-note {
+  display: block;
+  margin-top: $wb-space-2;
+  font-size: $wb-font-xs;
+  color: $wb-color-ink-3;
+}
+
+.mine-section {
+  margin-top: $wb-space-4;
+}
+
+.mine-section-title {
+  display: block;
+  margin-bottom: $wb-space-3;
+  font-size: $wb-font-md;
+  font-weight: 600;
+  color: $wb-color-ink;
+}
+
+.mine-empty {
+  display: flex;
+  justify-content: center;
+  padding: $wb-space-6 0;
+  border-radius: $wb-radius-md;
+  background: $wb-color-card;
+  border: 1px solid $wb-color-border;
+}
+
+.mine-empty-text {
+  font-size: $wb-font-sm;
+  color: $wb-color-ink-3;
+}
+
+.mine-entry {
+  display: flex;
+  align-items: center;
+  padding: $wb-space-3 $wb-space-4;
+  margin-bottom: $wb-space-2;
+  border-radius: $wb-radius-md;
+  background: $wb-color-card;
+  border: 1px solid $wb-color-border;
+}
+
+.mine-entry-badge {
+  padding: 3px 8px;
+  border-radius: 6px;
+}
+
+.mine-entry-badge.pos {
+  background: $wb-mark-bg;
+}
+
+.mine-entry-badge.neg {
+  background: #f0f0f2;
+}
+
+.mine-entry-badge-text {
+  font-size: $wb-font-xs;
+  color: $wb-color-ink-2;
+}
+
+.mine-entry-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  margin-left: $wb-space-3;
+  overflow: hidden;
+}
+
+.mine-entry-remark {
+  font-size: $wb-font-base;
+  color: $wb-color-ink;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mine-entry-time {
+  margin-top: 2px;
+  font-size: 10px;
+  color: $wb-color-ink-3;
+}
+
+.mine-entry-amount {
+  font-size: $wb-font-md;
+  font-weight: 700;
+}
+
+.mine-entry-amount.pos {
+  color: $wb-color-primary;
+}
+
+.mine-entry-amount.neg {
+  color: $wb-color-ink;
+}
+
+.mine-actions {
+  display: flex;
+  margin-top: $wb-space-5;
+}
+
+.mine-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: $wb-space-3 0;
+  border-radius: 999px;
+}
+
+.mine-btn.ghost {
+  margin-right: $wb-space-3;
+  background: $wb-color-card;
+  border: 1px solid $wb-color-border;
+}
+
+.mine-btn.danger {
+  background: $wb-color-card;
+  border: 1px solid rgba(232, 17, 45, 0.4);
+}
+
+.mine-btn-text {
+  font-size: $wb-font-base;
+  font-weight: 600;
+}
+
+.mine-btn-text.ghost {
+  color: $wb-color-ink-2;
+}
+
+.mine-btn-text.danger {
+  color: $wb-color-primary;
+}

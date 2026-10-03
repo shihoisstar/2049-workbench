@@ -103,7 +103,8 @@ test('路由:GET /v1/wallet 返回契约形状', async () => {
   const res = await app.inject({ method: 'GET', url: '/v1/wallet', headers: { authorization: `Bearer ${token}` } });
   assert.equal(res.statusCode, 200);
   const body = res.json();
-  assert.equal(body.balance, 10);
-  assert.equal(body.entries[0].type, 'grant');
+  assert.equal(body.balance, 20, '注册赠送 10 + 本测试发放 10');
+  assert.equal(body.entries.length, 2);
+  assert.ok(body.entries.every((e: { type: string }) => e.type === 'grant'));
   assert.equal(typeof body.entries[0].createdAt, 'string');
 });

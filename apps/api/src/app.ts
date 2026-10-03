@@ -1,4 +1,5 @@
 import Fastify, { type FastifyInstance } from 'fastify';
+import cors from '@fastify/cors';
 import fjwt from '@fastify/jwt';
 
 import { createDb } from './db';
@@ -20,11 +21,14 @@ export function buildApp(opts: AppOptions): FastifyInstance {
     await client.end();
   });
 
+  // H5 端跨源(开发期全放行;生产按域名收窄,随部署工单)
+  app.register(cors, { origin: true });
   app.register(fjwt, { secret: opts.jwtSecret });
 
+  const wallet = new WalletService(db);
   registerHealthRoutes(app);
-  registerAuthRoutes(app, db);
-  registerWalletRoutes(app, new WalletService(db));
+  registerAuthRoutes(app, db, wallet);
+  registerWalletRoutes(app, wallet);
 
   return app;
 }

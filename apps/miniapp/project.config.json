@@ -8,7 +8,7 @@
     "es6": false,
     "postcss": false,
     "minified": false,
-    "urlCheck": true,
+    "urlCheck": false,
     "compileWorklet": false,
     "uglifyFileName": false,
     "uploadWithSourceMap": true,
