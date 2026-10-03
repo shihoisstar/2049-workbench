@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "ok": true,
+  "command": "finalize",
+  "status": "pass",
+  "type": "sequence",
+  "quality": "showcase",
+  "specification": {
+    "path": "C:\\Users\\xhx_1\\.zcode\\workspace\\default\\.archify\\diagrams-v1-20261003\\candidate-sequence.json",
+    "sha256": "28593c351da545e305b9bd2709b51b2e2fe566d2e6a1d74c51c0b30563d1f386",
+    "bytes": 4308
+  },
+  "artifact": {
+    "path": "C:\\Users\\xhx_1\\.zcode\\workspace\\default\\.archify\\diagrams-v1-20261003\\v1-sequence.html",
+    "sha256": "c544137abb0d195ec083a2fb57a750498e2188b878580d85b6f88d5182a77f01",
+    "bytes": 759508
+  },
+  "gates": {
+    "validate": "pass",
+    "deliver": "pass",
+    "check": "pass",
+    "browser-check": "pass"
+  },
+  "diagnostics": [],
+  "diagnosticSummary": {
+    "total": 0,
+    "shown": 0,
+    "truncated": false
+  },
+  "evidence": {
+    "receipt": "C:\\Users\\xhx_1\\.zcode\\workspace\\default\\.archify\\diagrams-v1-20261003\\v1-sequence.finalize.json",
+    "summaryReceipt": "C:\\Users\\xhx_1\\.zcode\\workspace\\default\\.archify\\diagrams-v1-20261003\\v1-sequence.finalize-summary.json",
+    "browserCheckReceipt": "C:\\Users\\xhx_1\\.zcode\\workspace\\default\\.archify\\diagrams-v1-20261003\\v1-sequence.browser-check.json"
+  },
+  "update": {
+    "status": "current",
+    "installedVersion": "3.0.1",
+    "availableVersion": "3.0.1",
+    "releaseNotes": null,
+    "checkedAt": "2026-10-02T09:28:22.611Z",
+    "source": "cache",
+    "noticeRequired": false,
+    "noticeText": null
+  },
+  "visualReview": "not-requested",
+  "durationMs": 14442
+}

@@ -1,0 +1,258 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "V1 营销短视频端到端流水线(带货/探店)",
+    "locale": "zh-CN",
+    "animation": "trace",
+    "quality_profile": "showcase",
+    "output": ".archify/diagrams-v1-20261003/v1-mkv-pipeline.html"
+  },
+  "lanes": [
+    {
+      "id": "user",
+      "label": "商家用户"
+    },
+    {
+      "id": "client",
+      "label": "客户端(小程序+H5)"
+    },
+    {
+      "id": "api",
+      "label": "后端 API(含任务与网关)"
+    },
+    {
+      "id": "bill",
+      "label": "计费账本"
+    }
+  ],
+  "phases": [
+    {
+      "id": "p1",
+      "label": "① 选择与填写",
+      "fromCol": 0,
+      "toCol": 1
+    },
+    {
+      "id": "p2",
+      "label": "② 校验与预留",
+      "fromCol": 2,
+      "toCol": 3,
+      "variant": "emphasis"
+    },
+    {
+      "id": "p3",
+      "label": "③ 生成·结算·交付",
+      "fromCol": 4,
+      "toCol": 5
+    }
+  ],
+  "mainPath": [
+    "templates",
+    "form",
+    "check",
+    "estimate",
+    "enqueue",
+    "gateway",
+    "settle",
+    "progress",
+    "result"
+  ],
+  "nodes": [
+    {
+      "id": "templates",
+      "lane": "user",
+      "col": 0,
+      "type": "external",
+      "label": "模板feed",
+      "sublabel": "带货·探店案例",
+      "width": 150
+    },
+    {
+      "id": "form",
+      "lane": "client",
+      "col": 1,
+      "type": "frontend",
+      "label": "创作表单",
+      "sublabel": "图+描述+参数",
+      "width": 150
+    },
+    {
+      "id": "check",
+      "lane": "api",
+      "col": 2,
+      "type": "security",
+      "label": "内容校验",
+      "sublabel": "msgSecCheck+违禁词",
+      "width": 170
+    },
+    {
+      "id": "estimate",
+      "lane": "bill",
+      "col": 2,
+      "type": "backend",
+      "label": "积分估算",
+      "sublabel": "幂等键·预留冻结",
+      "width": 170
+    },
+    {
+      "id": "wallet",
+      "lane": "bill",
+      "col": 3,
+      "type": "database",
+      "label": "积分钱包",
+      "sublabel": "三账本",
+      "width": 150
+    },
+    {
+      "id": "enqueue",
+      "lane": "api",
+      "col": 3,
+      "type": "messagebus",
+      "label": "任务入队",
+      "sublabel": "BullMQ 状态机",
+      "width": 150
+    },
+    {
+      "id": "gateway",
+      "lane": "api",
+      "col": 4,
+      "type": "cloud",
+      "label": "模型网关",
+      "sublabel": "火山↔Atlas 渠道池",
+      "width": 170
+    },
+    {
+      "id": "settle",
+      "lane": "bill",
+      "col": 4,
+      "type": "backend",
+      "label": "结算/退款",
+      "sublabel": "按实际用量",
+      "width": 150
+    },
+    {
+      "id": "progress",
+      "lane": "client",
+      "col": 4,
+      "type": "frontend",
+      "label": "进度页",
+      "sublabel": "状态可视化",
+      "width": 150
+    },
+    {
+      "id": "result",
+      "lane": "client",
+      "col": 5,
+      "type": "frontend",
+      "label": "预览下载",
+      "sublabel": "水印+AI标识",
+      "width": 150
+    }
+  ],
+  "edges": [
+    {
+      "id": "t-f",
+      "from": "templates",
+      "to": "form",
+      "label": "选模板",
+      "variant": "emphasis"
+    },
+    {
+      "id": "f-c",
+      "from": "form",
+      "to": "check",
+      "label": "提交",
+      "variant": "emphasis"
+    },
+    {
+      "id": "c-f",
+      "from": "check",
+      "to": "form",
+      "label": "违禁词拦截",
+      "variant": "dashed",
+      "role": "error"
+    },
+    {
+      "id": "c-e",
+      "from": "check",
+      "to": "estimate",
+      "label": "通过",
+      "variant": "emphasis"
+    },
+    {
+      "id": "e-w",
+      "from": "estimate",
+      "to": "wallet",
+      "label": "冻结预留"
+    },
+    {
+      "id": "e-q",
+      "from": "estimate",
+      "to": "enqueue",
+      "label": "预留成功入队",
+      "variant": "emphasis"
+    },
+    {
+      "id": "e-f",
+      "from": "estimate",
+      "to": "form",
+      "label": "余额不足→充值",
+      "variant": "dashed",
+      "role": "error"
+    },
+    {
+      "id": "q-g",
+      "from": "enqueue",
+      "to": "gateway",
+      "label": "submit+poll"
+    },
+    {
+      "id": "g-s",
+      "from": "gateway",
+      "to": "settle",
+      "label": "终态+usage",
+      "variant": "emphasis"
+    },
+    {
+      "id": "s-w",
+      "from": "settle",
+      "to": "wallet",
+      "label": "实扣/即时退款",
+      "variant": "dashed"
+    },
+    {
+      "id": "s-p",
+      "from": "settle",
+      "to": "progress",
+      "label": "状态推送",
+      "variant": "emphasis"
+    },
+    {
+      "id": "p-r",
+      "from": "progress",
+      "to": "result",
+      "label": "TTL内下载"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "2049 复用点",
+      "items": [
+        "预留-结算+幂等键(billingKey)",
+        "网关渠道池/冷却/failover",
+        "Atlas 视频 submit+poll 适配器"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "差异化承诺",
+      "items": [
+        "失败即时退积分·原因透明",
+        "积分不过期",
+        "估算透明·无假倒计时"
+      ]
+    }
+  ]
+}

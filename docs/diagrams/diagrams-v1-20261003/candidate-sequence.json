@@ -1,0 +1,207 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "生成任务与计费时序(预留-结算-失败退款)",
+    "locale": "zh-CN",
+    "animation": "trace",
+    "quality_profile": "showcase",
+    "column_fit": "fixed",
+    "output": ".archify/diagrams-v1-20261003/v1-generation-billing-sequence.html"
+  },
+  "participants": [
+    {
+      "id": "user",
+      "type": "external",
+      "label": "商家用户"
+    },
+    {
+      "id": "client",
+      "type": "frontend",
+      "label": "小程序/H5"
+    },
+    {
+      "id": "api",
+      "type": "backend",
+      "label": "API(NestJS)"
+    },
+    {
+      "id": "sec",
+      "type": "security",
+      "label": "内容安全"
+    },
+    {
+      "id": "wallet",
+      "type": "database",
+      "label": "积分钱包"
+    },
+    {
+      "id": "queue",
+      "type": "messagebus",
+      "label": "BullMQ Worker"
+    },
+    {
+      "id": "gw",
+      "type": "cloud",
+      "label": "模型网关",
+      "sublabel": "火山/Atlas 渠道池"
+    }
+  ],
+  "messages": [
+    {
+      "id": "m1",
+      "from": "user",
+      "to": "client",
+      "y": 160,
+      "label": "填写并提交创作"
+    },
+    {
+      "id": "m2",
+      "from": "client",
+      "to": "api",
+      "y": 190,
+      "label": "POST /creations(幂等键)",
+      "variant": "emphasis"
+    },
+    {
+      "id": "m3",
+      "from": "api",
+      "to": "sec",
+      "y": 220,
+      "label": "文本+图片校验"
+    },
+    {
+      "id": "m4",
+      "from": "sec",
+      "to": "api",
+      "y": 248,
+      "label": "通过/拦截",
+      "variant": "return"
+    },
+    {
+      "id": "m5",
+      "from": "api",
+      "to": "wallet",
+      "y": 278,
+      "label": "预估上限+冻结",
+      "variant": "emphasis"
+    },
+    {
+      "id": "m6",
+      "from": "wallet",
+      "to": "api",
+      "y": 306,
+      "label": "余额确认",
+      "variant": "return"
+    },
+    {
+      "id": "m7",
+      "from": "api",
+      "to": "client",
+      "y": 336,
+      "label": "受理 task_id",
+      "variant": "return"
+    },
+    {
+      "id": "m8",
+      "from": "api",
+      "to": "queue",
+      "y": 364,
+      "label": "入队(重试退避封顶)"
+    },
+    {
+      "id": "m9",
+      "from": "queue",
+      "to": "gw",
+      "y": 394,
+      "label": "POST generateVideo",
+      "variant": "emphasis"
+    },
+    {
+      "id": "m10",
+      "from": "gw",
+      "to": "queue",
+      "y": 422,
+      "label": "prediction id",
+      "variant": "return"
+    },
+    {
+      "id": "m11",
+      "from": "queue",
+      "to": "gw",
+      "y": 452,
+      "label": "GET prediction/{id} ×N",
+      "variant": "dashed"
+    },
+    {
+      "id": "m12",
+      "from": "gw",
+      "to": "queue",
+      "y": 480,
+      "label": "status/outputs",
+      "variant": "return"
+    },
+    {
+      "id": "m13",
+      "from": "queue",
+      "to": "api",
+      "y": 510,
+      "label": "终态回调(success/fail)",
+      "variant": "emphasis"
+    },
+    {
+      "id": "m14",
+      "from": "api",
+      "to": "wallet",
+      "y": 540,
+      "label": "按实结算 / 失败即时退还",
+      "variant": "emphasis"
+    },
+    {
+      "id": "m15",
+      "from": "api",
+      "to": "client",
+      "y": 572,
+      "label": "终态推送:成片/失败原因",
+      "variant": "return"
+    },
+    {
+      "id": "m16",
+      "from": "client",
+      "to": "user",
+      "y": 602,
+      "label": "预览下载 或 一键重试"
+    }
+  ],
+  "activations": [
+    {
+      "participant": "client",
+      "from": 160,
+      "to": 602,
+      "type": "frontend"
+    },
+    {
+      "participant": "api",
+      "from": 190,
+      "to": 572,
+      "type": "backend"
+    },
+    {
+      "participant": "queue",
+      "from": 364,
+      "to": 510,
+      "type": "messagebus"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "幂等与重试语义(源自2049 gateway)",
+      "items": [
+        "同一请求重试不重复扣费(billingKey 唯一)",
+        "歧义失败(Timeout/Abort)不盲目重试付费调用",
+        "自动重试有退避+上限;内容拒绝不重试"
+      ]
+    }
+  ]
+}

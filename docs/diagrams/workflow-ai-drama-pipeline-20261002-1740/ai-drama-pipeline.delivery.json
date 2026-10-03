@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "receiptId": "5f188ad1-2aa8-4882-8df0-6e2a59b5eb90",
+  "status": "current",
+  "command": "deliver",
+  "type": "workflow",
+  "input": "C:\\Users\\xhx_1\\.zcode\\workspace\\default\\.archify\\workflow-ai-drama-pipeline-20261002-1740\\candidate.json",
+  "output": "C:\\Users\\xhx_1\\.zcode\\workspace\\default\\.archify\\workflow-ai-drama-pipeline-20261002-1740\\ai-drama-pipeline.html",
+  "specification": {
+    "sha256": "9be013cae6775717430acdec55d95fb892a01bc6e98a24bd7bdd835b7bde5650",
+    "bytes": 5862
+  },
+  "artifact": {
+    "sha256": "3136f4cc7b2c9be0cace3dacf245aad74e8af5ba580d8ee6adf66d6b28f5fbf4",
+    "bytes": 765282
+  }
+}

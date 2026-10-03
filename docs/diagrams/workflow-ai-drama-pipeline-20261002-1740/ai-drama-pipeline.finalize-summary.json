@@ -1,0 +1,89 @@
+{
+  "schemaVersion": 1,
+  "ok": true,
+  "command": "finalize",
+  "status": "pass",
+  "type": "workflow",
+  "quality": "showcase",
+  "specification": {
+    "path": "C:\\Users\\xhx_1\\.zcode\\workspace\\default\\.archify\\workflow-ai-drama-pipeline-20261002-1740\\candidate.json",
+    "sha256": "9be013cae6775717430acdec55d95fb892a01bc6e98a24bd7bdd835b7bde5650",
+    "bytes": 5862
+  },
+  "artifact": {
+    "path": "C:\\Users\\xhx_1\\.zcode\\workspace\\default\\.archify\\workflow-ai-drama-pipeline-20261002-1740\\ai-drama-pipeline.html",
+    "sha256": "3136f4cc7b2c9be0cace3dacf245aad74e8af5ba580d8ee6adf66d6b28f5fbf4",
+    "bytes": 765282
+  },
+  "gates": {
+    "validate": "pass",
+    "deliver": "pass",
+    "check": "pass",
+    "browser-check": "pass"
+  },
+  "diagnostics": [],
+  "diagnosticSummary": {
+    "total": 0,
+    "shown": 0,
+    "truncated": false
+  },
+  "evidence": {
+    "receipt": "C:\\Users\\xhx_1\\.zcode\\workspace\\default\\.archify\\workflow-ai-drama-pipeline-20261002-1740\\ai-drama-pipeline.finalize.json",
+    "summaryReceipt": "C:\\Users\\xhx_1\\.zcode\\workspace\\default\\.archify\\workflow-ai-drama-pipeline-20261002-1740\\ai-drama-pipeline.finalize-summary.json",
+    "browserCheckReceipt": "C:\\Users\\xhx_1\\.zcode\\workspace\\default\\.archify\\workflow-ai-drama-pipeline-20261002-1740\\ai-drama-pipeline.browser-check.json"
+  },
+  "update": {
+    "status": "current",
+    "installedVersion": "3.0.1",
+    "availableVersion": "3.0.1",
+    "releaseNotes": null,
+    "checkedAt": "2026-10-02T09:28:22.611Z",
+    "source": "cache",
+    "noticeRequired": false,
+    "noticeText": null
+  },
+  "visualReview": "not-requested",
+  "durationMs": 8149,
+  "visualReviewRecommendation": {
+    "action": "inspect-route-readability",
+    "signals": {
+      "routesOverSuggestedBends": 2
+    },
+    "reason": "Automated gates passed, but crossings or detours still need perceptual review before claiming visual quality.",
+    "affectedRoutes": {
+      "crossings": [],
+      "detours": [
+        {
+          "relationship": {
+            "id": "gate-mvp",
+            "from": "gate",
+            "to": "mvp",
+            "label": "有差异:定路线",
+            "collectionIndex": 4,
+            "artifactIndex": 5
+          },
+          "bends": 3,
+          "stretch": 1.183
+        },
+        {
+          "relationship": {
+            "id": "review-prd",
+            "from": "ai_review",
+            "to": "prd",
+            "label": "会改会加会删",
+            "collectionIndex": 9,
+            "artifactIndex": 10
+          },
+          "bends": 3,
+          "stretch": 1.225
+        }
+      ],
+      "truncated": false
+    },
+    "hints": [
+      "gate → mvp needs 3 bends: move node gate or mvp so they share a row or column with matching centers, or sit diagonally with a clear corner.",
+      "ai_review → prd needs 3 bends: move node ai_review or prd so they share a row or column with matching centers, or sit diagonally with a clear corner."
+    ],
+    "repair": "Trace these relationships at the desktop viewport. For Architecture, use references/architecture-layout-repair.md: reflow a blocked main path or tangled connected scene, and repair an isolated defect locally only when the surrounding composition is accepted. Preserve all semantic content and user-fixed geometry. Rerun finalize once after the edit."
+  }
+}

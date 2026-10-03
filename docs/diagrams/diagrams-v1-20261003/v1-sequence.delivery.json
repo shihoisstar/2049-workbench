@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "receiptId": "6b870c58-b1d0-4e6c-88ba-d70cdca754f8",
+  "status": "current",
+  "command": "deliver",
+  "type": "sequence",
+  "input": "C:\\Users\\xhx_1\\.zcode\\workspace\\default\\.archify\\diagrams-v1-20261003\\candidate-sequence.json",
+  "output": "C:\\Users\\xhx_1\\.zcode\\workspace\\default\\.archify\\diagrams-v1-20261003\\v1-sequence.html",
+  "specification": {
+    "sha256": "28593c351da545e305b9bd2709b51b2e2fe566d2e6a1d74c51c0b30563d1f386",
+    "bytes": 4308
+  },
+  "artifact": {
+    "sha256": "c544137abb0d195ec083a2fb57a750498e2188b878580d85b6f88d5182a77f01",
+    "bytes": 759508
+  }
+}

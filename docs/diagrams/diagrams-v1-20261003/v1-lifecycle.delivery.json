@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "receiptId": "7d4d20fb-c7e0-494b-9c3e-99d95a7aec75",
+  "status": "current",
+  "command": "deliver",
+  "type": "lifecycle",
+  "input": "C:\\Users\\xhx_1\\.zcode\\workspace\\default\\.archify\\diagrams-v1-20261003\\candidate-lifecycle.json",
+  "output": "C:\\Users\\xhx_1\\.zcode\\workspace\\default\\.archify\\diagrams-v1-20261003\\v1-lifecycle.html",
+  "specification": {
+    "sha256": "c11164bf3ab74afe9f3b1d172120bf5e09ae55700bdcd1cfadb36d9329df2f27",
+    "bytes": 4119
+  },
+  "artifact": {
+    "sha256": "de5e5c2db43297c4975785a78bbaf32faaf0c3adddb6df888a2648df0daf8087",
+    "bytes": 765741
+  }
+}

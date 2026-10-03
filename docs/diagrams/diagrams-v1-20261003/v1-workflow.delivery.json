@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "receiptId": "b6e1ec77-8f37-4ab1-8ece-2b164bb81724",
+  "status": "current",
+  "command": "deliver",
+  "type": "workflow",
+  "input": "C:\\Users\\xhx_1\\.zcode\\workspace\\default\\.archify\\diagrams-v1-20261003\\candidate-workflow.json",
+  "output": "C:\\Users\\xhx_1\\.zcode\\workspace\\default\\.archify\\diagrams-v1-20261003\\v1-workflow.html",
+  "specification": {
+    "sha256": "961e408fe2b25536f014ac42a81c1df27f46ad063c0074bce5115120c29e8c98",
+    "bytes": 5357
+  },
+  "artifact": {
+    "sha256": "6a6e4438c6d7ad8f4d7349176dd948ca51e9a721740a6b2352832824e12c55df",
+    "bytes": 766299
+  }
+}

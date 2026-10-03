@@ -1,0 +1,266 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "AI漫剧工作台:拆解→复刻→差异化全流程",
+    "locale": "zh-CN",
+    "animation": "trace",
+    "quality_profile": "showcase",
+    "output": ".archify/workflow-ai-drama-pipeline-20261002-1740/ai-drama-pipeline.html"
+  },
+  "lanes": [
+    {
+      "id": "field",
+      "label": "实证·对标APP"
+    },
+    {
+      "id": "product",
+      "label": "产品·需求池"
+    },
+    {
+      "id": "verify",
+      "label": "验证·评审",
+      "variant": "exception"
+    },
+    {
+      "id": "dev",
+      "label": "开发·上线"
+    }
+  ],
+  "phases": [
+    {
+      "id": "study",
+      "label": "① 实证拆解",
+      "fromCol": 0,
+      "toCol": 1
+    },
+    {
+      "id": "define",
+      "label": "② 定位与设计",
+      "fromCol": 2,
+      "toCol": 4,
+      "variant": "emphasis"
+    },
+    {
+      "id": "build",
+      "label": "③ 构建与迭代",
+      "fromCol": 5,
+      "toCol": 5,
+      "variant": "dashed"
+    }
+  ],
+  "mainPath": [
+    "field_use",
+    "dissect",
+    "diff",
+    "gate",
+    "mvp",
+    "prd",
+    "ai_review",
+    "devship"
+  ],
+  "nodes": [
+    {
+      "id": "field_use",
+      "lane": "field",
+      "col": 0,
+      "type": "external",
+      "label": "深度使用对标APP",
+      "sublabel": "买会员跑真实任务",
+      "width": 150
+    },
+    {
+      "id": "reviews",
+      "lane": "field",
+      "col": 1,
+      "type": "external",
+      "label": "差评挖掘",
+      "sublabel": "失败扣费=机会",
+      "width": 132
+    },
+    {
+      "id": "dissect",
+      "lane": "product",
+      "col": 1,
+      "type": "backend",
+      "label": "结构化拆解",
+      "sublabel": "截图·功能·计费",
+      "width": 132
+    },
+    {
+      "id": "diff",
+      "lane": "product",
+      "col": 2,
+      "type": "backend",
+      "label": "差异清单",
+      "sublabel": "想法vs落地",
+      "width": 132
+    },
+    {
+      "id": "gate",
+      "lane": "verify",
+      "col": 3,
+      "type": "security",
+      "label": "定位决策门",
+      "sublabel": "路线A工具·B内容",
+      "tag": "无差异不开工",
+      "width": 150
+    },
+    {
+      "id": "mvp",
+      "lane": "product",
+      "col": 3,
+      "type": "backend",
+      "label": "MVP范围",
+      "sublabel": "抽核心闭环",
+      "width": 132
+    },
+    {
+      "id": "prd",
+      "lane": "product",
+      "col": 4,
+      "type": "backend",
+      "label": "需求文档",
+      "sublabel": "先有自己版本",
+      "width": 132
+    },
+    {
+      "id": "ai_review",
+      "lane": "verify",
+      "col": 4,
+      "type": "security",
+      "label": "AI评审",
+      "sublabel": "先业务后开发",
+      "width": 132
+    },
+    {
+      "id": "devship",
+      "lane": "dev",
+      "col": 5,
+      "type": "backend",
+      "label": "开发·测试·上线",
+      "sublabel": "规则→测试→验收",
+      "width": 150
+    },
+    {
+      "id": "pool",
+      "lane": "product",
+      "col": 5,
+      "type": "database",
+      "label": "需求池",
+      "sublabel": "总·分析·开发多表",
+      "width": 150
+    }
+  ],
+  "edges": [
+    {
+      "id": "use-dissect",
+      "from": "field_use",
+      "to": "dissect",
+      "label": "全流程+截图",
+      "variant": "emphasis"
+    },
+    {
+      "id": "reviews-diff",
+      "from": "reviews",
+      "to": "diff",
+      "label": "机会输入",
+      "variant": "dashed",
+      "role": "branch"
+    },
+    {
+      "id": "dissect-diff",
+      "from": "dissect",
+      "to": "diff",
+      "label": "功能+规则",
+      "variant": "emphasis"
+    },
+    {
+      "id": "diff-gate",
+      "from": "diff",
+      "to": "gate",
+      "label": "带差异定位",
+      "variant": "emphasis"
+    },
+    {
+      "id": "gate-mvp",
+      "from": "gate",
+      "to": "mvp",
+      "label": "有差异:定路线",
+      "variant": "emphasis"
+    },
+    {
+      "id": "gate-diff",
+      "from": "gate",
+      "to": "diff",
+      "label": "无差异:不开工",
+      "variant": "security",
+      "role": "error"
+    },
+    {
+      "id": "mvp-prd",
+      "from": "mvp",
+      "to": "prd",
+      "label": "先有版本"
+    },
+    {
+      "id": "prd-review",
+      "from": "prd",
+      "to": "ai_review",
+      "label": "业务→开发"
+    },
+    {
+      "id": "review-prd",
+      "from": "ai_review",
+      "to": "prd",
+      "label": "会改会加会删",
+      "variant": "dashed",
+      "role": "error"
+    },
+    {
+      "id": "review-dev",
+      "from": "ai_review",
+      "to": "devship",
+      "label": "通过",
+      "variant": "emphasis"
+    },
+    {
+      "id": "dev-pool",
+      "from": "devship",
+      "to": "pool",
+      "label": "优化点回池",
+      "variant": "dashed",
+      "role": "async"
+    },
+    {
+      "id": "pool-diff",
+      "from": "pool",
+      "to": "diff",
+      "label": "下一轮迭代",
+      "variant": "dashed",
+      "role": "return"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "导师方法论锚点",
+      "items": [
+        "图只是工具,核心是讲明白需求",
+        "评审完多半会改·会加·会删",
+        "先有自己版本,再让AI评审",
+        "验收标准=需求文档",
+        "参照竞品做三角验证"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "当前状态(2026-10)",
+      "items": [
+        "对标APP已核实:上线2个月,订阅+积分双轨内购",
+        "差评=机会清单:生成失败仍扣费·积分消耗快",
+        "下一步:买首周会员,跑真实任务填拆解表"
+      ]
+    }
+  ]
+}

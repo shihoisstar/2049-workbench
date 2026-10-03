@@ -1,0 +1,192 @@
+{
+  "schema_version": 2,
+  "diagram_type": "lifecycle",
+  "meta": {
+    "title": "生成任务状态机 × 积分预留(镜序§12 + 2049 预留-结算)",
+    "locale": "zh-CN",
+    "animation": "trace",
+    "quality_profile": "showcase",
+    "output": ".archify/diagrams-v1-20261003/v1-task-lifecycle.html"
+  },
+  "lanes": [
+    {
+      "id": "main",
+      "label": "任务状态"
+    },
+    {
+      "id": "billing",
+      "label": "积分钱包"
+    },
+    {
+      "id": "recovery",
+      "label": "异常出口"
+    },
+    {
+      "id": "terminal",
+      "label": "终态"
+    }
+  ],
+  "states": [
+    {
+      "id": "queued",
+      "type": "start",
+      "label": "QUEUED",
+      "sublabel": "受理·幂等键",
+      "lane": "main",
+      "col": 0,
+      "step": "01"
+    },
+    {
+      "id": "submitted",
+      "type": "active",
+      "label": "SUBMITTED",
+      "sublabel": "校验通过",
+      "lane": "main",
+      "col": 1,
+      "step": "02"
+    },
+    {
+      "id": "running",
+      "type": "active",
+      "label": "RUNNING",
+      "sublabel": "submit+poll",
+      "lane": "main",
+      "col": 2,
+      "step": "03"
+    },
+    {
+      "id": "frozen",
+      "type": "waiting",
+      "label": "积分冻结",
+      "sublabel": "预估上限预留",
+      "lane": "billing",
+      "col": 1
+    },
+    {
+      "id": "cancelled",
+      "type": "failure",
+      "label": "CANCELLED",
+      "sublabel": "用户取消",
+      "lane": "recovery",
+      "col": 1
+    },
+    {
+      "id": "timeout",
+      "type": "failure",
+      "label": "TIMEOUT",
+      "sublabel": "超时/Abort",
+      "lane": "recovery",
+      "col": 2
+    },
+    {
+      "id": "failed",
+      "type": "failure",
+      "label": "FAILED",
+      "sublabel": "上游失败/内容拒绝",
+      "lane": "recovery",
+      "col": 3
+    },
+    {
+      "id": "succeeded",
+      "type": "success",
+      "label": "SUCCEEDED",
+      "sublabel": "按实际用量结算",
+      "lane": "terminal",
+      "col": 3
+    },
+    {
+      "id": "refunded",
+      "type": "neutral",
+      "label": "已全额退还",
+      "sublabel": "即时到账·原因透明",
+      "lane": "terminal",
+      "col": 4
+    }
+  ],
+  "transitions": [
+    {
+      "id": "t1",
+      "from": "queued",
+      "to": "submitted",
+      "label": "校验通过"
+    },
+    {
+      "id": "t2",
+      "from": "submitted",
+      "to": "running",
+      "label": "submit generateVideo"
+    },
+    {
+      "id": "t3",
+      "from": "submitted",
+      "to": "frozen",
+      "label": "冻结预留",
+      "variant": "emphasis"
+    },
+    {
+      "id": "t4",
+      "from": "running",
+      "to": "succeeded",
+      "label": "outputs 就绪",
+      "variant": "emphasis"
+    },
+    {
+      "id": "t5",
+      "from": "frozen",
+      "to": "succeeded",
+      "label": "按实结算",
+      "variant": "dashed"
+    },
+    {
+      "id": "t6",
+      "from": "submitted",
+      "to": "cancelled",
+      "label": "取消"
+    },
+    {
+      "id": "t7",
+      "from": "running",
+      "to": "timeout",
+      "label": "超时/Abort"
+    },
+    {
+      "id": "t8",
+      "from": "running",
+      "to": "failed",
+      "label": "上游失败"
+    },
+    {
+      "id": "t9",
+      "from": "cancelled",
+      "to": "refunded",
+      "label": "即时退"
+    },
+    {
+      "id": "t10",
+      "from": "timeout",
+      "to": "refunded",
+      "label": "即时退",
+      "variant": "emphasis"
+    },
+    {
+      "id": "t11",
+      "from": "failed",
+      "to": "refunded",
+      "label": "即时退",
+      "variant": "emphasis"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "硬规则",
+      "items": [
+        "幂等键防重复扣费",
+        "歧义失败不盲目重试付费调用",
+        "重试前重新估算,超预算须再次确认",
+        "FAILED 排查后可重试:回到 QUEUED 重新估算(详见任务规格)",
+        "失败即时退积分·原因透明"
+      ]
+    }
+  ]
+}
