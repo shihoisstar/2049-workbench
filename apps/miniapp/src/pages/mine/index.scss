@@ -9,6 +9,7 @@
 }
 
 .mine-card {
+  position: relative;
   padding: $wb-space-5 $wb-space-4;
   border-radius: $wb-radius-lg;
   background: $wb-color-card;
@@ -78,6 +79,24 @@
   margin-top: $wb-space-2;
   font-size: $wb-font-xs;
   color: $wb-color-ink-3;
+}
+
+.mine-recharge-btn {
+  position: absolute;
+  top: $wb-space-5;
+  right: $wb-space-4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 18px;
+  border-radius: 999px;
+  background: $wb-color-primary-gradient;
+}
+
+.mine-recharge-btn-text {
+  font-size: $wb-font-base;
+  font-weight: 700;
+  color: #ffffff;
 }
 
 .mine-section {

@@ -1,6 +1,6 @@
 import Taro from '@tarojs/taro';
 
-import type { GuestSession, WalletSummary } from '@wb/contracts';
+import type { GuestSession, StoreOrder, StorePackage, WalletSummary } from '@wb/contracts';
 
 /** API 基址:本地开发(3000 被参考项目容器占用,开发用 3010);
  * TODO(部署):正式域名 + weapp 合法域名白名单,并经 Taro defineConstants 注入。 */
@@ -70,4 +70,23 @@ export async function deactivate(): Promise<void> {
   await call<void>('POST', '/v1/auth/deactivate', undefined, true);
   Taro.removeStorageSync(TOKEN_KEY);
   Taro.removeStorageSync(USER_KEY);
+}
+
+/** 充值档位列表(T1.5 充值页数据源)。 */
+export async function getPackages(): Promise<StorePackage[]> {
+  const res = await call<{ packages: StorePackage[] }>('GET', '/v1/store/packages');
+  return res.packages;
+}
+
+/** 创建充值订单;真实微信支付参数随商户号接入(阻塞墙),当前返回后走开发态支付。 */
+export async function createOrder(packageId: string): Promise<StoreOrder> {
+  return call<StoreOrder>('POST', '/v1/store/orders', { packageId }, true);
+}
+
+/**
+ * 开发态支付(DEV-ONLY):模拟支付回调完成入账;生产环境该端点 404。
+ * 商户号到位后替换为 wx.requestPayment(真实 prepay)。
+ */
+export async function devPay(orderId: string): Promise<StoreOrder> {
+  return call<StoreOrder>('POST', `/v1/store/orders/${orderId}/dev-pay`, undefined, true);
 }

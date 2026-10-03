@@ -1,0 +1,116 @@
+@import '../../styles/tokens.scss';
+
+.store-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  padding: $wb-space-4;
+  background: $wb-color-bg;
+}
+
+.store-banner {
+  padding: $wb-space-5 $wb-space-4;
+  border-radius: $wb-radius-lg;
+  background: $wb-hero-gradient;
+}
+
+.store-banner-title {
+  font-size: $wb-font-lg;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.store-banner-sub {
+  display: block;
+  margin-top: $wb-space-1;
+  font-size: $wb-font-sm;
+  color: rgba(255, 255, 255, 0.68);
+}
+
+.store-card {
+  position: relative;
+  display: flex;
+  align-items: center;
+  margin-top: $wb-space-3;
+  padding: $wb-space-4;
+  border-radius: $wb-radius-lg;
+  background: $wb-color-card;
+  border: 1px solid $wb-color-border;
+}
+
+.store-card.recommend {
+  border: 1.5px solid $wb-color-primary;
+  background: #fffafa;
+}
+
+.store-card-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.store-credits {
+  display: flex;
+  align-items: baseline;
+}
+
+.store-credits-num {
+  font-size: $wb-font-xl;
+  font-weight: 800;
+  color: $wb-color-ink;
+}
+
+.store-credits-unit {
+  margin-left: $wb-space-1;
+  font-size: $wb-font-sm;
+  color: $wb-color-ink-2;
+}
+
+.store-label {
+  margin-top: 2px;
+  font-size: $wb-font-sm;
+  color: $wb-color-ink-2;
+}
+
+.store-pay-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 84px;
+  padding: $wb-space-2 $wb-space-4;
+  border-radius: 999px;
+  background: $wb-color-primary-gradient;
+  box-shadow: 0 6px 16px rgba(217, 4, 41, 0.28);
+}
+
+.store-pay-btn.disabled {
+  opacity: 0.6;
+}
+
+.store-pay-btn-text {
+  font-size: $wb-font-md;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.store-error {
+  display: flex;
+  justify-content: center;
+  padding: $wb-space-6 0;
+}
+
+.store-error-text {
+  font-size: $wb-font-sm;
+  color: $wb-color-ink-3;
+}
+
+.store-note {
+  display: flex;
+  justify-content: center;
+  margin-top: $wb-space-4;
+}
+
+.store-note-text {
+  font-size: $wb-font-xs;
+  color: $wb-color-ink-3;
+}

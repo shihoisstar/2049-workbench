@@ -71,6 +71,12 @@ export default function Mine() {
             注册已赠 1 条 480P 预览额度 · 积分不过期
           </Text>
         )}
+        <View
+          className="mine-recharge-btn"
+          onClick={() => Taro.navigateTo({ url: '/pages/store/index' })}
+        >
+          <Text className="mine-recharge-btn-text">充值</Text>
+        </View>
       </View>
 
       <View className="mine-section">
