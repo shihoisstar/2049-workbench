@@ -31,7 +31,7 @@
     },
     "/v1/auth/guest": {
       "post": {
-        "summary": "游客登录(鉴权骨架,实现随 T1.1)",
+        "summary": "游客登录(实现:T1.1 Fastify)",
         "requestBody": {
           "required": true,
           "content": {
@@ -53,8 +53,33 @@
               }
             }
           },
+          "400": {
+            "description": "参数校验失败",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/auth/deactivate": {
+      "post": {
+        "summary": "账号注销(软删除;实现:T1.1)",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "已注销"
+          },
           "401": {
-            "description": "鉴权失败",
+            "description": "未登录/凭证失效",
             "content": {
               "application/json": {
                 "schema": {
@@ -68,6 +93,13 @@
     }
   },
   "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
     "schemas": {
       "HealthResponse": {
         "type": "object",

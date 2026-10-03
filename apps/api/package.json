@@ -8,9 +8,24 @@
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "lint": "eslint .",
-    "test": "echo 'api: tests land with T1.1'",
-    "dev": "echo 'api dev stub: T1.1 落地真实服务框架后替换'"
+    "test": "cd dist && node --test",
+    "dev": "tsc -p tsconfig.json --watch",
+    "start": "node dist/index.js",
+    "db:generate": "drizzle-kit generate",
+    "db:push": "drizzle-kit push"
   },
-  "dependencies": { "@wb/contracts": "workspace:*" },
-  "devDependencies": { "typescript": "^5.6.0" }
+  "dependencies": {
+    "@fastify/jwt": "^10.2.2",
+    "@wb/contracts": "workspace:*",
+    "dotenv": "^18.0.5",
+    "drizzle-orm": "^0.45.3",
+    "fastify": "^5.12.5",
+    "postgres": "^3.4.9",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "drizzle-kit": "^0.31.11",
+    "typescript": "^5.6.0"
+  }
 }

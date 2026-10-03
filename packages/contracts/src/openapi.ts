@@ -36,7 +36,7 @@ export function buildOpenApiDocument() {
       },
       '/v1/auth/guest': {
         post: {
-          summary: '游客登录(鉴权骨架,实现随 T1.1)',
+          summary: '游客登录(实现:T1.1 Fastify)',
           requestBody: {
             required: true,
             content: { 'application/json': { schema: ref('GuestLoginRequest') } },
@@ -46,8 +46,21 @@ export function buildOpenApiDocument() {
               description: '会话签发',
               content: { 'application/json': { schema: ref('GuestSession') } },
             },
+            '400': {
+              description: '参数校验失败',
+              content: { 'application/json': { schema: ref('ErrorBody') } },
+            },
+          },
+        },
+      },
+      '/v1/auth/deactivate': {
+        post: {
+          summary: '账号注销(软删除;实现:T1.1)',
+          security: [{ bearerAuth: [] }],
+          responses: {
+            '204': { description: '已注销' },
             '401': {
-              description: '鉴权失败',
+              description: '未登录/凭证失效',
               content: { 'application/json': { schema: ref('ErrorBody') } },
             },
           },
@@ -55,6 +68,9 @@ export function buildOpenApiDocument() {
       },
     },
     components: {
+      securitySchemes: {
+        bearerAuth: { type: 'http', scheme: 'bearer', bearerFormat: 'JWT' },
+      },
       schemas: {
         HealthResponse: zodToJsonSchema(HealthResponse, { target: 'openApi3' }),
         ErrorBody: zodToJsonSchema(ErrorBody, { target: 'openApi3' }),

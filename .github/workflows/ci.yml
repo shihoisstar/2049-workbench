@@ -8,6 +8,20 @@ on:
 jobs:
   gate:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: wb
+          POSTGRES_PASSWORD: wb_dev_only
+          POSTGRES_DB: workbench
+        ports:
+          - 5433:5432 # 与本地 infra/docker-compose 一致,测试/drizzle 默认连接串零配置
+        options: >-
+          --health-cmd "pg_isready -U wb -d workbench"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4 # 版本读根 package.json 的 packageManager 字段
@@ -17,5 +31,7 @@ jobs:
           cache: pnpm
       - name: install
         run: pnpm install --frozen-lockfile
+      - name: db schema push
+        run: pnpm --filter @wb/api db:push
       - name: gate (lint+typecheck+test+contract-diff)
         run: pnpm gate

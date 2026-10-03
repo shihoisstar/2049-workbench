@@ -21,7 +21,7 @@ workbench/
 │  ├─ miniapp/      # 微信小程序(uni-app/Taro,搭档技术确认二选一)
 │  ├─ h5/           # H5:充值兜底 + 落地页(与小程序共享业务层)
 │  ├─ admin/        # 运营后台(React,轻量)
-│  └─ api/          # 后端(NestJS 模块化单体)
+│  └─ api/          # 后端(Fastify 模块化单体;2026-10-03 修订见文末)
 ├─ packages/
 │  ├─ contracts/    # ★唯一接口事实源:Zod schema → 自动生成 OpenAPI + TS 类型 + JSON Schema
 │  ├─ domain/       # 纯业务规则:状态机/计费/剧本解析器(零框架依赖,双端复用)
@@ -49,7 +49,7 @@ CI = lint + typecheck + unit + **contract-diff 检查** + e2e。任何提交(人
 
 | 层 | 选型 | 理由 |
 | --- | --- | --- |
-| 后端 | NestJS 模块化单体(非微服务) | 2 人团队,模块边界清晰即可;微服务是分布式税 |
+| 后端 | Fastify 模块化单体(非微服务;原 NestJS,2026-10-03 修订见文末) | 2 人团队,模块边界清晰即可;微服务是分布式税 |
 | 数据库 | PostgreSQL + Drizzle(类型安全) | 主流、Agent 训练语料深 |
 | 任务队列 | Redis + BullMQ(状态机按镜序 §12) | 够用;Temporal 是未来选项不进 V0 |
 | 存储 | S3 兼容(阿里 OSS/腾讯 COS) | 国内合规 |
@@ -63,3 +63,7 @@ CI = lint + typecheck + unit + **contract-diff 检查** + e2e。任何提交(人
 2. 主链路只允许"LTS + 训练语料深"的技术;实验性技术只进 sandbox 分支,验证后按 ADR 引入;
 3. 每引入一个新依赖,`packages/contracts` 和 AGENTS.md 同步更新——否则门禁不过;
 4. "支撑未来更智能的模型"的正确姿势 = 任务切得足够小 + 契约足够清楚 + 验证足够自动,而不是预设某个模型的能力。
+
+## 修订记录
+
+- **v1.1(2026-10-03)后端框架 NestJS → Fastify**。原因:启动 T1.1 时核对参考实现 `2049-agent/apps/server`,其实际栈为 Fastify + @fastify/jwt + Zod(扁平模块);复用评估中的网关/计费移植(T1.2/T2.1)零转换的前提是同框架。代价评估:NestJS 的 DI/装饰器对单人+AI 是纯样板税,且与我们 Zod 契约直连需额外管道;Fastify 主流度与训练语料同样深,`app.inject` 原生测试无需 supertest。原则不变:仍是模块化单体、非微服务。

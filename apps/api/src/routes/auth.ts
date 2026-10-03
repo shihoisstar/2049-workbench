@@ -1,0 +1,40 @@
+import type { FastifyInstance, FastifyRequest } from 'fastify';
+import { eq } from 'drizzle-orm';
+import { ErrorCode, GuestLoginRequest, type GuestSession } from '@wb/contracts';
+
+import type { Db } from '../db';
+import { users } from '../schema';
+
+/** 会话有效期:游客态 7 天,过期前端静默重登(契约注释)。 */
+const SESSION_TTL_SEC = 7 * 24 * 3600;
+
+/** Bearer 校验;载荷即 JWT claims({ sub: userId })。 */
+async function requireAuth(req: FastifyRequest): Promise<void> {
+  await req.jwtVerify();
+}
+
+export function registerAuthRoutes(app: FastifyInstance, db: Db) {
+  app.post<{ Body: unknown }>('/v1/auth/guest', async (req, reply) => {
+    const parsed = GuestLoginRequest.safeParse(req.body);
+    if (!parsed.success) {
+      return reply.code(400).send({ code: ErrorCode.VALIDATION, message: '参数校验失败' });
+    }
+    const { deviceId } = parsed.data;
+
+    const existing = await db.select().from(users).where(eq(users.deviceId, deviceId)).limit(1);
+    const user = existing[0] ?? (await db.insert(users).values({ deviceId }).returning())[0];
+
+    const token = app.jwt.sign({ sub: user.id }, { expiresIn: SESSION_TTL_SEC });
+    return { token, userId: user.id, expiresInSec: SESSION_TTL_SEC } satisfies GuestSession;
+  });
+
+  /** 注销(软删除):清 deviceId/phone 可重新注册,行留存合规审计。 */
+  app.post('/v1/auth/deactivate', { preHandler: [requireAuth] }, async (req, reply) => {
+    const { sub } = req.user as { sub: string };
+    await db
+      .update(users)
+      .set({ status: 'deactivated', deviceId: null, phone: null, deactivatedAt: new Date() })
+      .where(eq(users.id, sub));
+    return reply.code(204).send();
+  });
+}
