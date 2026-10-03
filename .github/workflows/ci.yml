@@ -31,7 +31,7 @@ jobs:
           cache: pnpm
       - name: install
         run: pnpm install --frozen-lockfile
-      - name: db schema push
-        run: pnpm --filter @wb/api db:push
+      - name: db migrate(版本化迁移,大厂纪律:不用 push)
+        run: pnpm --filter @wb/api db:migrate
       - name: gate (lint+typecheck+test+contract-diff)
         run: pnpm gate

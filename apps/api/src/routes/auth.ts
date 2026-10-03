@@ -1,4 +1,4 @@
-import type { FastifyInstance, FastifyRequest } from 'fastify';
+import type { FastifyInstance } from 'fastify';
 import { eq } from 'drizzle-orm';
 import { ErrorCode, GuestLoginRequest, type GuestSession } from '@wb/contracts';
 
@@ -8,10 +8,8 @@ import { users } from '../schema';
 /** 会话有效期:游客态 7 天,过期前端静默重登(契约注释)。 */
 const SESSION_TTL_SEC = 7 * 24 * 3600;
 
-/** Bearer 校验;载荷即 JWT claims({ sub: userId })。 */
-async function requireAuth(req: FastifyRequest): Promise<void> {
-  await req.jwtVerify();
-}
+export { requireAuth } from './auth-route-shared';
+import { requireAuth } from './auth-route-shared';
 
 export function registerAuthRoutes(app: FastifyInstance, db: Db) {
   app.post<{ Body: unknown }>('/v1/auth/guest', async (req, reply) => {

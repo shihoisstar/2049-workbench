@@ -5,6 +5,7 @@ import { zodToJsonSchema } from 'zod-to-json-schema';
 import { GuestLoginRequest, GuestSession } from './auth';
 import { ErrorBody } from './errors';
 import { HealthResponse } from './health';
+import { WalletSummary } from './wallet';
 import { API_VERSION } from './version';
 
 /**
@@ -66,12 +67,29 @@ export function buildOpenApiDocument() {
           },
         },
       },
+      '/v1/wallet': {
+        get: {
+          summary: '钱包概览:余额+最近流水(实现:T1.2)',
+          security: [{ bearerAuth: [] }],
+          responses: {
+            '200': {
+              description: '余额与流水',
+              content: { 'application/json': { schema: ref('WalletSummary') } },
+            },
+            '401': {
+              description: '未登录',
+              content: { 'application/json': { schema: ref('ErrorBody') } },
+            },
+          },
+        },
+      },
     },
     components: {
       securitySchemes: {
         bearerAuth: { type: 'http', scheme: 'bearer', bearerFormat: 'JWT' },
       },
       schemas: {
+        WalletSummary: zodToJsonSchema(WalletSummary, { target: 'openApi3' }),
         HealthResponse: zodToJsonSchema(HealthResponse, { target: 'openApi3' }),
         ErrorBody: zodToJsonSchema(ErrorBody, { target: 'openApi3' }),
         GuestLoginRequest: zodToJsonSchema(GuestLoginRequest, { target: 'openApi3' }),

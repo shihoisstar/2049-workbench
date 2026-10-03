@@ -3,4 +3,5 @@ export { ErrorCode, ErrorBody } from './errors';
 export type { ErrorCodeValue } from './errors';
 export { HealthResponse } from './health';
 export { GuestLoginRequest, GuestSession } from './auth';
+export { WalletEntry, WalletSummary } from './wallet';
 export { buildOpenApiDocument, endpointList } from './openapi';

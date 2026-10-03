@@ -41,6 +41,9 @@ importers:
       '@wb/contracts':
         specifier: workspace:*
         version: link:../../packages/contracts
+      '@wb/domain':
+        specifier: workspace:*
+        version: link:../../packages/domain
       dotenv:
         specifier: ^18.0.5
         version: 18.0.5
