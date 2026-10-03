@@ -1,6 +1,28 @@
 /**
- * @wb/model-gateway —— 模型网关(自 2049-agent gateway 瘦身移植)。
- * 当前:T0.1 空壳。T2.1 落地 router / channel-pool / rate-limiter,
- * 火山 Seedance 2.0 唯一主通道 + Atlas 备用 stub(决策记录 0002)。
+ * @wb/model-gateway —— 模型网关(自 2049-agent packages/gateway 瘦身移植,T2.1)。
+ * 主通道:火山 Seedance 2.0;备用:Atlas stub(ADR-0002)。切换演练 = 业务层仅经 createGatewayRouter。
  */
-export const MODEL_GATEWAY_SKELETON = true as const;
+export {
+  createGatewayRouter,
+  createEnvSecretResolver,
+  type GatewayRouter,
+  type GatewayRouterDeps,
+  type SecretResolver,
+} from './router/router';
+export { ChannelPool } from './router/channel-pool';
+export { createMemoryRateLimiter, rateLimiterKey, type SyncRateLimiter } from './router/rate-limiter';
+export { volcengineSeedanceAdapter } from './router/adapters/volcengine-seedance';
+export { atlasVideoStub } from './router/adapters/atlas-stub';
+export type {
+  AdapterContext,
+  ChannelView,
+  GatewayAttempt,
+  GatewayErrorCode,
+  GatewayRequest,
+  GatewayResponse,
+  GatewayUsage,
+  ModelType,
+  TaskOperation,
+  VideoAdapter,
+} from './router/types';
+export { GatewayError } from './router/types';
