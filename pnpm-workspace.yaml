@@ -14,3 +14,4 @@ allowBuilds:
   core-js: true
   core-js-pure: true
   esbuild: true
+  msgpackr-extract: true # bullmq 传递依赖(msgpackr 原生加速),脚本仅编译本地二进制

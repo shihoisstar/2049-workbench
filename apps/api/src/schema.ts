@@ -84,6 +84,31 @@ export const orders = pgTable('orders', {
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 });
 
+/** 生成任务(INF-03/T2.2):状态机见 @wb/domain task-machine;billingKey 关联钱包冻结/退回。 */
+export const generationTasks = pgTable('generation_tasks', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  userId: uuid('user_id')
+    .notNull()
+    .references(() => users.id),
+  billingKey: text('billing_key').notNull().unique(),
+  status: text('status').notNull().default('created'),
+  prompt: text('prompt').notNull(),
+  resolution: text('resolution').notNull().default('480p'),
+  durationSec: integer('duration_sec').notNull().default(5),
+  model: text('model').notNull(),
+  estimateCredits: integer('estimate_credits').notNull(),
+  attempts: integer('attempts').notNull().default(0),
+  providerName: text('provider_name'),
+  providerTaskId: text('provider_task_id'),
+  channelId: integer('channel_id'),
+  videoUrl: text('video_url'),
+  errorCode: integer('error_code'),
+  errorMessage: text('error_message'),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  finishedAt: timestamp('finished_at', { withTimezone: true }),
+});
+
 export type User = typeof users.$inferSelect;
 export type CreditLog = typeof creditLogs.$inferSelect;
 export type UsageLog = typeof usageLogs.$inferSelect;

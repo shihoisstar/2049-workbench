@@ -12,4 +12,6 @@ export {
   StorePackage,
   StorePackages,
 } from './store';
+export { CreateTaskRequest, TaskStatus } from './tasks';
+export type { GenerationTask, GenerationTasks } from './tasks';
 export { buildOpenApiDocument, endpointList } from './openapi';

@@ -223,6 +223,112 @@
           }
         }
       }
+    },
+    "/v1/tasks": {
+      "post": {
+        "summary": "创建生成任务(冻结估算积分并入队;实现:T2.2)",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateTaskRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "任务已受理",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenerationTask"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "积分不足",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "summary": "我的任务列表",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "任务列表",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenerationTasks"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/tasks/{id}": {
+      "get": {
+        "summary": "任务详情(进度轮询)",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "任务",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenerationTask"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/tasks/{id}/cancel": {
+      "post": {
+        "summary": "取消任务(失败/取消全额退积分)",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "取消后的任务",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenerationTask"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -234,6 +340,197 @@
       }
     },
     "schemas": {
+      "CreateTaskRequest": {
+        "type": "object",
+        "properties": {
+          "prompt": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 3000
+          },
+          "resolution": {
+            "type": "string",
+            "enum": [
+              "480p",
+              "720p",
+              "1080p"
+            ],
+            "default": "480p"
+          },
+          "durationSec": {
+            "type": "integer",
+            "minimum": 3,
+            "maximum": 15,
+            "default": 5
+          }
+        },
+        "required": [
+          "prompt"
+        ],
+        "additionalProperties": false
+      },
+      "GenerationTask": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "created",
+              "queued",
+              "running",
+              "succeeded",
+              "failed",
+              "canceled"
+            ]
+          },
+          "prompt": {
+            "type": "string"
+          },
+          "resolution": {
+            "type": "string"
+          },
+          "durationSec": {
+            "type": "integer"
+          },
+          "estimateCredits": {
+            "type": "integer",
+            "exclusiveMinimum": true,
+            "minimum": 0
+          },
+          "attempts": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "videoUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "errorCode": {
+            "type": "integer",
+            "nullable": true
+          },
+          "errorMessage": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          },
+          "finishedAt": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "status",
+          "prompt",
+          "resolution",
+          "durationSec",
+          "estimateCredits",
+          "attempts",
+          "videoUrl",
+          "errorCode",
+          "errorMessage",
+          "createdAt",
+          "updatedAt",
+          "finishedAt"
+        ],
+        "additionalProperties": false
+      },
+      "GenerationTasks": {
+        "type": "object",
+        "properties": {
+          "tasks": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "string",
+                  "enum": [
+                    "created",
+                    "queued",
+                    "running",
+                    "succeeded",
+                    "failed",
+                    "canceled"
+                  ]
+                },
+                "prompt": {
+                  "type": "string"
+                },
+                "resolution": {
+                  "type": "string"
+                },
+                "durationSec": {
+                  "type": "integer"
+                },
+                "estimateCredits": {
+                  "type": "integer",
+                  "exclusiveMinimum": true,
+                  "minimum": 0
+                },
+                "attempts": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "videoUrl": {
+                  "type": "string",
+                  "nullable": true
+                },
+                "errorCode": {
+                  "type": "integer",
+                  "nullable": true
+                },
+                "errorMessage": {
+                  "type": "string",
+                  "nullable": true
+                },
+                "createdAt": {
+                  "type": "string"
+                },
+                "updatedAt": {
+                  "type": "string"
+                },
+                "finishedAt": {
+                  "type": "string",
+                  "nullable": true
+                }
+              },
+              "required": [
+                "id",
+                "status",
+                "prompt",
+                "resolution",
+                "durationSec",
+                "estimateCredits",
+                "attempts",
+                "videoUrl",
+                "errorCode",
+                "errorMessage",
+                "createdAt",
+                "updatedAt",
+                "finishedAt"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "tasks"
+        ],
+        "additionalProperties": false
+      },
       "StorePackages": {
         "type": "object",
         "properties": {

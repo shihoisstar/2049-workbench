@@ -6,6 +6,7 @@ import { GuestLoginRequest, GuestSession } from './auth';
 import { ErrorBody } from './errors';
 import { HealthResponse } from './health';
 import { CreateOrderRequest, StoreOrder, StoreOrders, StorePackages } from './store';
+import { CreateTaskRequest, GenerationTask, GenerationTasks } from './tasks';
 import { WalletSummary } from './wallet';
 import { API_VERSION } from './version';
 
@@ -137,12 +138,69 @@ export function buildOpenApiDocument() {
           },
         },
       },
+      '/v1/tasks': {
+        post: {
+          summary: '创建生成任务(冻结估算积分并入队;实现:T2.2)',
+          security: [{ bearerAuth: [] }],
+          requestBody: {
+            required: true,
+            content: { 'application/json': { schema: ref('CreateTaskRequest') } },
+          },
+          responses: {
+            '202': {
+              description: '任务已受理',
+              content: { 'application/json': { schema: ref('GenerationTask') } },
+            },
+            '402': {
+              description: '积分不足',
+              content: { 'application/json': { schema: ref('ErrorBody') } },
+            },
+          },
+        },
+        get: {
+          summary: '我的任务列表',
+          security: [{ bearerAuth: [] }],
+          responses: {
+            '200': {
+              description: '任务列表',
+              content: { 'application/json': { schema: ref('GenerationTasks') } },
+            },
+          },
+        },
+      },
+      '/v1/tasks/{id}': {
+        get: {
+          summary: '任务详情(进度轮询)',
+          security: [{ bearerAuth: [] }],
+          responses: {
+            '200': {
+              description: '任务',
+              content: { 'application/json': { schema: ref('GenerationTask') } },
+            },
+          },
+        },
+      },
+      '/v1/tasks/{id}/cancel': {
+        post: {
+          summary: '取消任务(失败/取消全额退积分)',
+          security: [{ bearerAuth: [] }],
+          responses: {
+            '200': {
+              description: '取消后的任务',
+              content: { 'application/json': { schema: ref('GenerationTask') } },
+            },
+          },
+        },
+      },
     },
     components: {
       securitySchemes: {
         bearerAuth: { type: 'http', scheme: 'bearer', bearerFormat: 'JWT' },
       },
       schemas: {
+        CreateTaskRequest: zodToJsonSchema(CreateTaskRequest, { target: 'openApi3' }),
+        GenerationTask: zodToJsonSchema(GenerationTask, { target: 'openApi3' }),
+        GenerationTasks: zodToJsonSchema(GenerationTasks, { target: 'openApi3' }),
         StorePackages: zodToJsonSchema(StorePackages, { target: 'openApi3' }),
         CreateOrderRequest: zodToJsonSchema(CreateOrderRequest, { target: 'openApi3' }),
         StoreOrder: zodToJsonSchema(StoreOrder, { target: 'openApi3' }),

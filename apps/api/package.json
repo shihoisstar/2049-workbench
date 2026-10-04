@@ -13,16 +13,20 @@
     "start": "node dist/index.js",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
-    "db:push": "drizzle-kit push"
+    "db:push": "drizzle-kit push",
+    "start:worker": "node dist/worker-main.js"
   },
   "dependencies": {
     "@fastify/cors": "^11.3.0",
     "@fastify/jwt": "^10.2.2",
     "@wb/contracts": "workspace:*",
     "@wb/domain": "workspace:*",
+    "@wb/model-gateway": "workspace:*",
+    "bullmq": "^6.3.11",
     "dotenv": "^18.0.5",
     "drizzle-orm": "^0.45.3",
     "fastify": "^5.12.5",
+    "ioredis": "^5.11.1",
     "postgres": "^3.4.9",
     "zod": "^3.25.76"
   },
