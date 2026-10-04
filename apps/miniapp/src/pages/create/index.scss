@@ -1,0 +1,177 @@
+@import '../../styles/tokens.scss';
+
+.create-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  padding: $wb-space-4;
+  background: $wb-color-bg;
+}
+
+.create-card {
+  padding: $wb-space-4;
+  margin-bottom: $wb-space-3;
+  border-radius: $wb-radius-lg;
+  background: $wb-color-card;
+  border: 1px solid $wb-color-border;
+}
+
+.create-label {
+  display: block;
+  margin-bottom: $wb-space-2;
+  font-size: $wb-font-base;
+  font-weight: 600;
+  color: $wb-color-ink;
+}
+
+.create-textarea-wrap {
+  position: relative;
+  border-radius: $wb-radius-md;
+  border: 1px solid $wb-color-border;
+  background: $wb-color-bg;
+}
+
+.create-textarea-wrap.blocked {
+  border-color: $wb-color-primary;
+}
+
+.create-textarea {
+  width: 100%;
+  min-height: 120px;
+  padding: $wb-space-3;
+  box-sizing: border-box;
+  font-size: $wb-font-base;
+  color: $wb-color-ink;
+}
+
+.create-count {
+  position: absolute;
+  right: $wb-space-2;
+  bottom: $wb-space-1;
+  font-size: $wb-font-xs;
+  color: $wb-color-ink-3;
+}
+
+.create-blocked {
+  margin-top: $wb-space-2;
+  padding: $wb-space-2 $wb-space-3;
+  border-radius: $wb-radius-sm;
+  background: $wb-mark-bg;
+}
+
+.create-blocked-text {
+  font-size: $wb-font-sm;
+  color: $wb-color-primary;
+}
+
+.create-images {
+  display: flex;
+}
+
+.create-image {
+  width: 88px;
+  height: 88px;
+  margin-right: $wb-space-2;
+  border-radius: $wb-radius-sm;
+  background: $wb-color-bg;
+}
+
+.create-image.add {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px dashed $wb-color-ink-3;
+  box-sizing: border-box;
+}
+
+.create-image-add {
+  font-size: $wb-font-xl;
+  color: $wb-color-ink-3;
+}
+
+.create-options {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.create-option {
+  display: flex;
+  align-items: center;
+  padding: 6px 14px;
+  margin: 0 $wb-space-2 $wb-space-2 0;
+  border-radius: 999px;
+  border: 1px solid $wb-color-border;
+  background: $wb-color-bg;
+}
+
+.create-option.active {
+  border-color: $wb-color-primary;
+  background: $wb-mark-bg;
+}
+
+.create-option-text {
+  font-size: $wb-font-sm;
+  color: $wb-color-ink-2;
+}
+
+.create-option-text.active {
+  color: $wb-color-primary;
+  font-weight: 600;
+}
+
+.create-option-badge {
+  margin-left: 4px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: $wb-color-primary;
+  font-size: 10px;
+  color: #ffffff;
+}
+
+.create-estimate {
+  display: flex;
+  flex-direction: column;
+  padding: $wb-space-3 $wb-space-4;
+  border-radius: $wb-radius-md;
+  background: $wb-color-card;
+  border: 1px solid $wb-color-border;
+}
+
+.create-estimate-label {
+  font-size: $wb-font-sm;
+  color: $wb-color-ink-2;
+}
+
+.create-estimate-value {
+  margin-top: 2px;
+  font-size: $wb-font-lg;
+  font-weight: 800;
+  color: $wb-color-primary;
+}
+
+.create-estimate-note {
+  margin-top: 2px;
+  font-size: $wb-font-xs;
+  color: $wb-color-ink-3;
+}
+
+.create-submit {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: $wb-space-4;
+  padding: $wb-space-3 0;
+  border-radius: 999px;
+  background: $wb-color-primary-gradient;
+  box-shadow: 0 8px 20px rgba(217, 4, 41, 0.32);
+}
+
+.create-submit.disabled {
+  opacity: 0.5;
+}
+
+.create-submit-text {
+  font-size: $wb-font-md;
+  font-weight: 700;
+  color: #ffffff;
+}

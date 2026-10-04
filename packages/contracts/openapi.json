@@ -348,6 +348,15 @@
             "minLength": 1,
             "maxLength": 3000
           },
+          "aspectRatio": {
+            "type": "string",
+            "enum": [
+              "16:9",
+              "9:16",
+              "1:1"
+            ],
+            "default": "9:16"
+          },
           "resolution": {
             "type": "string",
             "enum": [
@@ -387,6 +396,9 @@
             ]
           },
           "prompt": {
+            "type": "string"
+          },
+          "aspectRatio": {
             "type": "string"
           },
           "resolution": {
@@ -431,6 +443,7 @@
           "id",
           "status",
           "prompt",
+          "aspectRatio",
           "resolution",
           "durationSec",
           "estimateCredits",
@@ -467,6 +480,9 @@
                   ]
                 },
                 "prompt": {
+                  "type": "string"
+                },
+                "aspectRatio": {
                   "type": "string"
                 },
                 "resolution": {
@@ -511,6 +527,7 @@
                 "id",
                 "status",
                 "prompt",
+                "aspectRatio",
                 "resolution",
                 "durationSec",
                 "estimateCredits",

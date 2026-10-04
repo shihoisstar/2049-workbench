@@ -1,0 +1,1 @@
+ALTER TABLE "generation_tasks" ADD COLUMN "aspect_ratio" text DEFAULT '9:16' NOT NULL;

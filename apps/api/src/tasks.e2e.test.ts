@@ -142,7 +142,7 @@ async function waitForBalance(userId_: string, expected: number, label: string, 
 test('端到端成功:受理→轮询→结算,视频 URL 与余额正确', async () => {
   deps.router = freshRouter();
   const uid = await mkUser('ok');
-  const { task } = await tasks.create(uid, { prompt: '测试成片', resolution: '480p', durationSec: 5, model: 'mock-video' });
+  const { task } = await tasks.create(uid, { prompt: '测试成片', aspectRatio: '9:16', resolution: '480p', durationSec: 5, model: 'mock-video' });
   await tasks.markQueued(task.id);
   await queue.add('submit', { taskId: task.id });
 
@@ -156,7 +156,7 @@ test('端到端成功:受理→轮询→结算,视频 URL 与余额正确', asyn
 test('上游终态失败:即时退款(attempts=受理次数,poll 失败不再受理)', async () => {
   deps.router = freshRouter();
   const uid = await mkUser('fail-provider');
-  const { task } = await tasks.create(uid, { prompt: 'x', resolution: '480p', durationSec: 5, model: 'mock-video' });
+  const { task } = await tasks.create(uid, { prompt: 'x', aspectRatio: '9:16', resolution: '480p', durationSec: 5, model: 'mock-video' });
   await tasks.markQueued(task.id);
   await queue.add('submit', { taskId: task.id });
   await redirectOutcome(task.id, 'fail_model');
@@ -171,7 +171,7 @@ test('上游终态失败:即时退款(attempts=受理次数,poll 失败不再受
 test('submit 瞬断:任务级重试至上限(3 次)后失败全额退款;网关熔断使重试快速落空', async () => {
   deps.router = freshRouter();
   const uid = await mkUser('retry');
-  const { task } = await tasks.create(uid, { prompt: 'x', resolution: '480p', durationSec: 5, model: 'mock-video' });
+  const { task } = await tasks.create(uid, { prompt: 'x', aspectRatio: '9:16', resolution: '480p', durationSec: 5, model: 'mock-video' });
   await tasks.markQueued(task.id);
   flaky.remaining = 999; // 持续瞬断
   try {
@@ -190,7 +190,7 @@ test('submit 瞬断:任务级重试至上限(3 次)后失败全额退款;网关�
 test('内容拒绝:即时失败退款', async () => {
   deps.router = freshRouter();
   const uid = await mkUser('fail-content');
-  const { task } = await tasks.create(uid, { prompt: 'x', resolution: '480p', durationSec: 5, model: 'mock-video' });
+  const { task } = await tasks.create(uid, { prompt: 'x', aspectRatio: '9:16', resolution: '480p', durationSec: 5, model: 'mock-video' });
   await tasks.markQueued(task.id);
   await queue.add('submit', { taskId: task.id });
   await redirectOutcome(task.id, 'fail_content');
@@ -218,7 +218,7 @@ test('创建链路守门:命中违禁词 → CONTENT_BLOCKED + hits(不冻结积
 
 test('取消:queued 任务取消并退款;终态再取消非法', async () => {
   const uid = await mkUser('cancel');
-  const { task } = await tasks.create(uid, { prompt: 'x', resolution: '480p', durationSec: 5, model: 'mock-video' });
+  const { task } = await tasks.create(uid, { prompt: 'x', aspectRatio: '9:16', resolution: '480p', durationSec: 5, model: 'mock-video' });
   await tasks.markQueued(task.id);
   const canceled = await tasks.cancel(uid, task.id);
   assert.equal(canceled.status, 'canceled');
@@ -232,7 +232,7 @@ test('取消:queued 任务取消并退款;终态再取消非法', async () => {
 
 test('卡单 sweep:超时任务自动取消退款', async () => {
   const uid = await mkUser('sweep');
-  const { task } = await tasks.create(uid, { prompt: 'x', resolution: '480p', durationSec: 5, model: 'mock-video' });
+  const { task } = await tasks.create(uid, { prompt: 'x', aspectRatio: '9:16', resolution: '480p', durationSec: 5, model: 'mock-video' });
   await tasks.markQueued(task.id);
   const old = new Date(Date.now() - 11 * 60_000);
   await db.update(generationTasks).set({ updatedAt: old }).where(eq(generationTasks.id, task.id));

@@ -6,6 +6,8 @@ export type TaskStatus = z.infer<typeof TaskStatus>;
 
 export const CreateTaskRequest = z.object({
   prompt: z.string().min(1).max(3000),
+  /** 画面比例(对标 S17-S18 字段;营销短视频默认竖屏) */
+  aspectRatio: z.enum(['16:9', '9:16', '1:1']).default('9:16'),
   resolution: z.enum(['480p', '720p', '1080p']).default('480p'),
   durationSec: z.number().int().min(3).max(15).default(5),
 });
@@ -16,6 +18,7 @@ export const GenerationTask = z.object({
   id: z.string(),
   status: TaskStatus,
   prompt: z.string(),
+  aspectRatio: z.string(),
   resolution: z.string(),
   durationSec: z.number().int(),
   estimateCredits: z.number().int().positive(),

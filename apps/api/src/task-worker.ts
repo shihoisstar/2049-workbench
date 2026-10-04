@@ -39,27 +39,22 @@ async function loadRow(deps: TaskWorkerDeps, taskId: string): Promise<TaskRow | 
   return row;
 }
 
-async function setFinished(deps: TaskWorkerDeps, taskId: string, extra: { errorCode?: number; errorMessage?: string; videoUrl?: string }) {
-  await deps.db
-    .update(generationTasks)
-    .set({ ...extra, finishedAt: new Date(), updatedAt: new Date() })
-    .where(eq(generationTasks.id, taskId));
-}
-
-/** 失败收尾:fail 迁移 + 全额退款(钱包侧 billingKey 幂等)。 */
+/** 失败收尾:fail 迁移(状态+错误信息原子落库)+ 全额退款(钱包侧 billingKey 幂等)。 */
 async function failTask(deps: TaskWorkerDeps, taskId: string, userId: string, billingKey: string, code: number, message: string) {
-  await deps.tasks.apply(taskId, 'fail');
-  await setFinished(deps, taskId, { errorCode: code, errorMessage: message.slice(0, 300) });
+  await deps.tasks.apply(taskId, 'fail', {
+    errorCode: code,
+    errorMessage: message.slice(0, 300),
+    finishedAt: new Date(),
+  });
   if (refundOnTerminal('failed')) {
     await deps.wallet.refundAll(userId, billingKey);
   }
 }
 
-/** 成功收尾:结算(足额;差额退语义见钱包)+ videoUrl。 */
+/** 成功收尾:succeed 迁移(状态+videoUrl 原子落库)+ 结算(足额;差额退语义见钱包)。 */
 async function succeedTask(deps: TaskWorkerDeps, taskId: string, userId: string, billingKey: string, estimate: number, videoUrl: string) {
-  await deps.tasks.apply(taskId, 'succeed');
+  await deps.tasks.apply(taskId, 'succeed', { videoUrl, finishedAt: new Date() });
   await deps.wallet.settle(userId, billingKey, estimate, estimate);
-  await setFinished(deps, taskId, { videoUrl });
 }
 
 /** submit 处理器:queued → running → 网关受理;失败按分类走 重试/终态退款。 */
@@ -72,7 +67,7 @@ export async function handleSubmitTask(deps: TaskWorkerDeps, taskId: string): Pr
     const res = await deps.router.dispatch({
       modelName: row.model,
       modelType: 'video',
-      payload: { prompt: row.prompt, resolution: row.resolution, durationSec: row.durationSec },
+      payload: { prompt: row.prompt, aspectRatio: row.aspectRatio, resolution: row.resolution, durationSec: row.durationSec },
       taskOperation: 'submit',
     });
     await deps.db

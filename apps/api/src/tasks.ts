@@ -22,6 +22,7 @@ export function toTaskView(row: TaskRow): GenerationTask {
     id: row.id,
     status: row.status as TaskStatus,
     prompt: row.prompt,
+    aspectRatio: row.aspectRatio,
     resolution: row.resolution,
     durationSec: row.durationSec,
     estimateCredits: row.estimateCredits,
@@ -37,6 +38,7 @@ export function toTaskView(row: TaskRow): GenerationTask {
 
 export interface CreateTaskInput {
   prompt: string;
+  aspectRatio: string;
   resolution: string;
   durationSec: number;
   model: string;
@@ -67,6 +69,7 @@ export class TaskService {
           billingKey,
           status: 'created',
           prompt: input.prompt,
+          aspectRatio: input.aspectRatio,
           resolution: input.resolution,
           durationSec: input.durationSec,
           model: input.model,
@@ -119,14 +122,14 @@ export class TaskService {
     return toTaskView(updated);
   }
 
-  /** worker/sweep 用:带状态机校验的迁移(refundOnTerminal 自动退款)。 */
-  async apply(taskId: string, event: Parameters<typeof transition>[1]): Promise<TaskRow> {
+  /** worker/sweep 用:带状态机校验的迁移;extra 与状态同事务落库(防轮询读到中间态)。 */
+  async apply(taskId: string, event: Parameters<typeof transition>[1], extra?: Partial<TaskRow>): Promise<TaskRow> {
     const row = (
       await this.db.select().from(generationTasks).where(eq(generationTasks.id, taskId)).limit(1)
     )[0];
     if (!row) throw Object.assign(new Error('task not found'), { statusCode: 404, code: ErrorCode.TASK_NOT_FOUND });
     const next = transition(row.status as TaskStatus, event);
-    return this.persist(taskId, next);
+    return this.persist(taskId, next, extra);
   }
 
   /** 卡单 sweep:超时未终态 → cancel + 全额退。返回处理数。 */

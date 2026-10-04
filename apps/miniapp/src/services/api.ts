@@ -1,6 +1,6 @@
 import Taro from '@tarojs/taro';
 
-import type { GuestSession, StoreOrder, StorePackage, WalletSummary } from '@wb/contracts';
+import type { GenerationTask, GuestSession, StoreOrder, StorePackage, WalletSummary } from '@wb/contracts';
 
 /** API 基址:本地开发(3000 被参考项目容器占用,开发用 3010);
  * TODO(部署):正式域名 + weapp 合法域名白名单,并经 Taro defineConstants 注入。 */
@@ -12,12 +12,14 @@ const DEVICE_KEY = 'wb_device_id';
 interface ApiErrorShape {
   code: number;
   message: string;
+  details?: { hits?: string[] };
 }
 
 export class ApiError extends Error {
   constructor(
     public code: number,
     message: string,
+    public details?: { hits?: string[] },
   ) {
     super(message);
   }
@@ -31,7 +33,7 @@ async function call<T>(method: 'GET' | 'POST', path: string, data?: unknown, aut
   const res = await Taro.request<T | ApiErrorShape>({ url: `${BASE_URL}${path}`, method, data, header });
   if (res.statusCode >= 400) {
     const body = res.data as ApiErrorShape;
-    throw new ApiError(body?.code ?? res.statusCode, body?.message ?? `HTTP ${res.statusCode}`);
+    throw new ApiError(Number(body?.code ?? res.statusCode), body?.message ?? `HTTP ${res.statusCode}`, body?.details);
   }
   return res.data as T;
 }
@@ -89,4 +91,24 @@ export async function createOrder(packageId: string): Promise<StoreOrder> {
  */
 export async function devPay(orderId: string): Promise<StoreOrder> {
   return call<StoreOrder>('POST', `/v1/store/orders/${orderId}/dev-pay`, undefined, true);
+}
+
+/** 创建生成任务(T2.3):命中违禁词抛 ApiError(5001 + hits 高亮)。 */
+export async function createTask(input: {
+  prompt: string;
+  aspectRatio: string;
+  resolution: string;
+  durationSec: number;
+}): Promise<GenerationTask> {
+  return call<GenerationTask>('POST', '/v1/tasks', input, true);
+}
+
+/** 任务详情(进度页轮询)。 */
+export async function getTask(taskId: string): Promise<GenerationTask> {
+  return call<GenerationTask>(`GET`, `/v1/tasks/${taskId}`, undefined, true);
+}
+
+/** 取消任务(queued/running;失败/取消自动全额退)。 */
+export async function cancelTask(taskId: string): Promise<GenerationTask> {
+  return call<GenerationTask>('POST', `/v1/tasks/${taskId}/cancel`, undefined, true);
 }
