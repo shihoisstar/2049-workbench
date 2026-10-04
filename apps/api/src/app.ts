@@ -4,6 +4,7 @@ import fjwt from '@fastify/jwt';
 import type { Queue } from 'bullmq';
 
 import { createDb } from './db';
+import { ContentSafetyService, loadBannedWords } from './content-safety';
 import { registerAuthRoutes } from './routes/auth';
 import { registerHealthRoutes } from './routes/health';
 import { registerStoreRoutes } from './routes/store';
@@ -44,10 +45,12 @@ export function buildApp(opts: AppOptions): FastifyInstance {
   const wallet = new WalletService(db);
   const tasks = new TaskService(db, wallet);
   const store = new StoreService(db, wallet);
+  const safety = new ContentSafetyService(loadBannedWords());
   app.decorate('db', db);
   app.decorate('wallet', wallet);
   app.decorate('tasks', tasks);
   app.decorate('store', store);
+  app.decorate('safety', safety);
 
   // 入队惰性建连:api 进程只 add job,消费在 worker 进程(REDIS_URL 未配时显式报错)
   let queuePromise: Promise<Queue<TaskJobData>> | null = null;
@@ -66,7 +69,7 @@ export function buildApp(opts: AppOptions): FastifyInstance {
   registerAuthRoutes(app, db, wallet);
   registerWalletRoutes(app, wallet);
   registerStoreRoutes(app, store);
-  registerTaskRoutes(app, { tasks, enqueue });
+  registerTaskRoutes(app, { tasks, safety, enqueue });
 
   return app;
 }

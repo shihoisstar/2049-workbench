@@ -122,6 +122,12 @@ async function balance(userId_: string): Promise<number> {
   return (await wallet.summary(userId_)).balance;
 }
 
+/** 走真实登录链路拿 token(守门测试用)。 */
+async function loginToken(userId_: string): Promise<string> {
+  const login = await app.inject({ method: 'POST', url: '/v1/auth/guest', payload: { deviceId: `t22-login-${userId_}` } });
+  return login.json().token;
+}
+
 /** 余额断言用轮询:终态落库与退款/结算是毫秒级先后,固定读会竞态。 */
 async function waitForBalance(userId_: string, expected: number, label: string, timeoutMs = 3000): Promise<void> {
   const deadline = Date.now() + timeoutMs;
@@ -192,6 +198,22 @@ test('内容拒绝:即时失败退款', async () => {
   const final = await waitForTask(task.id, ['failed']);
   assert.equal(final.status, 'failed');
   await waitForBalance(uid, 100, '即时退回');
+});
+
+test('创建链路守门:命中违禁词 → CONTENT_BLOCKED + hits(不冻结积分)', async () => {
+  const uid = await mkUser('content-block');
+  const before = await balance(uid);
+  const res = await app.inject({
+    method: 'POST',
+    url: '/v1/tasks',
+    headers: { authorization: `Bearer ${await loginToken(uid)}` },
+    payload: { prompt: '来点博彩内容', resolution: '480p', durationSec: 5 },
+  });
+  assert.equal(res.statusCode, 400);
+  const body = res.json();
+  assert.equal(Number(body.code), 5001);
+  assert.ok((body.details?.hits ?? []).includes('博彩'), 'hits 供前端高亮');
+  assert.equal(await balance(uid), before, '拒绝在冻结之前,积分分毫不动');
 });
 
 test('取消:queued 任务取消并退款;终态再取消非法', async () => {

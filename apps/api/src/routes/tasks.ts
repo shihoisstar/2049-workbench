@@ -2,10 +2,12 @@ import type { FastifyInstance } from 'fastify';
 import { CreateTaskRequest, ErrorCode } from '@wb/contracts';
 
 import { requireAuth } from './auth-route-shared';
+import type { ContentSafetyService } from '../content-safety';
 import type { TaskService } from '../tasks';
 
 export interface TaskRouteDeps {
   tasks: TaskService;
+  safety: ContentSafetyService;
   /** 入队器(队列在 worker 进程消费;测试可注入 stub) */
   enqueue: (taskId: string) => Promise<void>;
 }
@@ -16,6 +18,15 @@ export function registerTaskRoutes(app: FastifyInstance, deps: TaskRouteDeps) {
     const parsed = CreateTaskRequest.safeParse(req.body);
     if (!parsed.success) {
       return reply.code(400).send({ code: ErrorCode.VALIDATION, message: '参数校验失败' });
+    }
+    // 守门员(T2.4):命中违禁词 → 拒绝入链路,hits 供前端高亮(INF-06/MKV-03)
+    const verdict = await deps.safety.checkText(parsed.data.prompt);
+    if (verdict.blocked) {
+      return reply.code(400).send({
+        code: ErrorCode.CONTENT_BLOCKED,
+        message: '内容包含违规词,请修改后重试',
+        details: { hits: verdict.hits },
+      });
     }
     try {
       // V0 模型路由:默认 mock(开发)/ 火山(生产,有 KEY 时 gateway-setup 决定)
