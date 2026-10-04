@@ -209,6 +209,43 @@
   color: $wb-color-ink-3;
 }
 
+.mine-feedback {
+  margin-top: $wb-space-2;
+  padding: $wb-space-3;
+  border-radius: $wb-radius-md;
+  background: $wb-color-card;
+  border: 1px solid $wb-color-border;
+}
+
+.mine-feedback-textarea {
+  width: 100%;
+  min-height: 80px;
+  padding: $wb-space-2;
+  box-sizing: border-box;
+  font-size: $wb-font-sm;
+  color: $wb-color-ink;
+}
+
+.mine-feedback-submit {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: $wb-space-2;
+  padding: 8px 0;
+  border-radius: 999px;
+  background: $wb-color-primary-gradient;
+}
+
+.mine-feedback-submit.disabled {
+  opacity: 0.5;
+}
+
+.mine-feedback-submit-text {
+  font-size: $wb-font-sm;
+  font-weight: 600;
+  color: #ffffff;
+}
+
 .mine-actions {
   display: flex;
   margin-top: $wb-space-5;

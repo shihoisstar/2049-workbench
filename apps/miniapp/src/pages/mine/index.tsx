@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { View, Text } from '@tarojs/components';
+import { View, Text, Textarea } from '@tarojs/components';
 import { Tag } from '@nutui/nutui-react-taro';
 import Taro from '@tarojs/taro';
 
@@ -21,6 +21,9 @@ export default function Mine() {
   const [wallet, setWallet] = useState<WalletSummary | null>(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [feedbackOpen, setFeedbackOpen] = useState(false);
+  const [feedbackText, setFeedbackText] = useState('');
+  const [feedbackSending, setFeedbackSending] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -107,32 +110,41 @@ export default function Mine() {
         )}
       </View>
 
-      <View
-        className="mine-compliance"
-        onClick={async () => {
-          // H5 端 showModal 支持 editable 输入,但 Taro 类型未收录 → 局部断言
-          const showModalEx = Taro.showModal as unknown as (o: Record<string, unknown>) => Promise<{ confirm: boolean; content?: string }>;
-          const res = await showModalEx({
-            title: '意见反馈',
-            content: '告诉我哪里不好用、想要什么功能(1000 字内):',
-            editable: true,
-            placeholderText: '选填:联系方式(邮箱/微信),方便回访',
-            confirmText: '提交',
-          });
-          if (res.confirm && res.content?.trim()) {
-            try {
-              await ensureSession();
-              await submitFeedback(res.content.trim());
-              Taro.showToast({ title: '已收到,感谢反馈', icon: 'success' });
-            } catch (e) {
-              Taro.showToast({ title: (e as Error).message || '提交失败', icon: 'none' });
-            }
-          }
-        }}
-      >
+      <View className="mine-compliance" onClick={() => setFeedbackOpen((v) => !v)}>
         <Text className="mine-compliance-text">意见反馈</Text>
-        <Text className="mine-compliance-arrow">›</Text>
+        <Text className="mine-compliance-arrow">{feedbackOpen ? '⌃' : '›'}</Text>
       </View>
+      {feedbackOpen && (
+        <View className="mine-feedback">
+          <Textarea
+            className="mine-feedback-textarea"
+            value={feedbackText}
+            maxlength={1000}
+            placeholder="告诉我哪里不好用、想要什么功能(1000 字内)"
+            onInput={(e) => setFeedbackText(e.detail.value)}
+          />
+          <View
+            className={`mine-feedback-submit ${feedbackText.trim() ? '' : 'disabled'}`}
+            onClick={async () => {
+              if (!feedbackText.trim() || feedbackSending) return;
+              setFeedbackSending(true);
+              try {
+                await ensureSession();
+                await submitFeedback(feedbackText.trim());
+                Taro.showToast({ title: '已收到,感谢反馈', icon: 'success' });
+                setFeedbackText('');
+                setFeedbackOpen(false);
+              } catch (e) {
+                Taro.showToast({ title: (e as Error).message || '提交失败', icon: 'none' });
+              } finally {
+                setFeedbackSending(false);
+              }
+            }}
+          >
+            <Text className="mine-feedback-submit-text">{feedbackSending ? '提交中…' : '提交反馈'}</Text>
+          </View>
+        </View>
+      )}
 
       <View
         className="mine-compliance"
