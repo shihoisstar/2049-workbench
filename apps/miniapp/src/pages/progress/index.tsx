@@ -5,7 +5,7 @@ import { Video } from '@tarojs/components';
 
 import type { GenerationTask } from '@wb/contracts';
 
-import { cancelTask, ensureSession, getTask } from '../../services/api';
+import { cancelTask, createTask, ensureSession, getTask } from '../../services/api';
 
 import './index.scss';
 
@@ -136,6 +136,27 @@ export default function Progress() {
       {canCancel && (
         <View className="progress-cancel" onClick={() => void onCancel()}>
           <Text className="progress-cancel-text">取消任务(积分将退回)</Text>
+        </View>
+      )}
+      {task?.status === 'failed' && (
+        <View
+          className="progress-again"
+          onClick={async () => {
+            try {
+              await ensureSession();
+              const next = await createTask({
+                prompt: task.prompt,
+                aspectRatio: task.aspectRatio,
+                resolution: task.resolution,
+                durationSec: task.durationSec,
+              });
+              Taro.redirectTo({ url: `/pages/progress/index?taskId=${next.id}` });
+            } catch (e) {
+              Taro.showToast({ title: (e as Error).message || '重试失败', icon: 'none' });
+            }
+          }}
+        >
+          <Text className="progress-again-text">一键重试(原参数,重新冻结积分)</Text>
         </View>
       )}
       {task?.status === 'succeeded' && (

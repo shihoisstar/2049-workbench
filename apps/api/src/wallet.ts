@@ -13,6 +13,17 @@ export type WalletEntry = {
   createdAt: Date;
 };
 
+/** 沿错误链找 unique_violation(drizzle/postgres.js 的包装层级不稳定)。 */
+export function isUniqueViolation(e: unknown): boolean {
+  let cur = e as { code?: string; cause?: unknown } | null | undefined;
+  for (let i = 0; cur && i < 5; i++) {
+    if (cur.code === '23505') return true;
+    cur = cur.cause as typeof cur;
+  }
+  const msg = (e as Error | undefined)?.message ?? '';
+  return msg.includes('duplicate key') || msg.includes('unique constraint');
+}
+
 /**
  * 积分钱包服务(INF-02 / T1.2):预留-结算 + 三账本,事务双写。
  * 大厂纪律:所有余额变动只经本服务入口;余额表与流水表同事务提交,
@@ -177,13 +188,3 @@ export class WalletService {
   }
 }
 
-/** 沿错误链找 unique_violation(drizzle/postgres.js 的包装层级不稳定)。 */
-function isUniqueViolation(e: unknown): boolean {
-  let cur = e as { code?: string; cause?: unknown } | null | undefined;
-  for (let i = 0; cur && i < 5; i++) {
-    if (cur.code === '23505') return true;
-    cur = cur.cause as typeof cur;
-  }
-  const msg = (e as Error | undefined)?.message ?? '';
-  return msg.includes('duplicate key') || msg.includes('unique constraint');
-}

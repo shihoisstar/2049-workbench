@@ -57,15 +57,25 @@ function ensureDeviceId(): string {
  * 游客会话(登录授权屏的服务端部分):幂等登录,缓存 token/userId。
  * 401 时由调用方清缓存重试(T1.3 简化为手动刷新触发)。
  */
-export async function ensureSession(): Promise<GuestSession> {
+let sessionPromise: Promise<GuestSession> | null = null;
+
+/** 单飞:app 启动与页面 effect 并发调用时只发一次登录请求(服务端幂等,客户端也不制造竞态)。 */
+export function ensureSession(): Promise<GuestSession> {
   const token = Taro.getStorageSync(TOKEN_KEY) as string;
   const userId = Taro.getStorageSync(USER_KEY) as string;
-  if (token && userId) return { token, userId, expiresInSec: 0 };
+  if (token && userId) return Promise.resolve({ token, userId, expiresInSec: 0 });
 
-  const session = await call<GuestSession>('POST', '/v1/auth/guest', { deviceId: ensureDeviceId() });
-  Taro.setStorageSync(TOKEN_KEY, session.token);
-  Taro.setStorageSync(USER_KEY, session.userId);
-  return session;
+  sessionPromise ??= call<GuestSession>('POST', '/v1/auth/guest', { deviceId: ensureDeviceId() })
+    .then((session) => {
+      Taro.setStorageSync(TOKEN_KEY, session.token);
+      Taro.setStorageSync(USER_KEY, session.userId);
+      return session;
+    })
+    .catch((e: unknown) => {
+      sessionPromise = null; // 失败不缓存,允许重试
+      throw e;
+    });
+  return sessionPromise;
 }
 
 /** 钱包概览(我的/积分明细屏数据源)。 */

@@ -4,6 +4,7 @@ import { ErrorCode, GuestLoginRequest, type GuestSession } from '@wb/contracts';
 
 import type { Db } from '../db';
 import { users } from '../schema';
+import { isUniqueViolation } from '../wallet';
 import type { WalletService } from '../wallet';
 
 /** 会话有效期:游客态 7 天,过期前端静默重登(契约注释)。 */
@@ -24,7 +25,17 @@ export function registerAuthRoutes(app: FastifyInstance, db: Db, wallet: WalletS
     const { deviceId } = parsed.data;
 
     const existing = await db.select().from(users).where(eq(users.deviceId, deviceId)).limit(1);
-    const user = existing[0] ?? (await db.insert(users).values({ deviceId }).returning())[0];
+    let user = existing[0];
+    if (!user) {
+      try {
+        user = (await db.insert(users).values({ deviceId }).returning())[0];
+      } catch (e) {
+        // 并发登录竞态:唯一约束冲突 → 读回已有用户(幂等,登录永远 200)
+        if (!isUniqueViolation(e)) throw e;
+        user = (await db.select().from(users).where(eq(users.deviceId, deviceId)).limit(1))[0];
+        if (!user) throw e;
+      }
+    }
 
     // 注册即赠:幂等键按用户域,重复登录不重复发放
     await wallet.grant(user.id, SIGNUP_GRANT, `signup-grant:${user.id}`, '注册赠送(1 条 480P 预览)');
