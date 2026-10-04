@@ -10,7 +10,7 @@
     "typecheck": "turbo run typecheck",
     "lint": "turbo run lint",
     "test": "turbo run test",
-    "gate": "turbo run lint typecheck test contract-diff",
+    "gate": "node scripts/check-secrets.mjs && turbo run lint typecheck test contract-diff",
     "dev:api": "turbo run dev --filter=@wb/api"
   },
   "devDependencies": {

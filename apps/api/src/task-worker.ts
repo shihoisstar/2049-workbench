@@ -141,7 +141,7 @@ export async function handleSweep(deps: TaskWorkerDeps): Promise<number> {
 
 /** 组装 BullMQ Worker(独立进程运行;测试直接调 handleX 不经 redis)。 */
 export function createTaskWorker(deps: TaskWorkerDeps, connection = createRedisConnection(process.env.REDIS_URL ?? 'redis://localhost:6379')): WorkerT<TaskJobData> {
-  return new Worker<TaskJobData>(
+  const worker = new Worker<TaskJobData>(
     QUEUE_NAME,
     async (job) => {
       if (job.name === 'submit' && job.data.taskId) return handleSubmitTask(deps, job.data.taskId);
@@ -150,6 +150,23 @@ export function createTaskWorker(deps: TaskWorkerDeps, connection = createRedisC
     },
     { connection },
   );
+  // T3.3 告警:连续失败 ≥3 触发(INF-09);webhook 未配置时仅高声日志,不丢事件
+  const alerts = { consecutive: 0, threshold: Number(process.env.ALERT_CONSECUTIVE_FAILURES ?? 3) };
+  worker.on('completed', () => { alerts.consecutive = 0; });
+  worker.on('failed', async (job, err) => {
+    alerts.consecutive += 1;
+    const summary = `queue=${QUEUE_NAME} job=${job?.name}/${job?.id} consecutive=${alerts.consecutive} err=${err.message.slice(0, 200)}`;
+    if (alerts.consecutive >= alerts.threshold) {
+      console.error(`[ALERT] 任务连续失败: ${summary}`);
+      const hook = process.env.ALERT_WEBHOOK;
+      if (hook) {
+        await fetch(hook, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ text: `[2049出片] 连续失败告警: ${summary}` }) }).catch((e) => console.error('[ALERT] webhook 投递失败:', (e as Error).message));
+      }
+    } else {
+      console.error(`[worker] job failed: ${summary}`);
+    }
+  });
+  return worker;
 }
 
 /** gateway GatewayErrorCode → contracts ErrorCode(面向前端文案)。 */

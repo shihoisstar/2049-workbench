@@ -40,6 +40,10 @@ jobs:
           cache: pnpm
       - name: install
         run: pnpm install --frozen-lockfile
+      - name: secret scan(gitleaks,与本地 check-secrets 双保险)
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: db migrate(版本化迁移,大厂纪律:不用 push)
         run: pnpm --filter @wb/api db:migrate
       - name: gate (lint+typecheck+test+contract-diff)

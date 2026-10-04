@@ -1,5 +1,6 @@
 import { join } from 'node:path';
 import { mkdirSync } from 'node:fs';
+import { randomUUID } from 'node:crypto';
 import Fastify, { type FastifyInstance } from 'fastify';
 import cors from '@fastify/cors';
 import fjwt from '@fastify/jwt';
@@ -36,7 +37,15 @@ declare module 'fastify' {
 
 /** 组装应用(routes 经闭包拿依赖;结构对齐 2049-agent apps/server,不做装饰器花活)。 */
 export function buildApp(opts: AppOptions): FastifyInstance {
-  const app = Fastify({ logger: false });
+  // T3.3:结构化日志(pino)+ request-id;authorization 一律脱敏
+  const app = Fastify({
+    logger: {
+      level: process.env.LOG_LEVEL ?? 'info',
+      redact: { paths: ['req.headers.authorization', 'req.headers.cookie'] },
+    },
+    genReqId: () => randomUUID(),
+    requestIdHeader: 'x-request-id',
+  });
   const { db, client } = createDb(opts.databaseUrl);
   app.addHook('onClose', async () => {
     await client.end();
