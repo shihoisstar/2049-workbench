@@ -84,6 +84,18 @@
   margin-top: $wb-space-4;
 }
 
+.progress-ttl {
+  margin-bottom: $wb-space-2;
+  padding: $wb-space-2 $wb-space-3;
+  border-radius: $wb-radius-sm;
+  background: $wb-mark-bg;
+}
+
+.progress-ttl-text {
+  font-size: $wb-font-xs;
+  color: $wb-color-primary;
+}
+
 .progress-video {
   width: 100%;
   height: 320px;

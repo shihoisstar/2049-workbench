@@ -115,6 +115,9 @@ export default function Progress() {
 
         {task?.status === 'succeeded' && task.videoUrl && (
           <View className="progress-result">
+            <View className="progress-ttl">
+              <Text className="progress-ttl-text">成片保存期 7 天,到期自动清理,请及时下载</Text>
+            </View>
             <Video className="progress-video" src={task.videoUrl} controls />
             <Text
               className="progress-copy"

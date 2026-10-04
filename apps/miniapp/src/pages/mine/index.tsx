@@ -107,6 +107,22 @@ export default function Mine() {
         )}
       </View>
 
+      <View
+        className="mine-compliance"
+        onClick={() =>
+          Taro.showModal({
+            title: '水印与内容标识说明',
+            content:
+              '依据《互联网信息服务深度合成管理规定》第十六条、第十七条与《生成式人工智能服务管理暂行办法》第十二条:本平台生成的全部视频均携带显式水印(右下角“2049出片”)与元数据隐式标识,显式水印暂不支持关闭,元数据标识不可去除。成片保存期为 7 天,到期前请及时下载。',
+            showCancel: false,
+            confirmText: '我已了解',
+          })
+        }
+      >
+        <Text className="mine-compliance-text">水印与内容标识说明(合规)</Text>
+        <Text className="mine-compliance-arrow">›</Text>
+      </View>
+
       <View className="mine-actions">
         <View className="mine-btn ghost" onClick={() => void load()}>
           <Text className="mine-btn-text ghost">刷新</Text>

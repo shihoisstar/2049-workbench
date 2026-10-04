@@ -188,6 +188,27 @@
   color: $wb-color-ink;
 }
 
+.mine-compliance {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: $wb-space-3;
+  padding: $wb-space-3 $wb-space-4;
+  border-radius: $wb-radius-md;
+  background: $wb-color-card;
+  border: 1px solid $wb-color-border;
+}
+
+.mine-compliance-text {
+  font-size: $wb-font-sm;
+  color: $wb-color-ink-2;
+}
+
+.mine-compliance-arrow {
+  font-size: $wb-font-md;
+  color: $wb-color-ink-3;
+}
+
 .mine-actions {
   display: flex;
   margin-top: $wb-space-5;

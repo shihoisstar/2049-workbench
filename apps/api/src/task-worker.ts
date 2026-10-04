@@ -14,7 +14,7 @@ import type { Db } from './db';
 import { generationTasks } from './schema';
 import { TASK_MAX_ATTEMPTS, TaskService } from './tasks';
 import type { WalletService } from './wallet';
-import { applyWatermark, type StorageService } from './storage';
+import { applyWatermark, embedAiMetadata, type StorageService } from './storage';
 
 export interface WorkerTimings {
   pollIntervalMs: number;
@@ -57,15 +57,24 @@ async function failTask(deps: TaskWorkerDeps, taskId: string, userId: string, bi
 }
 
 /** 成功收尾:succeed 迁移(状态+videoUrl 原子落库)+ 结算(足额;差额退语义见钱包)。
- * T3.1 自动水印:成片先下载→overlay 品牌 PNG→入存储库,替换 videoUrl;
- * 水印失败降级原片(不阻塞交付,console 记录——降级策略见 spec INF-06 §3)。 */
+ * T3.1:显式水印(失败可降级)+ AI 元数据标识(强制,不可关,合规底线 INF-06)。 */
 async function succeedTask(deps: TaskWorkerDeps, taskId: string, userId: string, billingKey: string, estimate: number, videoUrl: string) {
   let finalUrl = videoUrl;
   try {
     const watermarked = await applyWatermark(videoUrl, deps.watermarkAssetPath, deps.fetchImpl);
     finalUrl = await deps.storage.put(`${taskId}.mp4`, watermarked);
   } catch (e) {
-    console.error(`[worker] 水印失败,降级原片: taskId=${taskId}`, (e as Error).message);
+    console.error(`[worker] 水印失败,降级原片+元数据: taskId=${taskId}`, (e as Error).message);
+    try {
+      const res = await (deps.fetchImpl ?? fetch)(videoUrl, { signal: AbortSignal.timeout(60_000) });
+      if (res.ok) {
+        const raw = Buffer.from(await res.arrayBuffer());
+        const withMeta = await embedAiMetadata(raw);
+        finalUrl = await deps.storage.put(`${taskId}.mp4`, withMeta);
+      }
+    } catch (e2) {
+      console.error(`[worker] 元数据兜底也失败,原片直出: taskId=${taskId}`, (e2 as Error).message);
+    }
   }
   await deps.tasks.apply(taskId, 'succeed', { videoUrl: finalUrl, finishedAt: new Date() });
   await deps.wallet.settle(userId, billingKey, estimate, estimate);

@@ -3,6 +3,7 @@
  * 边界:worker/服务层只经本服务存取,不直写磁盘路径。
  */
 import { mkdir, writeFile } from 'node:fs/promises';
+import { spawn } from 'node:child_process';
 import { join, resolve } from 'node:path';
 
 export interface StorageService {
@@ -31,9 +32,21 @@ export class LocalDiskStorage implements StorageService {
   }
 }
 
-/** 水印:下载原始成片 → ffmpeg overlay 品牌 PNG → 返回带水印 buffer。失败上抛(调用方定降级策略)。 */
+/** AI 元数据标识(INF-06:隐式标识,不可关闭)——所有出口视频无论是否带显式水印都嵌入。 */
+export const AI_METADATA_COMMENT = 'AI生成内容 · 2049出片(依据《互联网信息服务深度合成管理规定》第十七条)';
+
+function runFfmpeg(args: string[]): Promise<void> {
+  return new Promise((resolvePromise, reject) => {
+    const ff = spawn('ffmpeg', args);
+    let stderr = '';
+    ff.stderr.on('data', (d) => { stderr += String(d); });
+    ff.on('error', reject);
+    ff.on('close', (code) => (code === 0 ? resolvePromise() : reject(new Error(`ffmpeg 失败(code ${code}): ${stderr.slice(-200)}`))));
+  });
+}
+
+/** 水印:下载原始成片 → ffmpeg overlay 品牌 PNG + AI 元数据 → 返回带水印 buffer。失败上抛(调用方定降级策略)。 */
 export async function applyWatermark(videoUrl: string, watermarkPath: string, fetchImpl: typeof fetch = fetch, timeoutMs = 60_000): Promise<Buffer> {
-  const { spawn } = await import('node:child_process');
   const res = await fetchImpl(videoUrl, { signal: AbortSignal.timeout(timeoutMs) });
   if (!res.ok) throw new Error(`下载成片失败: HTTP ${res.status}`);
   const raw = Buffer.from(await res.arrayBuffer());
@@ -42,14 +55,28 @@ export async function applyWatermark(videoUrl: string, watermarkPath: string, fe
   const { writeFile: wf, rm } = await import('node:fs/promises');
   await wf(tmpIn, raw);
   try {
-    await new Promise<void>((resolvePromise, reject) => {
-      const ff = spawn('ffmpeg', ['-y', '-i', tmpIn, '-i', watermarkPath, '-filter_complex', 'overlay=W-w-16:H-h-16', '-c:a', 'copy', tmpOut]);
-      let stderr = '';
-      ff.stderr.on('data', (d) => { stderr += String(d); });
-      ff.on('error', reject);
-      ff.on('close', (code) => (code === 0 ? resolvePromise() : reject(new Error(`ffmpeg 失败(code ${code}): ${stderr.slice(-200)}`))));
-    });
+    await runFfmpeg([
+      '-y', '-i', tmpIn, '-i', watermarkPath,
+      '-filter_complex', 'overlay=W-w-16:H-h-16',
+      '-metadata', `comment=${AI_METADATA_COMMENT}`,
+      '-c:a', 'copy', tmpOut,
+    ]);
     const { readFile: rf } = await import('node:fs/promises');
+    return await rf(tmpOut);
+  } finally {
+    await rm(tmpIn, { force: true }).catch(() => undefined);
+    await rm(tmpOut, { force: true }).catch(() => undefined);
+  }
+}
+
+/** 降级路径兜底:无显式水印也必须嵌入 AI 元数据(流复制,不重编码,毫秒级)。 */
+export async function embedAiMetadata(videoBuffer: Buffer): Promise<Buffer> {
+  const tmpIn = join(process.env.TEMP ?? '/tmp', `wb-meta-in-${Date.now()}.mp4`);
+  const tmpOut = join(process.env.TEMP ?? '/tmp', `wb-meta-out-${Date.now()}.mp4`);
+  const { writeFile: wf, readFile: rf, rm } = await import('node:fs/promises');
+  await wf(tmpIn, videoBuffer);
+  try {
+    await runFfmpeg(['-y', '-i', tmpIn, '-c', 'copy', '-metadata', `comment=${AI_METADATA_COMMENT}`, tmpOut]);
     return await rf(tmpOut);
   } finally {
     await rm(tmpIn, { force: true }).catch(() => undefined);
