@@ -99,6 +99,11 @@ export async function devPay(orderId: string): Promise<StoreOrder> {
   return call<StoreOrder>('POST', `/v1/store/orders/${orderId}/dev-pay`, undefined, true);
 }
 
+/** 提交用户反馈(OPS-01)。 */
+export async function submitFeedback(content: string, contact?: string): Promise<{ id: string }> {
+  return call<{ id: string }>('POST', '/v1/feedback', { content, contact }, true);
+}
+
 /** 模板 feed(T3.2 首页)。 */
 export async function getTemplates(): Promise<Template[]> {
   const res = await call<{ templates?: Template[] } | undefined>('GET', '/v1/templates');

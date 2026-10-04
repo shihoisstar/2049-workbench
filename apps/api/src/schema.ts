@@ -123,6 +123,18 @@ export const templates = pgTable('templates', {
   sortOrder: integer('sort_order').notNull().default(0),
 });
 
+/** 用户反馈(OPS-01/T3.4):落库即验收"可见";运营侧后续经 admin 后台查询。 */
+export const feedbacks = pgTable('feedbacks', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  userId: uuid('user_id')
+    .notNull()
+    .references(() => users.id),
+  content: text('content').notNull(),
+  contact: text('contact'),
+  status: text('status').notNull().default('open'),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+});
+
 export type User = typeof users.$inferSelect;
 export type CreditLog = typeof creditLogs.$inferSelect;
 export type UsageLog = typeof usageLogs.$inferSelect;

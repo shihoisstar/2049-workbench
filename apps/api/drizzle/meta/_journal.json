@@ -36,6 +36,13 @@
       "when": 1791108978950,
       "tag": "0004_dizzy_spitfire",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1791114591175,
+      "tag": "0005_gigantic_the_captain",
+      "breakpoints": true
     }
   ]
 }

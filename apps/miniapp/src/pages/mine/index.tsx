@@ -5,7 +5,7 @@ import Taro from '@tarojs/taro';
 
 import type { WalletSummary } from '@wb/contracts';
 
-import { deactivate, ensureSession, getWallet } from '../../services/api';
+import { deactivate, ensureSession, getWallet, submitFeedback } from '../../services/api';
 
 import './index.scss';
 
@@ -105,6 +105,33 @@ export default function Mine() {
             </View>
           ))
         )}
+      </View>
+
+      <View
+        className="mine-compliance"
+        onClick={async () => {
+          // H5 端 showModal 支持 editable 输入,但 Taro 类型未收录 → 局部断言
+          const showModalEx = Taro.showModal as unknown as (o: Record<string, unknown>) => Promise<{ confirm: boolean; content?: string }>;
+          const res = await showModalEx({
+            title: '意见反馈',
+            content: '告诉我哪里不好用、想要什么功能(1000 字内):',
+            editable: true,
+            placeholderText: '选填:联系方式(邮箱/微信),方便回访',
+            confirmText: '提交',
+          });
+          if (res.confirm && res.content?.trim()) {
+            try {
+              await ensureSession();
+              await submitFeedback(res.content.trim());
+              Taro.showToast({ title: '已收到,感谢反馈', icon: 'success' });
+            } catch (e) {
+              Taro.showToast({ title: (e as Error).message || '提交失败', icon: 'none' });
+            }
+          }
+        }}
+      >
+        <Text className="mine-compliance-text">意见反馈</Text>
+        <Text className="mine-compliance-arrow">›</Text>
       </View>
 
       <View

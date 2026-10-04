@@ -10,6 +10,7 @@ import type { Queue } from 'bullmq';
 import { createDb } from './db';
 import { ContentSafetyService, loadBannedWords } from './content-safety';
 import { registerAuthRoutes } from './routes/auth';
+import { registerFeedbackRoutes } from './routes/feedback';
 import { registerHealthRoutes } from './routes/health';
 import { registerStoreRoutes } from './routes/store';
 import { registerTaskRoutes } from './routes/tasks';
@@ -89,6 +90,7 @@ export function buildApp(opts: AppOptions): FastifyInstance {
   registerHealthRoutes(app);
   registerAuthRoutes(app, db, wallet);
   registerTemplateRoutes(app, db);
+  registerFeedbackRoutes(app, db);
   registerWalletRoutes(app, wallet);
   registerStoreRoutes(app, store);
   registerTaskRoutes(app, { tasks, safety, enqueue });

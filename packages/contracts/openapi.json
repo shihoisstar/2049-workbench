@@ -241,6 +241,38 @@
         }
       }
     },
+    "/v1/feedback": {
+      "post": {
+        "summary": "提交用户反馈(OPS-01;落库后运营可见)",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateFeedbackRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "已受理",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FeedbackCreated"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/tasks": {
       "post": {
         "summary": "创建生成任务(冻结估算积分并入队;实现:T2.2)",
@@ -357,6 +389,36 @@
       }
     },
     "schemas": {
+      "CreateFeedbackRequest": {
+        "type": "object",
+        "properties": {
+          "content": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1000
+          },
+          "contact": {
+            "type": "string",
+            "maxLength": 100
+          }
+        },
+        "required": [
+          "content"
+        ],
+        "additionalProperties": false
+      },
+      "FeedbackCreated": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "additionalProperties": false
+      },
       "Templates": {
         "type": "object",
         "properties": {

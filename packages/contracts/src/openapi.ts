@@ -6,6 +6,7 @@ import { GuestLoginRequest, GuestSession } from './auth';
 import { ErrorBody } from './errors';
 import { HealthResponse } from './health';
 import { CreateOrderRequest, StoreOrder, StoreOrders, StorePackages } from './store';
+import { CreateFeedbackRequest, FeedbackCreated } from './feedback';
 import { CreateTaskRequest, GenerationTask, GenerationTasks } from './tasks';
 import { Templates } from './templates';
 import { WalletSummary } from './wallet';
@@ -150,6 +151,22 @@ export function buildOpenApiDocument() {
           },
         },
       },
+      '/v1/feedback': {
+        post: {
+          summary: '提交用户反馈(OPS-01;落库后运营可见)',
+          security: [{ bearerAuth: [] }],
+          requestBody: {
+            required: true,
+            content: { 'application/json': { schema: ref('CreateFeedbackRequest') } },
+          },
+          responses: {
+            '201': {
+              description: '已受理',
+              content: { 'application/json': { schema: ref('FeedbackCreated') } },
+            },
+          },
+        },
+      },
       '/v1/tasks': {
         post: {
           summary: '创建生成任务(冻结估算积分并入队;实现:T2.2)',
@@ -210,6 +227,8 @@ export function buildOpenApiDocument() {
         bearerAuth: { type: 'http', scheme: 'bearer', bearerFormat: 'JWT' },
       },
       schemas: {
+        CreateFeedbackRequest: zodToJsonSchema(CreateFeedbackRequest, { target: 'openApi3' }),
+        FeedbackCreated: zodToJsonSchema(FeedbackCreated, { target: 'openApi3' }),
         Templates: zodToJsonSchema(Templates, { target: 'openApi3' }),
         CreateTaskRequest: zodToJsonSchema(CreateTaskRequest, { target: 'openApi3' }),
         GenerationTask: zodToJsonSchema(GenerationTask, { target: 'openApi3' }),
