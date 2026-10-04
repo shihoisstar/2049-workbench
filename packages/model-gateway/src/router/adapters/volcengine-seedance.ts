@@ -50,9 +50,14 @@ export const volcengineSeedanceAdapter: VideoAdapter = {
     const cfg = seedanceConfigFrom(channel);
     const base = channel.baseUrl ?? 'https://ark.cn-beijing.volces.com';
     // 载荷契约:prompt 必填;可选 durationSec/resolution/watermark(镜像 T2.3 表单字段)
-    const p = req.payload as { prompt?: string; durationSec?: number; resolution?: string; imageUrls?: string[] };
+    const p = req.payload as { prompt?: string; durationSec?: number; resolution?: string; aspectRatio?: string; imageUrls?: string[] };
     if (!p.prompt) throw Object.assign(new Error('prompt 必填'), { status: 400 });
-    const text = [p.prompt, `--resolution ${p.resolution ?? '480p'}`, `--duration ${p.durationSec ?? 5}`]
+    const text = [
+      p.prompt,
+      `--resolution ${p.resolution ?? '480p'}`,
+      `--ratio ${p.aspectRatio ?? '9:16'}`,
+      `--duration ${p.durationSec ?? 5}`,
+    ]
       .filter(Boolean)
       .join(' ');
     const body = {

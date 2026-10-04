@@ -18,12 +18,15 @@
 
 业务层唯一调用点 = `router.dispatch(GatewayRequest)`;测试证明:火山主/Atlas 主两套渠道配置下,同一调用点返回形状一致(attempts/channelId/providerTaskId)。failover(5xx→冷却 30s→备用)、限流(429→retryAfter)、凭证缺失冷却均有测试覆盖。
 
-## 4. 联调校准点(未验证,真实调用前必须过一遍)
+## 4. 联调校准点(T2.5 真实联调 2026-10-04 已验证 ✓)
 
-- [ ] Ark API 路径与字段:`POST /api/v3/contents/generations/tasks` / `GET .../{id}` 按公开文档映射,**未经真实调用验证**(T2.5 前置);校准面收窄在 `volcengine-seedance.ts` 单文件。
-- [ ] 模型 ID:`doubao-seedance-2-0-fast` 为占位,以火山控制台实际开通为准。
-- [ ] 环境变量:`VOLC_ARK_API_KEY` 注入(refToEnv 映射);密钥纪律:禁入日志/Body(INF-09 检查覆盖)。
-- [ ] Atlas 真实接入:当前 stub(503);免费层启用时替换 adapter 即可(业务层零改动)。
+- [x] **鉴权**:`Authorization: Bearer {key}` 正确;曾 401 系 KEY 过期,换 KEY 后通过。
+- [x] **模型 ID 为全路径**:Atlas 的模型形如 `bytedance/seedance-2.0-fast/text-to-video`(裸名 `seedance-2.0-fast` 返回 400 not found);有效模型清单经 `GET /api/v1/models`(type=Video,239 个)查询。
+- [x] **真实生成实证**:Seedance 2.0 Fast / 480P / 5s,受理→轮询→completed→outputs[0] 视频URL(火山 TOS),全链路(worker 轮询 2s)约 3 分钟出片;账本三流水(grant/hold/settle)严丝合缝。
+- [x] duration 必须数字(2049-agent 真机结论,适配器已强转)。
+- [x] 模型清单发现:Atlas 聚合含 Seedance 2.5 / 2.0 / Mini、Kling V3/O3、Vidu Q3、Wan 3.0、MiniMax H3 等——免费层与后续档位选型空间大。
+- [ ] Atlas 各模型的计费/分辨率参数细则:按所选模型在 Atlas 控制台核对(随 T1.4 定价)。
+- [ ] 火山 Seedance 2.0 官方直连:待 `VOLC_ARK_API_KEY`(上线主通道,提审前切换——演练已证零改动)。
 
 ## 5. 工单映射
 

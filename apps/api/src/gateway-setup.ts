@@ -3,6 +3,7 @@
  * 渠道配置集中此处——业务层只拿 GatewayRouter,切换/增删渠道零改动(INF-04 验收)。
  */
 import {
+  atlasVideoAdapter,
   atlasVideoStub,
   createEnvSecretResolver,
   createGatewayRouter,
@@ -15,7 +16,7 @@ import {
 import { mockVideoAdapter } from './mock-adapter';
 
 export type GatewayEnv = Partial<
-  Record<'VOLC_ARK_API_KEY' | 'VOLC_ARK_BASE_URL' | 'VOLC_RPM_LIMIT' | 'VOLC_SEEDANCE_MODEL' | 'NODE_ENV', string>
+  Record<'ATLAS_API_KEY' | 'ATLAS_BASE_URL' | 'ATLAS_MODEL' | 'MOCK_CHANNEL' | 'VOLC_ARK_API_KEY' | 'VOLC_ARK_BASE_URL' | 'VOLC_RPM_LIMIT' | 'VOLC_SEEDANCE_MODEL' | 'NODE_ENV', string>
 >;
 
 export function buildGatewayRouterFromEnv(env: GatewayEnv = process.env): GatewayRouter {
@@ -39,22 +40,24 @@ export function buildGatewayRouterFromEnv(env: GatewayEnv = process.env): Gatewa
     adapters.volcengine = volcengineSeedanceAdapter;
   }
 
-  // Atlas:V0 stub(503)——演练 failover/切换用;免费层启用时替换为真实 adapter
+  // Atlas:有 KEY 即真实聚合通道(联调/免费层 480P);无 KEY 用 stub(503)保 failover 演练
+  const atlasReady = Boolean(env.ATLAS_API_KEY);
   channels.push({
     id: 2,
     providerName: 'atlas',
-    name: 'Atlas 备用(stub)',
-    baseUrl: null,
+    name: atlasReady ? 'Atlas 聚合通道' : 'Atlas 备用(stub)',
+    baseUrl: env.ATLAS_BASE_URL ?? null,
     secretRef: 'atlas-key',
-    weight: 5,
+    weight: atlasReady ? 5 : 5,
     rpmLimit: null,
     status: 'active',
     health: 'ok',
-    config: {},
+    config: atlasReady ? { model: env.ATLAS_MODEL ?? 'kling-v1' } : {},
   });
-  adapters.atlas = atlasVideoStub;
+  adapters.atlas = atlasReady ? atlasVideoAdapter : atlasVideoStub;
 
-  if (isDev) {
+  // Mock:仅开发且未显式关闭(MOCK_CHANNEL=off)时注册;真实联调/生产走真实通道
+  if (isDev && env.MOCK_CHANNEL !== 'off') {
     channels.push({
       id: 3,
       providerName: 'mock',

@@ -12,6 +12,7 @@ export {
 export { ChannelPool } from './router/channel-pool';
 export { createMemoryRateLimiter, rateLimiterKey, type SyncRateLimiter } from './router/rate-limiter';
 export { volcengineSeedanceAdapter } from './router/adapters/volcengine-seedance';
+export { atlasVideoAdapter } from './router/adapters/atlas';
 export { atlasVideoStub } from './router/adapters/atlas-stub';
 export type {
   AdapterContext,
