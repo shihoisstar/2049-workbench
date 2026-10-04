@@ -4,7 +4,8 @@
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  padding: 0 $wb-space-4 $wb-space-6;
+  padding: 0 $wb-space-4 96px;
+  box-sizing: border-box;
   background: $wb-color-bg;
 }
 
@@ -12,7 +13,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: $wb-space-4 0;
+  padding: $wb-space-3 0;
 }
 
 .index-brand {
@@ -22,24 +23,58 @@
   letter-spacing: 0.5px;
 }
 
-/* Hero:近黑对角渐变 + 右上暗红光晕(高级感锚点) */
+.index-coin {
+  display: flex;
+  align-items: center;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: $wb-color-card;
+  border: 1px solid $wb-color-border;
+}
+
+.index-coin-num {
+  font-size: $wb-font-sm;
+  font-weight: 700;
+  color: $wb-color-primary;
+}
+
+.index-coin-unit {
+  margin-left: 3px;
+  font-size: $wb-font-xs;
+  color: $wb-color-ink-2;
+}
+
+.index-coin-arrow {
+  margin-left: 2px;
+  font-size: $wb-font-sm;
+  color: $wb-color-ink-3;
+}
+
+.index-banner {
+  height: 170px;
+  border-radius: $wb-radius-lg;
+}
+
 .index-hero {
   position: relative;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  padding: $wb-space-6 $wb-space-5;
+  justify-content: center;
+  height: 100%;
+  padding: $wb-space-5;
   border-radius: $wb-radius-lg;
   background: $wb-hero-gradient;
   overflow: hidden;
+  box-sizing: border-box;
 }
 
 .index-hero-glow {
   position: absolute;
-  top: -80px;
-  right: -56px;
-  width: 220px;
-  height: 220px;
+  top: -70px;
+  right: -50px;
+  width: 200px;
+  height: 200px;
   border-radius: 50%;
   background: radial-gradient(circle, $wb-hero-glow, transparent 70%);
 }
@@ -71,132 +106,170 @@
   color: rgba(255, 255, 255, 0.85);
 }
 
-/* CTA:红色渐变胶囊 + 轻投影 */
-.index-hero-btn {
-  position: relative;
+.index-cta {
+  margin-top: $wb-space-3;
+}
+
+.index-cta-btn {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 100%;
-  margin-top: $wb-space-5;
   padding: $wb-space-3 0;
   border-radius: 999px;
   background: $wb-color-primary-gradient;
   box-shadow: 0 8px 20px rgba(217, 4, 41, 0.32);
 }
 
-.index-hero-btn-text {
+.index-cta-btn-text {
   font-size: $wb-font-md;
   font-weight: 700;
   color: #ffffff;
 }
 
-.index-hero-link {
-  position: relative;
+.index-chips {
   display: flex;
-  justify-content: center;
-  width: 100%;
-  margin-top: $wb-space-3;
+  flex-wrap: wrap;
+  margin-top: $wb-space-4;
 }
 
-.index-hero-link-text {
-  font-size: $wb-font-sm;
-  color: rgba(255, 255, 255, 0.6);
-}
-
-.index-section-title {
-  margin: $wb-space-5 0 $wb-space-3;
-  font-size: $wb-font-md;
-  font-weight: 600;
-  color: $wb-color-ink;
-}
-
-/* 功能列表:白卡 + 细描边 */
-.index-feature {
-  display: flex;
-  align-items: center;
-  padding: $wb-space-3 $wb-space-4;
-  margin-bottom: $wb-space-2;
-  border-radius: $wb-radius-md;
-  background: $wb-color-card;
+.index-chip {
+  padding: 5px 14px;
+  margin: 0 $wb-space-2 $wb-space-2 0;
+  border-radius: 999px;
   border: 1px solid $wb-color-border;
+  background: $wb-color-card;
 }
 
-.index-feature-mark {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  margin-right: $wb-space-3;
-  border-radius: $wb-radius-sm;
+.index-chip.active {
+  border-color: $wb-color-primary;
   background: $wb-mark-bg;
 }
 
-.index-feature-mark-text {
-  font-size: $wb-font-md;
-  font-weight: 600;
-  color: $wb-color-primary;
-}
-
-.index-feature-body {
-  display: flex;
-  flex-direction: column;
-}
-
-.index-feature-title {
-  font-size: $wb-font-base;
-  font-weight: 600;
-  color: $wb-color-ink;
-}
-
-.index-feature-desc {
-  margin-top: 2px;
+.index-chip-text {
   font-size: $wb-font-sm;
   color: $wb-color-ink-2;
 }
 
-.index-quota {
-  margin-top: $wb-space-4;
-  padding: $wb-space-4;
+.index-chip-text.active {
+  color: $wb-color-primary;
+  font-weight: 600;
+}
+
+.index-feed {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+
+.index-tpl {
+  width: 48.5%;
+  margin-bottom: $wb-space-3;
   border-radius: $wb-radius-md;
   background: $wb-color-card;
   border: 1px solid $wb-color-border;
+  overflow: hidden;
 }
 
-.index-quota-row {
+.index-tpl-cover {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  margin-bottom: $wb-space-3;
+  justify-content: center;
+  height: 96px;
 }
 
-.index-quota-label {
-  font-size: $wb-font-base;
+.index-tpl-cover-mark {
+  font-size: $wb-font-xl;
+  font-weight: 800;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.index-tpl-body {
+  display: flex;
+  flex-direction: column;
+  padding: $wb-space-2 $wb-space-3 $wb-space-3;
+}
+
+.index-tpl-title {
+  font-size: $wb-font-sm;
   font-weight: 600;
   color: $wb-color-ink;
 }
 
-.index-quota-value {
-  font-size: $wb-font-sm;
+.index-tpl-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: $wb-space-1;
+}
+
+.index-tpl-heat {
+  font-size: 10px;
+  color: $wb-color-ink-3;
+}
+
+.index-tpl-cta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: $wb-space-2;
+  padding: 5px 0;
+  border-radius: 999px;
+  background: $wb-color-primary-soft;
+}
+
+.index-tpl-cta-text {
+  font-size: $wb-font-xs;
   font-weight: 600;
   color: $wb-color-primary;
 }
 
-.index-quota-note {
-  display: block;
-  margin-top: $wb-space-2;
-  font-size: $wb-font-xs;
-  color: $wb-color-ink-3;
-}
-
-.index-footer {
+.index-empty {
+  width: 100%;
   display: flex;
   justify-content: center;
-  margin-top: $wb-space-6;
+  padding: $wb-space-6 0;
 }
 
-.index-footer-text {
-  font-size: $wb-font-xs;
+.index-empty-text {
+  font-size: $wb-font-sm;
   color: $wb-color-ink-3;
+}
+
+.index-tabbar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  padding: $wb-space-2 0 calc($wb-space-2 + env(safe-area-inset-bottom));
+  background: $wb-color-card;
+}
+
+.index-tab {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.index-tab-dot {
+  width: 20px;
+  height: 4px;
+  border-radius: 2px;
+  background: transparent;
+}
+
+.index-tab-dot.active {
+  background: $wb-color-primary;
+}
+
+.index-tab-label {
+  margin-top: 2px;
+  font-size: $wb-font-sm;
+  color: $wb-color-ink-3;
+}
+
+.index-tab-label.active {
+  color: $wb-color-primary;
+  font-weight: 600;
 }

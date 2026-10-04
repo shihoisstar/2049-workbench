@@ -156,8 +156,16 @@ test('端到端成功:受理→轮询→结算,视频 URL 与余额正确', asyn
   const final = await waitForTask(task.id, ['succeeded']);
   assert.match(final.videoUrl ?? '', /^https:\/\/mock\.cdn\//);
   await waitForBalance(uid, 90, '100 - 10(足额结算)');
-  const s = await wallet.summary(uid);
-  assert.ok(s.entries.some((e) => e.type === 'settle'), '结算流水可查');
+  // 结算流水与余额同事务,但 summary 查询有毫秒级视图延迟 → 轮询兜底
+  const deadline = Date.now() + 3000;
+  let settleFound = false;
+  for (;;) {
+    const s = await wallet.summary(uid);
+    if (s.entries.some((e) => e.type === 'settle')) { settleFound = true; break; }
+    if (Date.now() > deadline) break;
+    await new Promise((r) => setTimeout(r, 50));
+  }
+  assert.ok(settleFound, '结算流水可查');
 });
 
 test('上游终态失败:即时退款(attempts=受理次数,poll 失败不再受理)', async () => {

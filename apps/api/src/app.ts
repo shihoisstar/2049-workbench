@@ -13,6 +13,7 @@ import { registerAuthRoutes } from './routes/auth';
 import { registerHealthRoutes } from './routes/health';
 import { registerStoreRoutes } from './routes/store';
 import { registerTaskRoutes } from './routes/tasks';
+import { registerTemplateRoutes } from './routes/templates';
 import { registerWalletRoutes } from './routes/wallet';
 import { StoreService } from './store';
 import { TaskService } from './tasks';
@@ -87,6 +88,7 @@ export function buildApp(opts: AppOptions): FastifyInstance {
 
   registerHealthRoutes(app);
   registerAuthRoutes(app, db, wallet);
+  registerTemplateRoutes(app, db);
   registerWalletRoutes(app, wallet);
   registerStoreRoutes(app, store);
   registerTaskRoutes(app, { tasks, safety, enqueue });

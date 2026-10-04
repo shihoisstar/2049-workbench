@@ -29,6 +29,11 @@ export default defineConfig<'webpack5'>(async (merge) => {
     h5: {
       publicPath: '/',
       staticDirectory: 'static',
+      // T3.2 踩坑:H5 默认代码分割把页面切进异步 chunk(780.js),运行时 chunk 映射
+      // 缺失导致页面永不加载(白屏无报错)。页面体量小,关闭分割全量进 app.js。
+      webpackChain(chain) {
+        chain.optimization.splitChunks({});
+      },
       postcss: {
         autoprefixer: { enable: true },
         cssModules: { enable: false },

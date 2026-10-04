@@ -1,10 +1,10 @@
 import Taro from '@tarojs/taro';
 
-import type { GenerationTask, GuestSession, StoreOrder, StorePackage, WalletSummary } from '@wb/contracts';
+import type { GenerationTask, GuestSession, StoreOrder, StorePackage, Template, WalletSummary } from '@wb/contracts';
 
 /** API 基址:本地开发(3000 被参考项目容器占用,开发用 3010);
  * TODO(部署):正式域名 + weapp 合法域名白名单,并经 Taro defineConstants 注入。 */
-const BASE_URL = 'http://localhost:3010';
+export const BASE_URL = 'http://localhost:3010';
 const TOKEN_KEY = 'wb_token';
 const USER_KEY = 'wb_user_id';
 const DEVICE_KEY = 'wb_device_id';
@@ -31,11 +31,17 @@ async function call<T>(method: 'GET' | 'POST', path: string, data?: unknown, aut
   if (auth && token) header.authorization = `Bearer ${token}`;
 
   const res = await Taro.request<T | ApiErrorShape>({ url: `${BASE_URL}${path}`, method, data, header });
-  if (res.statusCode >= 400) {
-    const body = res.data as ApiErrorShape;
-    throw new ApiError(Number(body?.code ?? res.statusCode), body?.message ?? `HTTP ${res.statusCode}`, body?.details);
+  const status = res.statusCode ?? (res as unknown as { status?: number }).status ?? 0;
+  // H5 端部分 Taro 版本返回字符串 body(dataType 未自动解析),此处统一兜底解析
+  let body: unknown = res.data;
+  if (typeof body === 'string') {
+    try { body = JSON.parse(body); } catch { /* 保留原字符串 */ }
   }
-  return res.data as T;
+  if (status >= 400) {
+    const errBody = (body ?? {}) as ApiErrorShape;
+    throw new ApiError(Number(errBody?.code ?? status), errBody?.message ?? `HTTP ${status}`, errBody?.details);
+  }
+  return body as T;
 }
 
 function ensureDeviceId(): string {
@@ -91,6 +97,12 @@ export async function createOrder(packageId: string): Promise<StoreOrder> {
  */
 export async function devPay(orderId: string): Promise<StoreOrder> {
   return call<StoreOrder>('POST', `/v1/store/orders/${orderId}/dev-pay`, undefined, true);
+}
+
+/** 模板 feed(T3.2 首页)。 */
+export async function getTemplates(): Promise<Template[]> {
+  const res = await call<{ templates?: Template[] } | undefined>('GET', '/v1/templates');
+  return res?.templates ?? [];
 }
 
 /** 创建生成任务(T2.3):命中违禁词抛 ApiError(5001 + hits 高亮)。 */

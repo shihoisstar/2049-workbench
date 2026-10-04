@@ -14,4 +14,5 @@ export {
 } from './store';
 export { CreateTaskRequest, TaskStatus } from './tasks';
 export type { GenerationTask, GenerationTasks } from './tasks';
+export { Template, Templates } from './templates';
 export { buildOpenApiDocument, endpointList } from './openapi';

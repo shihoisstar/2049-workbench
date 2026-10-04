@@ -224,6 +224,23 @@
         }
       }
     },
+    "/v1/templates": {
+      "get": {
+        "summary": "模板 feed(T3.2 首页;生成同款→预填创作表单)",
+        "responses": {
+          "200": {
+            "description": "模板列表",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Templates"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/tasks": {
       "post": {
         "summary": "创建生成任务(冻结估算积分并入队;实现:T2.2)",
@@ -340,6 +357,54 @@
       }
     },
     "schemas": {
+      "Templates": {
+        "type": "object",
+        "properties": {
+          "templates": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "title": {
+                  "type": "string"
+                },
+                "category": {
+                  "type": "string"
+                },
+                "coverGradient": {
+                  "type": "string"
+                },
+                "coverMark": {
+                  "type": "string"
+                },
+                "heat": {
+                  "type": "string"
+                },
+                "promptTemplate": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "title",
+                "category",
+                "coverGradient",
+                "coverMark",
+                "heat",
+                "promptTemplate"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "templates"
+        ],
+        "additionalProperties": false
+      },
       "CreateTaskRequest": {
         "type": "object",
         "properties": {

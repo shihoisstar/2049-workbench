@@ -13,7 +13,11 @@
     "lint": "eslint .",
     "test": "echo 'miniapp: 页面测试随功能工单落地'"
   },
-  "browserslist": ["last 3 versions", "Android >= 4.1", "ios >= 8"],
+  "browserslist": [
+    "last 3 versions",
+    "Android >= 4.1",
+    "ios >= 8"
+  ],
   "dependencies": {
     "@babel/runtime": "^7.24.4",
     "@nutui/nutui-react-taro": "3.0.23-cpp",
@@ -32,6 +36,7 @@
   "devDependencies": {
     "@babel/core": "^7.24.4",
     "@babel/preset-react": "^7.24.0",
+    "@pmmmwh/react-refresh-webpack-plugin": "^0.6.3",
     "@tarojs/cli": "4.3.0",
     "@tarojs/plugin-platform-h5": "4.3.0",
     "@tarojs/webpack5-runner": "4.3.0",

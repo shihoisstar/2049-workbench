@@ -7,6 +7,7 @@ import { ErrorBody } from './errors';
 import { HealthResponse } from './health';
 import { CreateOrderRequest, StoreOrder, StoreOrders, StorePackages } from './store';
 import { CreateTaskRequest, GenerationTask, GenerationTasks } from './tasks';
+import { Templates } from './templates';
 import { WalletSummary } from './wallet';
 import { API_VERSION } from './version';
 
@@ -138,6 +139,17 @@ export function buildOpenApiDocument() {
           },
         },
       },
+      '/v1/templates': {
+        get: {
+          summary: '模板 feed(T3.2 首页;生成同款→预填创作表单)',
+          responses: {
+            '200': {
+              description: '模板列表',
+              content: { 'application/json': { schema: ref('Templates') } },
+            },
+          },
+        },
+      },
       '/v1/tasks': {
         post: {
           summary: '创建生成任务(冻结估算积分并入队;实现:T2.2)',
@@ -198,6 +210,7 @@ export function buildOpenApiDocument() {
         bearerAuth: { type: 'http', scheme: 'bearer', bearerFormat: 'JWT' },
       },
       schemas: {
+        Templates: zodToJsonSchema(Templates, { target: 'openApi3' }),
         CreateTaskRequest: zodToJsonSchema(CreateTaskRequest, { target: 'openApi3' }),
         GenerationTask: zodToJsonSchema(GenerationTask, { target: 'openApi3' }),
         GenerationTasks: zodToJsonSchema(GenerationTasks, { target: 'openApi3' }),

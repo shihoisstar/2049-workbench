@@ -110,6 +110,19 @@ export const generationTasks = pgTable('generation_tasks', {
   finishedAt: timestamp('finished_at', { withTimezone: true }),
 });
 
+/** 模板(T3.2 feed):promptTemplate 支撑"生成同款"预填;coverGradient 为 tokens 体系渐变对。 */
+export const templates = pgTable('templates', {
+  id: text('id').primaryKey(),
+  title: text('title').notNull(),
+  category: text('category').notNull(),
+  coverGradient: text('cover_gradient').notNull(),
+  coverMark: text('cover_mark').notNull(),
+  heat: text('heat').notNull(),
+  promptTemplate: text('prompt_template').notNull(),
+  active: boolean('active').notNull().default(true),
+  sortOrder: integer('sort_order').notNull().default(0),
+});
+
 export type User = typeof users.$inferSelect;
 export type CreditLog = typeof creditLogs.$inferSelect;
 export type UsageLog = typeof usageLogs.$inferSelect;

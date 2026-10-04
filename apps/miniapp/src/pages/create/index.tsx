@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { View, Text, Textarea, Image } from '@tarojs/components';
 import Taro from '@tarojs/taro';
 
@@ -31,6 +31,15 @@ const DURATIONS = [
 /** 创作表单(T2.3):字段对标 S17-S18(灵感描述/参考图/比例/清晰度/时长),差异化=积分估算条。 */
 export default function Create() {
   const [prompt, setPrompt] = useState('');
+
+  // T3.2「生成同款」:读取模板预填(一次性,读后即清)
+  useEffect(() => {
+    const prefill = Taro.getStorageSync('wb_prefill') as { promptTemplate?: string; title?: string } | '';
+    if (prefill && prefill.promptTemplate) {
+      setPrompt(prefill.promptTemplate);
+      Taro.removeStorageSync('wb_prefill');
+    }
+  }, []);
   const [images, setImages] = useState<string[]>([]);
   const [ratio, setRatio] = useState('9:16');
   const [resolution, setResolution] = useState('480p');
