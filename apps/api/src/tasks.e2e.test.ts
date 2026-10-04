@@ -1,12 +1,14 @@
 import { after, before, test } from 'node:test';
 import assert from 'node:assert/strict';
 import { eq } from 'drizzle-orm';
+import { resolve } from 'node:path';
 import type { Queue } from 'bullmq';
 import { createGatewayRouter, type ChannelView, type GatewayRouter, type VideoAdapter } from '@wb/model-gateway';
 
 import { buildApp } from './app';
 import { createRedisConnection, createTaskQueue } from './queue';
 import { createTaskWorker, handleSweep, type TaskWorkerDeps } from './task-worker';
+import { LocalDiskStorage } from './storage';
 import { generationTasks, users } from './schema';
 
 /**
@@ -57,6 +59,11 @@ const router: GatewayRouter = createGatewayRouter({
 const deps: TaskWorkerDeps = {
   db, wallet, tasks, router, queue,
   timings: { pollIntervalMs: 150, retryBackoffMs: 100 },
+  // mock.cdn 不可达 → 自动水印走降级路径(原片直出),正好覆盖降级策略
+  storage: new LocalDiskStorage({ rootDir: resolve('storage-test'), publicBase: 'http://localhost:3010' }),
+  watermarkAssetPath: resolve('assets', 'watermark.png'),
+  // 立即失败的 fetch:mock.cdn 不可达场景确定性化(不再依赖 DNS 超时时长)
+  fetchImpl: (async () => { throw new Error('mock cdn unreachable'); }) as unknown as typeof fetch,
 };
 const worker = createTaskWorker(deps, connection);
 

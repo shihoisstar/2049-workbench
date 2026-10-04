@@ -1,3 +1,4 @@
+import { join } from 'node:path';
 /**
  * worker 独立入口:开发/生产以 `pnpm start:worker` 运行(与 api 进程分离,共享 postgres/redis)。
  */
@@ -36,6 +37,8 @@ export async function startWorker() {
         pollIntervalMs: numEnv('TASK_POLL_INTERVAL_MS', 2_000, { min: 0 }),
         retryBackoffMs: numEnv('TASK_RETRY_BACKOFF_MS', 1_000, { min: 0 }),
       },
+      storage: app.storage,
+      watermarkAssetPath: join(__dirname, '..', 'assets', 'watermark.png'),
     },
     connection,
   );

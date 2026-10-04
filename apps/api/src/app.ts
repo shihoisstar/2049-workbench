@@ -1,6 +1,9 @@
+import { join } from 'node:path';
+import { mkdirSync } from 'node:fs';
 import Fastify, { type FastifyInstance } from 'fastify';
 import cors from '@fastify/cors';
 import fjwt from '@fastify/jwt';
+import fastifyStatic from '@fastify/static';
 import type { Queue } from 'bullmq';
 
 import { createDb } from './db';
@@ -14,6 +17,7 @@ import { StoreService } from './store';
 import { TaskService } from './tasks';
 import { WalletService } from './wallet';
 import { createRedisConnection, createTaskQueue, type TaskJobData } from './queue';
+import { LocalDiskStorage } from './storage';
 
 export interface AppOptions {
   databaseUrl: string;
@@ -26,6 +30,7 @@ declare module 'fastify' {
     wallet: WalletService;
     tasks: TaskService;
     store: StoreService;
+    storage: LocalDiskStorage;
   }
 }
 
@@ -46,11 +51,17 @@ export function buildApp(opts: AppOptions): FastifyInstance {
   const tasks = new TaskService(db, wallet);
   const store = new StoreService(db, wallet);
   const safety = new ContentSafetyService(loadBannedWords());
+  // V0 本地盘存储(生产换 S3 兼容实现,接口不变);成片经 /videos/ 静态公开
+  const storage = new LocalDiskStorage({ rootDir: join(process.cwd(), 'storage') });
   app.decorate('db', db);
   app.decorate('wallet', wallet);
   app.decorate('tasks', tasks);
   app.decorate('store', store);
   app.decorate('safety', safety);
+  app.decorate('storage', storage);
+
+  mkdirSync(join(process.cwd(), 'storage'), { recursive: true });
+  void app.register(fastifyStatic, { root: join(process.cwd(), 'storage', 'videos'), prefix: '/videos/' });
 
   // 入队惰性建连:api 进程只 add job,消费在 worker 进程(REDIS_URL 未配时显式报错)
   let queuePromise: Promise<Queue<TaskJobData>> | null = null;
