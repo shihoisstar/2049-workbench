@@ -127,6 +127,19 @@ export async function devPay(orderId: string): Promise<StoreOrder> {
   return call<StoreOrder>('POST', `/v1/store/orders/${orderId}/dev-pay`, undefined, true);
 }
 
+/** 跨端下载成片:weapp 下载并保存到相册;H5 新窗口打开(浏览器自行下载)。 */
+export async function downloadOrSaveVideo(url: string): Promise<'saved' | 'opened'> {
+  if (process.env.TARO_ENV === 'weapp') {
+    const dl = await Taro.downloadFile({ url });
+    if (dl.statusCode !== 200) throw new Error(`下载失败 HTTP ${dl.statusCode}`);
+    await Taro.saveVideoToPhotosAlbum({ filePath: dl.tempFilePath });
+    return 'saved';
+  }
+  // H5:直接开新窗口(移动浏览器对 mp4 直链多为播放/下载二选一)
+  await Taro.navigateTo({ url: `/pages/works/index?open=${encodeURIComponent(url)}` }).catch(() => undefined);
+  return 'opened';
+}
+
 /** 提交用户反馈(OPS-01)。 */
 export async function submitFeedback(content: string, contact?: string): Promise<{ id: string }> {
   return call<{ id: string }>('POST', '/v1/feedback', { content, contact }, true);
@@ -175,6 +188,12 @@ export async function createTask(input: {
 /** 任务详情(进度页轮询)。 */
 export async function getTask(taskId: string): Promise<GenerationTask> {
   return call<GenerationTask>(`GET`, `/v1/tasks/${taskId}`, undefined, true);
+}
+
+/** 我的作品列表(T3.2 成片管理)。 */
+export async function listMyTasks(): Promise<GenerationTask[]> {
+  const res = await call<{ tasks: GenerationTask[] }>('GET', '/v1/tasks', undefined, true);
+  return res.tasks;
 }
 
 /** 取消任务(queued/running;失败/取消自动全额退)。 */

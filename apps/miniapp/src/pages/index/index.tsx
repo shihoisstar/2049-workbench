@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { View, Text } from '@tarojs/components';
-import Taro from '@tarojs/taro';
+import Taro, { useShareAppMessage } from '@tarojs/taro';
 import { Tag } from '@nutui/nutui-react-taro';
 
 import type { Template } from '@wb/contracts';
@@ -22,6 +22,11 @@ export default function Index() {
   const [templates, setTemplates] = useState<Template[]>([]);
   const [category, setCategory] = useState('全部');
   const [balance, setBalance] = useState<number | null>(null);
+
+  useShareAppMessage(() => ({
+    title: '2049出片 · 一句话生成营销短视频',
+    path: '/pages/index/index',
+  }));
 
   useEffect(() => {
     void (async () => {

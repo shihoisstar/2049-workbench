@@ -148,6 +148,14 @@ export default function Mine() {
 
       <View
         className="mine-compliance"
+        onClick={() => Taro.navigateTo({ url: '/pages/works/index' })}
+      >
+        <Text className="mine-compliance-text">我的作品</Text>
+        <Text className="mine-compliance-arrow">›</Text>
+      </View>
+
+      <View
+        className="mine-compliance"
         onClick={() =>
           Taro.showModal({
             title: '水印与内容标识说明',

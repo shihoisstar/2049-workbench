@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { View, Text, Textarea, Image } from '@tarojs/components';
+import { Tag } from '@nutui/nutui-react-taro';
 import Taro from '@tarojs/taro';
 
 import type { GenerationTask } from '@wb/contracts';
@@ -37,6 +38,7 @@ export default function Create() {
     const prefill = Taro.getStorageSync('wb_prefill') as { promptTemplate?: string; title?: string } | '';
     if (prefill && prefill.promptTemplate) {
       setPrompt(prefill.promptTemplate);
+      setFromTemplate(prefill.title ?? '');
       Taro.removeStorageSync('wb_prefill');
     }
   }, []);
@@ -46,6 +48,7 @@ export default function Create() {
   const [resolution, setResolution] = useState('480p');
   const [duration, setDuration] = useState(5);
   const [blockedHits, setBlockedHits] = useState<string[]>([]);
+  const [fromTemplate, setFromTemplate] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [polishing, setPolishing] = useState(false);
 
@@ -109,6 +112,7 @@ export default function Create() {
   return (
     <View className="create-page">
       <View className="create-card">
+        {fromTemplate && <Tag type="warning">来自模板:{fromTemplate}</Tag>}
         <Text className="create-label">灵感描述</Text>
         <View className={`create-textarea-wrap ${blockedHits.length ? 'blocked' : ''}`}>
           <Textarea

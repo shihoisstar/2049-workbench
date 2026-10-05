@@ -1,5 +1,5 @@
 export default defineAppConfig({
-  pages: ['pages/index/index', 'pages/mine/index', 'pages/store/index', 'pages/create/index', 'pages/progress/index'],
+  pages: ['pages/index/index', 'pages/mine/index', 'pages/store/index', 'pages/create/index', 'pages/progress/index', 'pages/works/index'],
   window: {
     navigationBarTitleText: '2049出片',
     navigationBarBackgroundColor: '#ffffff',

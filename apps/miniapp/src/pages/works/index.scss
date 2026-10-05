@@ -1,0 +1,108 @@
+@import '../../styles/tokens.scss';
+
+.works-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  padding: $wb-space-4;
+  background: $wb-color-bg;
+}
+
+.works-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: $wb-space-3;
+}
+
+.works-title {
+  font-size: $wb-font-lg;
+  font-weight: 700;
+  color: $wb-color-ink;
+}
+
+.works-count {
+  font-size: $wb-font-sm;
+  color: $wb-color-ink-3;
+}
+
+.works-empty {
+  display: flex;
+  justify-content: center;
+  padding: $wb-space-6 0;
+}
+
+.works-empty-text {
+  font-size: $wb-font-sm;
+  color: $wb-color-ink-3;
+}
+
+.works-card {
+  margin-bottom: $wb-space-3;
+  padding: $wb-space-3 $wb-space-4;
+  border-radius: $wb-radius-lg;
+  background: $wb-color-card;
+  border: 1px solid $wb-color-border;
+}
+
+.works-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.works-card-title {
+  flex: 1;
+  margin-right: $wb-space-2;
+  font-size: $wb-font-base;
+  font-weight: 600;
+  color: $wb-color-ink;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.works-card-meta {
+  display: block;
+  margin-top: $wb-space-1;
+  font-size: $wb-font-xs;
+  color: $wb-color-ink-3;
+}
+
+.works-card-fail {
+  display: block;
+  margin-top: $wb-space-1;
+  font-size: $wb-font-xs;
+  color: $wb-color-primary;
+}
+
+.works-card-actions {
+  margin-top: $wb-space-2;
+}
+
+.works-card-video {
+  width: 100%;
+  height: 200px;
+  border-radius: $wb-radius-md;
+  background: #000000;
+}
+
+.works-save {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: $wb-space-2;
+  padding: 8px 0;
+  border-radius: 999px;
+  background: $wb-color-primary-gradient;
+}
+
+.works-save.disabled {
+  opacity: 0.6;
+}
+
+.works-save-text {
+  font-size: $wb-font-sm;
+  font-weight: 600;
+  color: #ffffff;
+}

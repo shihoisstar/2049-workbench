@@ -16,5 +16,7 @@
 		root * /srv
 		try_files {path} /index.html
 		file_server
+		# 产物文件名无哈希:必须 no-cache,否则更新后浏览器用旧 bundle(2026-10-05 实测踩坑)
+		header Cache-Control "no-cache, no-store, must-revalidate"
 	}
 }
