@@ -13,3 +13,5 @@ coverage/
 .DS_Store
 backups/
 deploy/.env
+deploy/h5
+deploy/.env
