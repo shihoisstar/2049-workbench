@@ -12,3 +12,4 @@ project.private.config.json
 coverage/
 .DS_Store
 backups/
+deploy/.env

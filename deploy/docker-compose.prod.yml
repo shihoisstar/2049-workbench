@@ -60,6 +60,7 @@ services:
       DATABASE_URL: ${DATABASE_URL}
       REDIS_URL: ${REDIS_URL}
       JWT_SECRET: ${JWT_SECRET}
+      PUBLIC_BASE_URL: ${PUBLIC_BASE_URL}
       NODE_ENV: production
       MOCK_CHANNEL: "off"
       ATLAS_API_KEY: ${ATLAS_API_KEY}

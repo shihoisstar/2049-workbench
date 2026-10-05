@@ -13,14 +13,14 @@ COPY packages/contracts/package.json packages/contracts/
 COPY packages/domain/package.json packages/domain/
 COPY packages/model-gateway/package.json packages/model-gateway/
 COPY packages/shared/package.json packages/shared/
-RUN corepack enable && pnpm install --frozen-lockfile
+RUN corepack enable && pnpm install --frozen-lockfile --filter @wb/api...
 
 # 源码与构建
 COPY tsconfig.base.json ./
 COPY eslint.config.mjs ./
 COPY packages ./packages
 COPY apps/api ./apps/api
-RUN pnpm --filter @wb/contracts --filter @wb/domain --filter @wb/model-gateway --filter @wb/api run build
+RUN pnpm --filter @wb/api... run build
 
 # 启动:先迁移后起服务(工作目录 apps/api,.env 由 compose env 注入)
 WORKDIR /repo/apps/api
