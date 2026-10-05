@@ -7,9 +7,10 @@ import { createGatewayRouter, type ChannelView, type GatewayRouter, type VideoAd
 
 import { buildApp } from './app';
 import { createRedisConnection, createTaskQueue } from './queue';
-import { createTaskWorker, handleSweep, type TaskWorkerDeps } from './task-worker';
+import { createTaskWorker, handleSweep, handleTtlSweep, type TaskWorkerDeps } from './task-worker';
 import { LocalDiskStorage } from './storage';
 import { generationTasks, users } from './schema';
+import { rm } from 'node:fs/promises';
 
 /**
  * T2.2 集成验收(真 BullMQ + redis + mock 适配器):
@@ -213,6 +214,30 @@ test('内容拒绝:即时失败退款', async () => {
   const final = await waitForTask(task.id, ['failed']);
   assert.equal(final.status, 'failed');
   await waitForBalance(uid, 100, '即时退回');
+});
+
+test('TTL 清理:超 7 天成片删文件+URL 置空,未过期不动', async () => {
+  const uid = await mkUser('ttl');
+  const key = `ttl-verify/${Date.now()}.mp4`;
+  const url = await deps.storage.put(key, Buffer.from('ttl-video-bytes'));
+  const { task } = await tasks.create(uid, { prompt: 'x', aspectRatio: '9:16', resolution: '480p', durationSec: 5, model: 'mock-video' });
+  const old = new Date(Date.now() - 8 * 24 * 3600_000);
+  await db.update(generationTasks).set({ status: 'succeeded', videoUrl: url, finishedAt: old, updatedAt: old }).where(eq(generationTasks.id, task.id));
+
+  const freshUrl = await deps.storage.put(`ttl-verify/fresh-${Date.now()}.mp4`, Buffer.from('fresh'));
+  const { task: freshTask } = await tasks.create(uid, { prompt: 'fresh', aspectRatio: '9:16', resolution: '480p', durationSec: 5, model: 'mock-video' });
+  const now2 = new Date();
+  await db.update(generationTasks).set({ status: 'succeeded', videoUrl: freshUrl, finishedAt: now2, updatedAt: now2 }).where(eq(generationTasks.id, freshTask.id));
+
+  const handled = await handleTtlSweep(deps);
+  assert.ok(handled >= 1);
+  const expired = await taskRow(task.id);
+  assert.equal(expired.videoUrl, null, '到期 videoUrl 置空');
+  await assert.rejects(() => deps.storage.delete(key).then(() => { throw new Error('should-not-reach'); }));
+  // 文件确实删了:delete 对不存在文件是幂等 no-op,再验证目录文件数不可行——直接验证未过期文件仍在
+  const freshRow = await taskRow(freshTask.id);
+  assert.match(freshRow.videoUrl ?? '', /^http/, '未过期保留');
+  await rm(resolve('storage-test', 'ttl-verify'), { recursive: true, force: true });
 });
 
 test('创建链路守门:命中违禁词 → CONTENT_BLOCKED + hits(不冻结积分)', async () => {

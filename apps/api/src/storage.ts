@@ -2,13 +2,15 @@
  * 对象存储抽象(INF-05/T3.1):V0 本地盘实现(开发);生产实现位 = S3 兼容(MinIO/阿里 OSS,接口不变)。
  * 边界:worker/服务层只经本服务存取,不直写磁盘路径。
  */
-import { mkdir, writeFile } from 'node:fs/promises';
+import { mkdir, rm, writeFile } from 'node:fs/promises';
 import { spawn } from 'node:child_process';
 import { dirname, join, resolve } from 'node:path';
 
 export interface StorageService {
   /** 存对象并返回可公开访问的 URL */
   put(key: string, data: Buffer): Promise<string>;
+  /** 删除对象(TTL 到期清理;幂等,不存在不报错) */
+  delete(key: string): Promise<void>;
   /** 本地盘根目录(测试/运维用) */
   readonly rootDir: string;
 }
@@ -30,6 +32,10 @@ export class LocalDiskStorage implements StorageService {
     await mkdir(dirname(target), { recursive: true });
     await writeFile(target, data);
     return `${this.publicBase}/${this.subdir}/${key}`;
+  }
+
+  async delete(key: string): Promise<void> {
+    await rm(join(this.rootDir, this.subdir, key), { force: true });
   }
 }
 

@@ -25,6 +25,10 @@ export async function startWorker() {
     name: 'sweep',
     data: {},
   });
+  await queue.upsertJobScheduler('ttl-sweep', { every: numEnv('TASK_TTL_SWEEP_INTERVAL_MS', 3_600_000) }, {
+    name: 'ttl-sweep',
+    data: {},
+  });
 
   const worker = createTaskWorker(
     {

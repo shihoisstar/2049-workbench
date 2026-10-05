@@ -13,6 +13,7 @@ import { createRedisConnection, QUEUE_NAME, type TaskJobData } from './queue';
 import type { Db } from './db';
 import { generationTasks } from './schema';
 import { TASK_MAX_ATTEMPTS, TaskService } from './tasks';
+import { VIDEO_TTL_DAYS } from './ttl';
 import type { WalletService } from './wallet';
 import { applyWatermark, embedAiMetadata, type StorageService } from './storage';
 
@@ -152,6 +153,34 @@ export async function handlePollTask(deps: TaskWorkerDeps, taskId: string): Prom
 /** sweep 处理器:卡单超时自动取消退款(D4)。 */
 export async function handleSweep(deps: TaskWorkerDeps): Promise<number> {
   return deps.tasks.sweepStuck();
+}
+
+/** 从 storage URL 提取存储 key(PUBLIC_BASE_URL 后的 videos/ 相对路径)。 */
+export function videoUrlToKey(url: string, publicBase: string): string | null {
+  const base = publicBase.replace(/\/$/, '');
+  if (url.startsWith(`${base}/`)) return url.slice(base.length + 1);
+  // 兼容本地相对路径形态
+  const m = url.match(/\/videos\/(.+)$/);
+  return m ? m[1] : null;
+}
+
+/** TTL 清理(INF-05):succeeded 超 7 天 → 删成片文件 + videoUrl 置空。返回处理数。 */
+export async function handleTtlSweep(deps: TaskWorkerDeps, now = new Date()): Promise<number> {
+  const rows = await deps.db.select().from(generationTasks).where(eq(generationTasks.status, 'succeeded'));
+  let handled = 0;
+  for (const row of rows) {
+    if (!row.videoUrl || !row.finishedAt) continue;
+    const deadline = row.finishedAt.getTime() + VIDEO_TTL_DAYS * 24 * 3600_000;
+    if (now.getTime() <= deadline) continue;
+    const key = videoUrlToKey(row.videoUrl, process.env.PUBLIC_BASE_URL ?? '');
+    if (key) await deps.storage.delete(key).catch(() => undefined);
+    await deps.db
+      .update(generationTasks)
+      .set({ videoUrl: null, updatedAt: new Date() })
+      .where(eq(generationTasks.id, row.id));
+    handled += 1;
+  }
+  return handled;
 }
 
 /** 组装 BullMQ Worker(独立进程运行;测试直接调 handleX 不经 redis)。 */
