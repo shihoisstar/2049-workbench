@@ -10,6 +10,7 @@ import { createRedisConnection, createTaskQueue } from './queue';
 import { createTaskWorker, handleSweep, handleTtlSweep, type TaskWorkerDeps } from './task-worker';
 import { LocalDiskStorage } from './storage';
 import { generationTasks, users } from './schema';
+import { atlasImageAdapter } from '@wb/model-gateway';
 import { rm } from 'node:fs/promises';
 
 /**
@@ -240,7 +241,24 @@ test('TTL 清理:超 7 天成片删文件+URL 置空,未过期不动', async () 
   await rm(resolve('storage-test', 'ttl-verify'), { recursive: true, force: true });
 });
 
-test('创建链路守门:命中违禁词 → CONTENT_BLOCKED + hits(不冻结积分)', async () => {
+test('Atlas 图像适配器:submit/poll 协议(fake fetch)', async () => {
+  const calls: Array<{ url: string; init?: RequestInit }> = [];
+  const fetchImpl = (async (url: RequestInfo | URL, init?: RequestInit) => {
+    calls.push({ url: String(url), init });
+    const path = String(url);
+    if (path.includes('generateImage')) return new Response(JSON.stringify({ data: { id: 'img-1' } }), { status: 200 });
+    return new Response(JSON.stringify({ data: { status: 'completed', outputs: ['https://cdn/pic.png'] } }), { status: 200 });
+  }) as typeof fetch;
+  const ctx = { secret: 'sk', fetchImpl, timeoutMs: 3000 };
+  const ch = { id: 2, providerName: 'atlas', name: 'Atlas', baseUrl: 'https://atlas.fake', secretRef: 'k', weight: 1, rpmLimit: null, status: 'active' as const, health: 'ok' as const, config: { modelImageT2i: 'bytedance/seedream-v4.7/text-to-image' } };
+  const { providerTaskId } = await atlasImageAdapter.submitImage(ctx, ch as never, { modelName: 'x', prompt: 'p' });
+  assert.equal(providerTaskId, 'img-1');
+  const polled = await atlasImageAdapter.pollImage(ctx, ch as never, 'img-1');
+  assert.equal(polled.status, 'succeeded');
+  assert.equal(polled.imageUrls?.[0], 'https://cdn/pic.png');
+  assert.ok(calls.some((c) => c.url.includes('/api/v1/model/generateImage')));
+});
+:命中违禁词 → CONTENT_BLOCKED + hits(不冻结积分)', async () => {
   const uid = await mkUser('content-block');
   const before = await balance(uid);
   const res = await app.inject({

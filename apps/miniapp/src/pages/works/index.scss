@@ -26,6 +26,20 @@
   color: $wb-color-ink-3;
 }
 
+.works-expiring {
+  margin-bottom: $wb-space-3;
+  padding: $wb-space-3;
+  border-radius: $wb-radius-md;
+  background: $wb-mark-bg;
+  border: 1px solid rgba(232, 17, 45, 0.4);
+}
+
+.works-expiring-text {
+  font-size: $wb-font-sm;
+  font-weight: 600;
+  color: $wb-color-primary;
+}
+
 .works-empty {
   display: flex;
   justify-content: center;

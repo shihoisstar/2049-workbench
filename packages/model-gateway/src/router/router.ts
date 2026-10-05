@@ -7,6 +7,7 @@
 import { ChannelPool } from './channel-pool';
 import { createMemoryRateLimiter, rateLimiterKey, type SyncRateLimiter } from './rate-limiter';
 import type { ChatAdapter } from './chat';
+import type { ImageAdapter } from './image';
 import {
   GatewayError,
   type ChannelView,
@@ -43,6 +44,8 @@ export interface GatewayRouterDeps {
   adapters: Record<string, VideoAdapter>;
   /** chat 适配器注册表(可选;未配置渠道无 chat 能力) */
   chatAdapters?: Record<string, ChatAdapter>;
+  /** 图像适配器注册表(可选) */
+  imageAdapters?: Record<string, ImageAdapter>;
   secretResolver: SecretResolver;
   rateLimiter?: SyncRateLimiter;
   fetchImpl?: typeof fetch;
@@ -62,6 +65,8 @@ export interface GatewayRouter {
   dispatch(req: GatewayRequest): Promise<GatewayResponse>;
   /** 文本模型入口(chat):独立于视频任务,同渠道池/限流/冷却语义 */
   chat(req: { modelName: string; system?: string; user: string; maxTokens?: number }): Promise<{ text: string }>;
+  /** 图像生成入口(内部 submit+轮询至完成或超时;V1 AI 绘画/改图) */
+  generateImage(req: { modelName?: string; prompt: string; imageUrls?: string[]; aspectRatio?: string }): Promise<{ imageUrl: string }>;
 }
 
 export function createGatewayRouter(deps: GatewayRouterDeps): GatewayRouter {
@@ -183,5 +188,46 @@ export function createGatewayRouter(deps: GatewayRouterDeps): GatewayRouter {
     return { ok: true, status: 200, body: result, channelId: channel.id, channelName: channel.name, providerName: channel.providerName, attempts };
   }
 
-  return { dispatch, chat };
+  async function generateImage(req: { modelName?: string; prompt: string; imageUrls?: string[]; aspectRatio?: string }): Promise<{ imageUrl: string }> {
+    const imageAdapters = deps.imageAdapters ?? {};
+    const attempts: GatewayAttempt[] = [];
+    const maxWaitMs = 90_000;
+    const startedAt = now();
+    for (let i = 0; i < maxAttempts; i++) {
+      const channel = pool.pick(now());
+      if (!channel) break;
+      const adapter = imageAdapters[channel.providerName];
+      if (!adapter) {
+        attempts.push({ channelId: channel.id, channelName: channel.name, ok: false, errorCode: 'adapter_unavailable', errorMessage: 'no image adapter', durationMs: 0 });
+        continue;
+      }
+      const secret = await deps.secretResolver.resolve(channel.secretRef);
+      if (!secret) {
+        pool.cooldown(channel.id, DEFAULT_SECRET_COOLDOWN_MS, now());
+        continue;
+      }
+      const started = now();
+      const ctx = { secret, fetchImpl: deps.fetchImpl ?? fetch, timeoutMs: defaultTimeoutMs };
+      try {
+        const { providerTaskId } = await adapter.submitImage(ctx, channel, { modelName: req.modelName ?? 'image', prompt: req.prompt, imageUrls: req.imageUrls, aspectRatio: req.aspectRatio });
+        attempts.push({ channelId: channel.id, channelName: channel.name, ok: true, durationMs: now() - started });
+        // 轮询至完成(渠道限 429 仍冷却)
+        for (;;) {
+          if (now() - startedAt > maxWaitMs) throw new GatewayError('upstream_timeout', '图像生成超时', { attempts });
+          const r = await adapter.pollImage(ctx, channel, providerTaskId);
+          if (r.status === 'succeeded' && r.imageUrls?.[0]) return { imageUrl: r.imageUrls[0] };
+          if (r.status === 'failed') throw new GatewayError('upstream_failed', '图像生成失败', { attempts });
+          await new Promise((res) => setTimeout(res, 2000));
+        }
+      } catch (e) {
+        const err = e as { status?: number; message?: string };
+        if (err.status === 429) pool.cooldown(channel.id, DEFAULT_429_COOLDOWN_MS, now());
+        if (err instanceof GatewayError) throw e;
+        attempts.push({ channelId: channel.id, channelName: channel.name, ok: false, status: err.status, errorCode: 'upstream_failed', errorMessage: err.message, durationMs: 0 });
+      }
+    }
+    throw new GatewayError(attempts.length ? 'upstream_failed' : 'no_channel_available', '图像生成所有渠道尝试失败', { attempts });
+  }
+
+  return { dispatch, chat, generateImage };
 }

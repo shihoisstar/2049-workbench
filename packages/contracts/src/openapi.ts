@@ -9,6 +9,7 @@ import { CreateOrderRequest, StoreOrder, StoreOrders, StorePackages } from './st
 import { CreateFeedbackRequest, FeedbackCreated } from './feedback';
 import { CreateTaskRequest, GenerationTask, GenerationTasks } from './tasks';
 import { Templates } from './templates';
+import { GenerateImageRequest, GenerateImageResult } from './images';
 import { PolishRequest, PolishResult } from './polish';
 import { UploadResult } from './uploads';
 import { WalletSummary } from './wallet';
@@ -193,6 +194,22 @@ export function buildOpenApiDocument() {
           },
         },
       },
+      '/v1/images/generate': {
+        post: {
+          summary: 'AI 绘画/改图(V1;改图传 imageUrls;每用户每小时 5 次)',
+          security: [{ bearerAuth: [] }],
+          requestBody: {
+            required: true,
+            content: { 'application/json': { schema: ref('GenerateImageRequest') } },
+          },
+          responses: {
+            '200': {
+              description: '生成结果图',
+              content: { 'application/json': { schema: ref('GenerateImageResult') } },
+            },
+          },
+        },
+      },
       '/v1/polish': {
         post: {
           summary: 'AI 文案优化(一句卖点 → 结构化口播稿;V0 免费不计费)',
@@ -269,6 +286,8 @@ export function buildOpenApiDocument() {
         bearerAuth: { type: 'http', scheme: 'bearer', bearerFormat: 'JWT' },
       },
       schemas: {
+        GenerateImageRequest: zodToJsonSchema(GenerateImageRequest, { target: 'openApi3' }),
+        GenerateImageResult: zodToJsonSchema(GenerateImageResult, { target: 'openApi3' }),
         PolishRequest: zodToJsonSchema(PolishRequest, { target: 'openApi3' }),
         PolishResult: zodToJsonSchema(PolishResult, { target: 'openApi3' }),
         UploadResult: zodToJsonSchema(UploadResult, { target: 'openApi3' }),

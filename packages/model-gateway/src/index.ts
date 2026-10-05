@@ -14,6 +14,7 @@ export { createMemoryRateLimiter, rateLimiterKey, type SyncRateLimiter } from '.
 export { openAiCompatibleChatAdapter, buildChatMessages } from './router/chat';
 export type { ChatAdapter, ChatRequest } from './router/chat';
 export { volcengineSeedanceAdapter } from './router/adapters/volcengine-seedance';
+export { atlasImageAdapter } from './router/image';
 export { atlasVideoAdapter } from './router/adapters/atlas';
 export { atlasVideoStub } from './router/adapters/atlas-stub';
 export type {

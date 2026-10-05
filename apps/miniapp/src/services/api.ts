@@ -140,6 +140,15 @@ export async function downloadOrSaveVideo(url: string): Promise<'saved' | 'opene
   return 'opened';
 }
 
+/** AI 绘画/改图(V1)。改图传参考图 URL(先 uploadImage)。 */
+export async function generateImage(input: {
+  prompt: string;
+  imageUrls?: string[];
+  aspectRatio?: string;
+}): Promise<{ imageUrl: string }> {
+  return call<{ imageUrl: string }>('POST', '/v1/images/generate', input, true);
+}
+
 /** 提交用户反馈(OPS-01)。 */
 export async function submitFeedback(content: string, contact?: string): Promise<{ id: string }> {
   return call<{ id: string }>('POST', '/v1/feedback', { content, contact }, true);

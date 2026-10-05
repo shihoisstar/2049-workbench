@@ -60,6 +60,13 @@ export default function Works() {
   }, [saving]);
 
   const works = (tasks ?? []).filter((t) => ['succeeded', 'failed'].includes(t.status));
+  // INF-05 第二次到期提醒:剩余 ≤1 天的成片,页顶醒目横幅(订阅消息待小程序认证)
+  const expiringSoon = (tasks ?? []).filter((t) => {
+    if (t.status !== 'succeeded' || !t.videoUrl || !t.finishedAt) return false;
+    const deadline = new Date(t.finishedAt).getTime() + TTL_DAYS * 24 * 3600_000;
+    const left = deadline - Date.now();
+    return left > 0 && left <= 24 * 3600_000;
+  });
 
   return (
     <View className="works-page">
@@ -67,6 +74,14 @@ export default function Works() {
         <Text className="works-title">我的作品</Text>
         <Text className="works-count">{works.filter((t) => t.status === 'succeeded' && t.videoUrl).length} 条成片</Text>
       </View>
+
+      {expiringSoon.length > 0 && (
+        <View className="works-expiring">
+          <Text className="works-expiring-text">
+            ⏰ {expiringSoon.length} 条成片将在 24 小时内过期,请尽快保存
+          </Text>
+        </View>
+      )}
 
       {error ? (
         <View className="works-empty"><Text className="works-empty-text">{error}</Text></View>
