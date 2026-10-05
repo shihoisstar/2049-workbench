@@ -1,0 +1,20 @@
+# 本地拓扑验证:8080 同源(H5 静态 + API 反代到宿主机 3010)
+# 用法见 docs/操作手册-部署.md §本地预演
+:8080 {
+	encode gzip
+
+	handle /v1/* {
+		reverse_proxy host.docker.internal:3010
+	}
+	handle /healthz {
+		reverse_proxy host.docker.internal:3010
+	}
+	handle /videos/* {
+		reverse_proxy host.docker.internal:3010
+	}
+	handle {
+		root * /srv
+		try_files {path} /index.html
+		file_server
+	}
+}

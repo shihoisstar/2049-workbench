@@ -1,0 +1,12 @@
+**/node_modules
+**/dist
+**/.turbo
+**/.swc
+**/.env
+backups
+storage
+docs
+infra
+.github
+apps/miniapp/dist
+apps/miniapp/node_modules

@@ -1,0 +1,99 @@
+name: workbench-prod
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: wb
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: workbench
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U wb -d workbench"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
+  api:
+    build:
+      context: ..
+      dockerfile: apps/api/Dockerfile
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+      REDIS_URL: ${REDIS_URL}
+      JWT_SECRET: ${JWT_SECRET}
+      PUBLIC_BASE_URL: ${PUBLIC_BASE_URL}
+      NODE_ENV: production
+      MOCK_CHANNEL: "off"
+      ATLAS_API_KEY: ${ATLAS_API_KEY}
+      ATLAS_MODEL: ${ATLAS_MODEL}
+      ATLAS_BASE_URL: ${ATLAS_BASE_URL}
+      ALERT_WEBHOOK: ${ALERT_WEBHOOK:-}
+    volumes:
+      - storage:/repo/apps/api/storage
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  worker:
+    build:
+      context: ..
+      dockerfile: apps/api/Dockerfile
+    command: ["sh", "-c", "pnpm db:migrate && node dist/worker-main.js"]
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+      REDIS_URL: ${REDIS_URL}
+      JWT_SECRET: ${JWT_SECRET}
+      NODE_ENV: production
+      MOCK_CHANNEL: "off"
+      ATLAS_API_KEY: ${ATLAS_API_KEY}
+      ATLAS_MODEL: ${ATLAS_MODEL}
+      ATLAS_BASE_URL: ${ATLAS_BASE_URL}
+      ALERT_WEBHOOK: ${ALERT_WEBHOOK:-}
+    volumes:
+      - storage:/repo/apps/api/storage
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  caddy:
+    image: caddy:2-alpine
+    environment:
+      SITE_ADDRESS: ${SITE_ADDRESS}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./h5:/srv:ro
+      - caddydata:/data
+      - caddyconfig:/config
+    depends_on:
+      - api
+    restart: unless-stopped
+
+volumes:
+  pgdata:
+  redisdata:
+  storage:
+  caddydata:
+  caddyconfig:

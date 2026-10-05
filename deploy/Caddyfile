@@ -1,0 +1,22 @@
+# Caddy 反代 + H5 静态(自动 HTTPS;站点地址由 .env 的 SITE_ADDRESS 注入)
+{$SITE_ADDRESS} {
+	encode gzip
+
+	# API 与成片/静态视频 → api 容器
+	handle /v1/* {
+		reverse_proxy api:3000
+	}
+	handle /healthz {
+		reverse_proxy api:3000
+	}
+	handle /videos/* {
+		reverse_proxy api:3000
+	}
+
+	# H5 SPA(同源;/v1 等已在上面分流)
+	handle {
+		root * /srv
+		try_files {path} /index.html
+		file_server
+	}
+}

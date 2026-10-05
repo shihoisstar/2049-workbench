@@ -2,9 +2,11 @@ import Taro from '@tarojs/taro';
 
 import type { GenerationTask, GuestSession, StoreOrder, StorePackage, Template, WalletSummary } from '@wb/contracts';
 
-/** API 基址:本地开发(3000 被参考项目容器占用,开发用 3010);
- * TODO(部署):正式域名 + weapp 合法域名白名单,并经 Taro defineConstants 注入。 */
-export const BASE_URL = 'http://localhost:3010';
+/** API 基址(T3.5 部署解耦):
+ * - H5 生产:同源(空串),由 Caddy 反代 /v1 → api;
+ * - 本地开发:.env.development 设 TARO_APP_API_BASE=http://localhost:3010;
+ * - weapp 构建:.env.production 设 https://正式域名(需小程序后台配置合法域名)。 */
+export const BASE_URL = process.env.TARO_APP_API_BASE ?? '';
 const TOKEN_KEY = 'wb_token';
 const USER_KEY = 'wb_user_id';
 const DEVICE_KEY = 'wb_device_id';

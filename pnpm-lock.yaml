@@ -15,7 +15,7 @@ importers:
         specifier: ^22.0.0
         version: 22.20.5
       eslint:
-        specifier: ^9.0.0
+        specifier: ^9.39.5
         version: 9.39.5(jiti@2.7.0)(supports-color@8.0.0)
       turbo:
         specifier: ^2.3.0
