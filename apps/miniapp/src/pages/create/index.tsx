@@ -4,7 +4,7 @@ import Taro from '@tarojs/taro';
 
 import type { GenerationTask } from '@wb/contracts';
 
-import { ApiError, createTask, ensureSession, uploadImage } from '../../services/api';
+import { ApiError, createTask, ensureSession, polishCopy, uploadImage } from '../../services/api';
 
 import './index.scss';
 
@@ -47,6 +47,7 @@ export default function Create() {
   const [duration, setDuration] = useState(5);
   const [blockedHits, setBlockedHits] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
+  const [polishing, setPolishing] = useState(false);
 
   const canSubmit = useMemo(() => prompt.trim().length > 0 && !submitting, [prompt, submitting]);
 
@@ -119,6 +120,27 @@ export default function Create() {
           />
           <Text className="create-count">{prompt.length}/3000</Text>
         </View>
+        {blockedHits.length === 0 && prompt.trim().length >= 2 && (
+          <View
+            className={`create-polish ${polishing ? 'disabled' : ''}`}
+            onClick={async () => {
+              if (polishing) return;
+              setPolishing(true);
+              try {
+                await ensureSession();
+                const text = await polishCopy(prompt.trim());
+                setPrompt(text);
+                Taro.showToast({ title: 'AI 文案已生成(可再编辑)', icon: 'none' });
+              } catch (e) {
+                Taro.showToast({ title: (e as Error).message || '文案服务暂不可用', icon: 'none' });
+              } finally {
+                setPolishing(false);
+              }
+            }}
+          >
+            <Text className="create-polish-text">{polishing ? '✦ AI 写作中…' : '✦ AI 帮我写'}</Text>
+          </View>
+        )}
         {blockedHits.length > 0 && (
           <View className="create-blocked">
             <Text className="create-blocked-text">

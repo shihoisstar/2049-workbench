@@ -16,5 +16,6 @@ export { CreateTaskRequest, TaskStatus } from './tasks';
 export type { GenerationTask, GenerationTasks } from './tasks';
 export { Template, Templates } from './templates';
 export { UploadResult } from './uploads';
+export { PolishRequest, PolishResult } from './polish';
 export { CreateFeedbackRequest, FeedbackCreated } from './feedback';
 export { buildOpenApiDocument, endpointList } from './openapi';

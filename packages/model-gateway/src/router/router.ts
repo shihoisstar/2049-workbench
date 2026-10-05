@@ -6,6 +6,7 @@
  */
 import { ChannelPool } from './channel-pool';
 import { createMemoryRateLimiter, rateLimiterKey, type SyncRateLimiter } from './rate-limiter';
+import type { ChatAdapter } from './chat';
 import {
   GatewayError,
   type ChannelView,
@@ -40,6 +41,8 @@ export interface GatewayRouterDeps {
   /** 主/备渠道列表(业务层不感知顺序语义,权重决定) */
   channels: ChannelView[];
   adapters: Record<string, VideoAdapter>;
+  /** chat 适配器注册表(可选;未配置渠道无 chat 能力) */
+  chatAdapters?: Record<string, ChatAdapter>;
   secretResolver: SecretResolver;
   rateLimiter?: SyncRateLimiter;
   fetchImpl?: typeof fetch;
@@ -57,6 +60,8 @@ const DEFAULT_SECRET_COOLDOWN_MS = 60_000;
 
 export interface GatewayRouter {
   dispatch(req: GatewayRequest): Promise<GatewayResponse>;
+  /** 文本模型入口(chat):独立于视频任务,同渠道池/限流/冷却语义 */
+  chat(req: { modelName: string; system?: string; user: string; maxTokens?: number }): Promise<{ text: string }>;
 }
 
 export function createGatewayRouter(deps: GatewayRouterDeps): GatewayRouter {
@@ -65,6 +70,37 @@ export function createGatewayRouter(deps: GatewayRouterDeps): GatewayRouter {
   const limiter = deps.rateLimiter ?? createMemoryRateLimiter();
   const maxAttempts = deps.maxAttempts ?? DEFAULT_MAX_ATTEMPTS;
   const defaultTimeoutMs = deps.defaultTimeoutMs ?? DEFAULT_TIMEOUT_MS;
+
+  async function chat(req: { modelName: string; system?: string; user: string; maxTokens?: number }): Promise<{ text: string }> {
+    const attempts: GatewayAttempt[] = [];
+    for (let i = 0; i < maxAttempts; i++) {
+      const channel = pool.pick(now());
+      if (!channel) break;
+      const adapter = deps.chatAdapters?.[channel.providerName];
+      if (!adapter) {
+        attempts.push({ channelId: channel.id, channelName: channel.name, ok: false, errorCode: 'adapter_unavailable', errorMessage: 'no chat adapter', durationMs: 0 });
+        continue;
+      }
+      const secret = await deps.secretResolver.resolve(channel.secretRef);
+      if (!secret) {
+        pool.cooldown(channel.id, DEFAULT_SECRET_COOLDOWN_MS, now());
+        continue;
+      }
+      const started = now();
+      try {
+        const ctx = { secret, fetchImpl: deps.fetchImpl ?? fetch, timeoutMs: defaultTimeoutMs };
+        const { text } = await adapter.chat(ctx, channel, req);
+        attempts.push({ channelId: channel.id, channelName: channel.name, ok: true, durationMs: now() - started });
+        return { text };
+      } catch (e) {
+        const err = e as { status?: number; message?: string };
+        // chat 失败仅 429 冷却(保护上游);其余失败不冷却——避免波及同渠道的视频任务
+        if (err.status === 429) pool.cooldown(channel.id, cooldownFor(channel, 429), now());
+        attempts.push({ channelId: channel.id, channelName: channel.name, ok: false, status: err.status, errorCode: 'upstream_failed', errorMessage: err.message, durationMs: 0 });
+      }
+    }
+    throw new GatewayError(attempts.length ? 'upstream_failed' : 'no_channel_available', 'chat 所有渠道尝试失败', { attempts });
+  }
 
   function cooldownFor(channel: ChannelView, status?: number, retryAfterMs?: number): number {
     if (status === 429) return retryAfterMs ?? DEFAULT_429_COOLDOWN_MS;
@@ -147,5 +183,5 @@ export function createGatewayRouter(deps: GatewayRouterDeps): GatewayRouter {
     return { ok: true, status: 200, body: result, channelId: channel.id, channelName: channel.name, providerName: channel.providerName, attempts };
   }
 
-  return { dispatch };
+  return { dispatch, chat };
 }

@@ -13,6 +13,7 @@ import { ContentSafetyService, loadBannedWords } from './content-safety';
 import { registerAuthRoutes } from './routes/auth';
 import { registerFeedbackRoutes } from './routes/feedback';
 import { registerHealthRoutes } from './routes/health';
+import { registerPolishRoutes } from './routes/polish';
 import { registerStoreRoutes } from './routes/store';
 import { registerTaskRoutes } from './routes/tasks';
 import { registerUploadRoutes } from './routes/uploads';
@@ -23,6 +24,7 @@ import { TaskService } from './tasks';
 import { WalletService } from './wallet';
 import { createRedisConnection, createTaskQueue, type TaskJobData } from './queue';
 import { LocalDiskStorage } from './storage';
+import { buildGatewayRouterFromEnv } from './gateway-setup';
 
 export interface AppOptions {
   databaseUrl: string;
@@ -93,6 +95,7 @@ export function buildApp(opts: AppOptions): FastifyInstance {
   registerHealthRoutes(app);
   registerAuthRoutes(app, db, wallet);
   registerTemplateRoutes(app, db);
+  registerPolishRoutes(app, buildGatewayRouterFromEnv());
   registerFeedbackRoutes(app, db);
   registerWalletRoutes(app, wallet);
   registerStoreRoutes(app, store);

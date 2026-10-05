@@ -9,6 +9,7 @@ import { CreateOrderRequest, StoreOrder, StoreOrders, StorePackages } from './st
 import { CreateFeedbackRequest, FeedbackCreated } from './feedback';
 import { CreateTaskRequest, GenerationTask, GenerationTasks } from './tasks';
 import { Templates } from './templates';
+import { PolishRequest, PolishResult } from './polish';
 import { UploadResult } from './uploads';
 import { WalletSummary } from './wallet';
 import { API_VERSION } from './version';
@@ -192,6 +193,22 @@ export function buildOpenApiDocument() {
           },
         },
       },
+      '/v1/polish': {
+        post: {
+          summary: 'AI 文案优化(一句卖点 → 结构化口播稿;V0 免费不计费)',
+          security: [{ bearerAuth: [] }],
+          requestBody: {
+            required: true,
+            content: { 'application/json': { schema: ref('PolishRequest') } },
+          },
+          responses: {
+            '200': {
+              description: '优化后的文案',
+              content: { 'application/json': { schema: ref('PolishResult') } },
+            },
+          },
+        },
+      },
       '/v1/tasks': {
         post: {
           summary: '创建生成任务(冻结估算积分并入队;实现:T2.2)',
@@ -252,6 +269,8 @@ export function buildOpenApiDocument() {
         bearerAuth: { type: 'http', scheme: 'bearer', bearerFormat: 'JWT' },
       },
       schemas: {
+        PolishRequest: zodToJsonSchema(PolishRequest, { target: 'openApi3' }),
+        PolishResult: zodToJsonSchema(PolishResult, { target: 'openApi3' }),
         UploadResult: zodToJsonSchema(UploadResult, { target: 'openApi3' }),
         CreateFeedbackRequest: zodToJsonSchema(CreateFeedbackRequest, { target: 'openApi3' }),
         FeedbackCreated: zodToJsonSchema(FeedbackCreated, { target: 'openApi3' }),

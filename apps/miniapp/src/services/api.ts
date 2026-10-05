@@ -155,6 +155,12 @@ export async function uploadImage(filePath: string): Promise<string> {
   return (JSON.parse(res.data) as { url: string }).url;
 }
 
+/** AI 文案优化(剧本第 6 步;V0 免费不计费)。 */
+export async function polishCopy(text: string): Promise<string> {
+  const res = await call<{ text: string }>('POST', '/v1/polish', { text }, true);
+  return res.text;
+}
+
 /** 创建生成任务(T2.3):命中违禁词抛 ApiError(5001 + hits 高亮)。 */
 export async function createTask(input: {
   prompt: string;

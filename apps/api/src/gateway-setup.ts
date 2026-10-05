@@ -4,6 +4,7 @@
  */
 import {
   atlasVideoAdapter,
+  openAiCompatibleChatAdapter,
   atlasVideoStub,
   createEnvSecretResolver,
   createGatewayRouter,
@@ -16,7 +17,7 @@ import {
 import { mockVideoAdapter } from './mock-adapter';
 
 export type GatewayEnv = Partial<
-  Record<'ATLAS_API_KEY' | 'ATLAS_BASE_URL' | 'ATLAS_MODEL' | 'ATLAS_MODEL_I2V' | 'MOCK_CHANNEL' | 'VOLC_ARK_API_KEY' | 'VOLC_ARK_BASE_URL' | 'VOLC_RPM_LIMIT' | 'VOLC_SEEDANCE_MODEL' | 'NODE_ENV', string>
+  Record<'ATLAS_API_KEY' | 'ATLAS_BASE_URL' | 'ATLAS_MODEL' | 'ATLAS_MODEL_I2V' | 'ATLAS_CHAT_MODEL' | 'MOCK_CHANNEL' | 'VOLC_ARK_API_KEY' | 'VOLC_ARK_BASE_URL' | 'VOLC_RPM_LIMIT' | 'VOLC_SEEDANCE_MODEL' | 'NODE_ENV', string>
 >;
 
 export function buildGatewayRouterFromEnv(env: GatewayEnv = process.env): GatewayRouter {
@@ -52,7 +53,13 @@ export function buildGatewayRouterFromEnv(env: GatewayEnv = process.env): Gatewa
     rpmLimit: null,
     status: 'active',
     health: 'ok',
-    config: atlasReady ? { model: env.ATLAS_MODEL ?? 'bytedance/seedance-2.0-fast/text-to-video', modelI2v: env.ATLAS_MODEL_I2V ?? 'bytedance/seedance-2.0-fast/image-to-video' } : {},
+    config: atlasReady
+      ? {
+          model: env.ATLAS_MODEL ?? 'bytedance/seedance-2.0-fast/text-to-video',
+          modelI2v: env.ATLAS_MODEL_I2V ?? 'bytedance/seedance-2.0-fast/image-to-video',
+          chatModel: env.ATLAS_CHAT_MODEL ?? 'deepseek-ai/deepseek-v4.1-flash',
+        }
+      : {},
   });
   adapters.atlas = atlasReady ? atlasVideoAdapter : atlasVideoStub;
 
@@ -76,6 +83,7 @@ export function buildGatewayRouterFromEnv(env: GatewayEnv = process.env): Gatewa
   const router = createGatewayRouter({
     channels,
     adapters,
+    chatAdapters: atlasReady ? { atlas: openAiCompatibleChatAdapter } : {},
     secretResolver: createEnvSecretResolver({
       refToEnv: {
         'volc-key': 'VOLC_ARK_API_KEY',

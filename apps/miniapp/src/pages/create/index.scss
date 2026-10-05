@@ -52,6 +52,24 @@
   color: $wb-color-ink-3;
 }
 
+.create-polish {
+  align-self: flex-end;
+  margin-top: -$wb-space-6;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: $wb-mark-bg;
+}
+
+.create-polish.disabled {
+  opacity: 0.5;
+}
+
+.create-polish-text {
+  font-size: $wb-font-xs;
+  font-weight: 600;
+  color: $wb-color-primary;
+}
+
 .create-blocked {
   margin-top: $wb-space-2;
   padding: $wb-space-2 $wb-space-3;
