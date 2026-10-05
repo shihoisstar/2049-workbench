@@ -20,7 +20,7 @@ import { rm } from 'node:fs/promises';
  * mock 结果经 providerTaskId 前缀控制:submit 统一受理为 mock-succeed,测试随后改写前缀决定 poll 结局。
  */
 const url = process.env.DATABASE_URL ?? 'postgres://wb:wb_dev_only@localhost:5433/workbench';
-const redisUrl = process.env.REDIS_URL ?? 'redis://localhost:6379';
+const redisUrl = process.env.REDIS_URL ?? 'redis://localhost:6379/1'; // 独立 db:与生产/开发 worker(db0)物理隔离,不再抢任务
 
 const app = buildApp({ databaseUrl: url, jwtSecret: 'test-secret' });
 const db = app.db;
@@ -80,6 +80,7 @@ function freshRouter(): GatewayRouter {
 
 before(async () => {
   await queue.waitUntilReady();
+  await connection.flushdb(); // 测试独立 db1:先清残留队列
   await worker.waitUntilReady();
 });
 
@@ -258,7 +259,7 @@ test('Atlas 图像适配器:submit/poll 协议(fake fetch)', async () => {
   assert.equal(polled.imageUrls?.[0], 'https://cdn/pic.png');
   assert.ok(calls.some((c) => c.url.includes('/api/v1/model/generateImage')));
 });
-:命中违禁词 → CONTENT_BLOCKED + hits(不冻结积分)', async () => {
+test('创建链路守门:命中违禁词 → CONTENT_BLOCKED + hits(不冻结积分)', async () => {
   const uid = await mkUser('content-block');
   const before = await balance(uid);
   const res = await app.inject({
