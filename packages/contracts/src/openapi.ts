@@ -9,6 +9,7 @@ import { CreateOrderRequest, StoreOrder, StoreOrders, StorePackages } from './st
 import { CreateFeedbackRequest, FeedbackCreated } from './feedback';
 import { CreateTaskRequest, GenerationTask, GenerationTasks } from './tasks';
 import { Templates } from './templates';
+import { UploadResult } from './uploads';
 import { WalletSummary } from './wallet';
 import { API_VERSION } from './version';
 
@@ -67,6 +68,30 @@ export function buildOpenApiDocument() {
             '401': {
               description: '未登录/凭证失效',
               content: { 'application/json': { schema: ref('ErrorBody') } },
+            },
+          },
+        },
+      },
+      '/v1/uploads': {
+        post: {
+          summary: '上传参考图(V1 传图生成;multipart 字段 file,≤10M,jpg/png/webp)',
+          security: [{ bearerAuth: [] }],
+          requestBody: {
+            required: true,
+            content: {
+              'multipart/form-data': {
+                schema: {
+                  type: 'object',
+                  properties: { file: { type: 'string', format: 'binary' } },
+                  required: ['file'],
+                },
+              },
+            },
+          },
+          responses: {
+            '201': {
+              description: '上传完成',
+              content: { 'application/json': { schema: ref('UploadResult') } },
             },
           },
         },
@@ -227,6 +252,7 @@ export function buildOpenApiDocument() {
         bearerAuth: { type: 'http', scheme: 'bearer', bearerFormat: 'JWT' },
       },
       schemas: {
+        UploadResult: zodToJsonSchema(UploadResult, { target: 'openApi3' }),
         CreateFeedbackRequest: zodToJsonSchema(CreateFeedbackRequest, { target: 'openApi3' }),
         FeedbackCreated: zodToJsonSchema(FeedbackCreated, { target: 'openApi3' }),
         Templates: zodToJsonSchema(Templates, { target: 'openApi3' }),

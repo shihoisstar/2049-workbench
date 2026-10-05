@@ -231,6 +231,32 @@ test('创建链路守门:命中违禁词 → CONTENT_BLOCKED + hits(不冻结积
   assert.equal(await balance(uid), before, '拒绝在冻结之前,积分分毫不动');
 });
 
+test('上传参考图:multipart → 落盘 → URL;createTask.imageUrls 进任务行', async () => {
+  const uid = await mkUser('upload');
+  const token = await loginToken(uid);
+  const boundary = '----wbtestboundary';
+  const pngHead = Buffer.from('89504e470d0a1a0a', 'hex');
+  const head = Buffer.from(`--${boundary}\r\nContent-Disposition: form-data; name="file"; filename="t.png"\r\nContent-Type: image/png\r\n\r\n`);
+  const tail = Buffer.from(`\r\n--${boundary}--\r\n`);
+  const body = Buffer.concat([head, pngHead, tail]);
+  const up = await app.inject({
+    method: 'POST',
+    url: '/v1/uploads',
+    headers: { authorization: `Bearer ${token}`, 'content-type': `multipart/form-data; boundary=${boundary}` },
+    payload: body,
+  });
+  assert.equal(up.statusCode, 201);
+  const { url } = up.json();
+  assert.match(url, /\/images\/[0-9a-f-]+\.png$/);
+
+  // imageUrls 进任务行(JSON)
+  const { task } = await tasks.create(uid, { prompt: '带图生成', imageUrls: [url], aspectRatio: '9:16', resolution: '480p', durationSec: 5, model: 'mock-video' });
+  const row = await taskRow(task.id);
+  assert.deepEqual(JSON.parse(row.imageUrls ?? '[]'), [url]);
+  const view = await tasks.get(uid, task.id);
+  assert.deepEqual(view?.imageUrls, [url]);
+});
+
 test('取消:queued 任务取消并退款;终态再取消非法', async () => {
   const uid = await mkUser('cancel');
   const { task } = await tasks.create(uid, { prompt: 'x', aspectRatio: '9:16', resolution: '480p', durationSec: 5, model: 'mock-video' });

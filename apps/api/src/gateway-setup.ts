@@ -16,7 +16,7 @@ import {
 import { mockVideoAdapter } from './mock-adapter';
 
 export type GatewayEnv = Partial<
-  Record<'ATLAS_API_KEY' | 'ATLAS_BASE_URL' | 'ATLAS_MODEL' | 'MOCK_CHANNEL' | 'VOLC_ARK_API_KEY' | 'VOLC_ARK_BASE_URL' | 'VOLC_RPM_LIMIT' | 'VOLC_SEEDANCE_MODEL' | 'NODE_ENV', string>
+  Record<'ATLAS_API_KEY' | 'ATLAS_BASE_URL' | 'ATLAS_MODEL' | 'ATLAS_MODEL_I2V' | 'MOCK_CHANNEL' | 'VOLC_ARK_API_KEY' | 'VOLC_ARK_BASE_URL' | 'VOLC_RPM_LIMIT' | 'VOLC_SEEDANCE_MODEL' | 'NODE_ENV', string>
 >;
 
 export function buildGatewayRouterFromEnv(env: GatewayEnv = process.env): GatewayRouter {
@@ -52,7 +52,7 @@ export function buildGatewayRouterFromEnv(env: GatewayEnv = process.env): Gatewa
     rpmLimit: null,
     status: 'active',
     health: 'ok',
-    config: atlasReady ? { model: env.ATLAS_MODEL ?? 'kling-v1' } : {},
+    config: atlasReady ? { model: env.ATLAS_MODEL ?? 'bytedance/seedance-2.0-fast/text-to-video', modelI2v: env.ATLAS_MODEL_I2V ?? 'bytedance/seedance-2.0-fast/image-to-video' } : {},
   });
   adapters.atlas = atlasReady ? atlasVideoAdapter : atlasVideoStub;
 

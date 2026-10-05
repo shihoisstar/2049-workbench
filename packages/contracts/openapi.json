@@ -91,6 +91,47 @@
         }
       }
     },
+    "/v1/uploads": {
+      "post": {
+        "summary": "上传参考图(V1 传图生成;multipart 字段 file,≤10M,jpg/png/webp)",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                },
+                "required": [
+                  "file"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "上传完成",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UploadResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/wallet": {
       "get": {
         "summary": "钱包概览:余额+最近流水(实现:T1.2)",
@@ -389,6 +430,19 @@
       }
     },
     "schemas": {
+      "UploadResult": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "format": "uri"
+          }
+        },
+        "required": [
+          "url"
+        ],
+        "additionalProperties": false
+      },
       "CreateFeedbackRequest": {
         "type": "object",
         "properties": {
@@ -475,6 +529,14 @@
             "minLength": 1,
             "maxLength": 3000
           },
+          "imageUrls": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uri"
+            },
+            "maxItems": 3
+          },
           "aspectRatio": {
             "type": "string",
             "enum": [
@@ -525,6 +587,12 @@
           "prompt": {
             "type": "string"
           },
+          "imageUrls": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
           "aspectRatio": {
             "type": "string"
           },
@@ -570,6 +638,7 @@
           "id",
           "status",
           "prompt",
+          "imageUrls",
           "aspectRatio",
           "resolution",
           "durationSec",
@@ -608,6 +677,12 @@
                 },
                 "prompt": {
                   "type": "string"
+                },
+                "imageUrls": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
                 },
                 "aspectRatio": {
                   "type": "string"
@@ -654,6 +729,7 @@
                 "id",
                 "status",
                 "prompt",
+                "imageUrls",
                 "aspectRatio",
                 "resolution",
                 "durationSec",

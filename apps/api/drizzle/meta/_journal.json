@@ -43,6 +43,13 @@
       "when": 1791114591175,
       "tag": "0005_gigantic_the_captain",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1791167002725,
+      "tag": "0006_many_electro",
+      "breakpoints": true
     }
   ]
 }

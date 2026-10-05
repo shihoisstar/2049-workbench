@@ -22,6 +22,7 @@ export function toTaskView(row: TaskRow): GenerationTask {
     id: row.id,
     status: row.status as TaskStatus,
     prompt: row.prompt,
+    imageUrls: row.imageUrls ? (JSON.parse(row.imageUrls) as string[]) : [],
     aspectRatio: row.aspectRatio,
     resolution: row.resolution,
     durationSec: row.durationSec,
@@ -38,6 +39,7 @@ export function toTaskView(row: TaskRow): GenerationTask {
 
 export interface CreateTaskInput {
   prompt: string;
+  imageUrls?: string[];
   aspectRatio: string;
   resolution: string;
   durationSec: number;
@@ -69,6 +71,7 @@ export class TaskService {
           billingKey,
           status: 'created',
           prompt: input.prompt,
+          imageUrls: input.imageUrls?.length ? JSON.stringify(input.imageUrls) : null,
           aspectRatio: input.aspectRatio,
           resolution: input.resolution,
           durationSec: input.durationSec,

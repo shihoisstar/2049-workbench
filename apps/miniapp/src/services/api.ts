@@ -27,7 +27,7 @@ export class ApiError extends Error {
   }
 }
 
-async function call<T>(method: 'GET' | 'POST', path: string, data?: unknown, auth = false): Promise<T> {
+async function callOnce<T>(method: 'GET' | 'POST', path: string, data?: unknown, auth = false): Promise<T> {
   const header: Record<string, string> = { 'content-type': 'application/json' };
   const token = Taro.getStorageSync(TOKEN_KEY) as string;
   if (auth && token) header.authorization = `Bearer ${token}`;
@@ -44,6 +44,22 @@ async function call<T>(method: 'GET' | 'POST', path: string, data?: unknown, aut
     throw new ApiError(Number(errBody?.code ?? status), errBody?.message ?? `HTTP ${status}`, errBody?.details);
   }
   return body as T;
+}
+
+/** 401 自愈:凭证失效(DB 重置/过期)→ 清本地会话重新登录后重试一次。 */
+async function call<T>(method: 'GET' | 'POST', path: string, data?: unknown, auth = false): Promise<T> {
+  try {
+    return await callOnce<T>(method, path, data, auth);
+  } catch (e) {
+    if (auth && e instanceof ApiError && e.code === 2001) {
+      Taro.removeStorageSync(TOKEN_KEY);
+      Taro.removeStorageSync(USER_KEY);
+      sessionPromise = null;
+      await ensureSession();
+      return callOnce<T>(method, path, data, auth);
+    }
+    throw e;
+  }
 }
 
 function ensureDeviceId(): string {
@@ -122,9 +138,27 @@ export async function getTemplates(): Promise<Template[]> {
   return res?.templates ?? [];
 }
 
+/** 上传参考图(Taro.uploadFile;返回可直接用于 createTask.imageUrls 的 URL)。 */
+export async function uploadImage(filePath: string): Promise<string> {
+  const token = Taro.getStorageSync(TOKEN_KEY) as string;
+  const res = await Taro.uploadFile({
+    url: `${BASE_URL}/v1/uploads`,
+    filePath,
+    name: 'file',
+    header: token ? { authorization: `Bearer ${token}` } : undefined,
+  });
+  if (res.statusCode >= 400) {
+    let msg = `HTTP ${res.statusCode}`;
+    try { msg = (JSON.parse(res.data) as { message?: string }).message ?? msg; } catch { /* keep */ }
+    throw new ApiError(res.statusCode, msg);
+  }
+  return (JSON.parse(res.data) as { url: string }).url;
+}
+
 /** 创建生成任务(T2.3):命中违禁词抛 ApiError(5001 + hits 高亮)。 */
 export async function createTask(input: {
   prompt: string;
+  imageUrls?: string[];
   aspectRatio: string;
   resolution: string;
   durationSec: number;

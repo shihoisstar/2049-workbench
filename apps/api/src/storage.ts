@@ -4,7 +4,7 @@
  */
 import { mkdir, writeFile } from 'node:fs/promises';
 import { spawn } from 'node:child_process';
-import { join, resolve } from 'node:path';
+import { dirname, join, resolve } from 'node:path';
 
 export interface StorageService {
   /** 存对象并返回可公开访问的 URL */
@@ -26,7 +26,8 @@ export class LocalDiskStorage implements StorageService {
 
   async put(key: string, data: Buffer): Promise<string> {
     const target = join(this.rootDir, this.subdir, key);
-    await mkdir(join(this.rootDir, this.subdir), { recursive: true });
+    // key 可含子路径(images/xxx.png):父目录递归创建
+    await mkdir(dirname(target), { recursive: true });
     await writeFile(target, data);
     return `${this.publicBase}/${this.subdir}/${key}`;
   }

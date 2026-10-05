@@ -5,6 +5,7 @@ import Fastify, { type FastifyInstance } from 'fastify';
 import cors from '@fastify/cors';
 import fjwt from '@fastify/jwt';
 import fastifyStatic from '@fastify/static';
+import multipart from '@fastify/multipart';
 import type { Queue } from 'bullmq';
 
 import { createDb } from './db';
@@ -14,6 +15,7 @@ import { registerFeedbackRoutes } from './routes/feedback';
 import { registerHealthRoutes } from './routes/health';
 import { registerStoreRoutes } from './routes/store';
 import { registerTaskRoutes } from './routes/tasks';
+import { registerUploadRoutes } from './routes/uploads';
 import { registerTemplateRoutes } from './routes/templates';
 import { registerWalletRoutes } from './routes/wallet';
 import { StoreService } from './store';
@@ -56,6 +58,7 @@ export function buildApp(opts: AppOptions): FastifyInstance {
 
   // H5 端跨源(开发期全放行;生产按域名收窄,随部署工单)
   app.register(cors, { origin: true });
+  app.register(multipart, { limits: { fileSize: 10 * 1024 * 1024 } });
   app.register(fjwt, { secret: opts.jwtSecret });
 
   const wallet = new WalletService(db);
@@ -93,6 +96,7 @@ export function buildApp(opts: AppOptions): FastifyInstance {
   registerFeedbackRoutes(app, db);
   registerWalletRoutes(app, wallet);
   registerStoreRoutes(app, store);
+  registerUploadRoutes(app, storage);
   registerTaskRoutes(app, { tasks, safety, enqueue });
 
   return app;

@@ -90,7 +90,13 @@ export async function handleSubmitTask(deps: TaskWorkerDeps, taskId: string): Pr
     const res = await deps.router.dispatch({
       modelName: row.model,
       modelType: 'video',
-      payload: { prompt: row.prompt, aspectRatio: row.aspectRatio, resolution: row.resolution, durationSec: row.durationSec },
+      payload: {
+        prompt: row.prompt,
+        imageUrls: row.imageUrls ? (JSON.parse(row.imageUrls) as string[]) : undefined,
+        aspectRatio: row.aspectRatio,
+        resolution: row.resolution,
+        durationSec: row.durationSec,
+      },
       taskOperation: 'submit',
     });
     await deps.db

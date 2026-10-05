@@ -37,8 +37,11 @@ export const atlasVideoAdapter: VideoAdapter = {
       imageUrls?: string[];
     };
     if (!p.prompt) throw Object.assign(new Error('prompt 必填'), { status: 400 });
+    // 传图生成 → i2v 模型(config.modelI2v);纯文生 → t2v(config.model)
+    const hasImages = Boolean(p.imageUrls?.length);
+    const model = String(hasImages ? channel.config.modelI2v ?? channel.config.model ?? req.modelName : channel.config.model ?? req.modelName);
     const body: Record<string, unknown> = {
-      model: String(channel.config.model ?? req.modelName),
+      model,
       prompt: p.prompt,
       // 真机验证(2049-agent 2026-06-25):duration 字符串会被上游拒,必须数字
       duration: typeof p.durationSec === 'number' ? p.durationSec : Number(p.durationSec ?? 5),

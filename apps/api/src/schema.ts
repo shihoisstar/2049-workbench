@@ -93,6 +93,7 @@ export const generationTasks = pgTable('generation_tasks', {
   billingKey: text('billing_key').notNull().unique(),
   status: text('status').notNull().default('created'),
   prompt: text('prompt').notNull(),
+  imageUrls: text('image_urls'),
   aspectRatio: text('aspect_ratio').notNull().default('9:16'),
   resolution: text('resolution').notNull().default('480p'),
   durationSec: integer('duration_sec').notNull().default(5),

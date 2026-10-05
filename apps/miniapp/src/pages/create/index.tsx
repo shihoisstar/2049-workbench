@@ -4,7 +4,7 @@ import Taro from '@tarojs/taro';
 
 import type { GenerationTask } from '@wb/contracts';
 
-import { ApiError, createTask, ensureSession } from '../../services/api';
+import { ApiError, createTask, ensureSession, uploadImage } from '../../services/api';
 
 import './index.scss';
 
@@ -41,6 +41,7 @@ export default function Create() {
     }
   }, []);
   const [images, setImages] = useState<string[]>([]);
+  const [imageUrls, setImageUrls] = useState<string[]>([]);
   const [ratio, setRatio] = useState('9:16');
   const [resolution, setResolution] = useState('480p');
   const [duration, setDuration] = useState(5);
@@ -56,7 +57,19 @@ export default function Create() {
       Taro.showToast({ title: '单张图片需小于 10M', icon: 'none' });
       return;
     }
-    setImages((prev) => [...prev, ...res.tempFilePaths].slice(0, MAX_IMAGES));
+    const localPaths = [...images, ...res.tempFilePaths].slice(0, MAX_IMAGES);
+    setImages(localPaths);
+    // 选图即上传(V1 传图生成);失败仅提示,不阻塞表单
+    try {
+      await ensureSession();
+      const urls: string[] = [];
+      for (const path of res.tempFilePaths) {
+        urls.push(await uploadImage(path));
+      }
+      setImageUrls((prev) => [...prev, ...urls].slice(0, MAX_IMAGES));
+    } catch (e) {
+      Taro.showToast({ title: (e as Error).message || '图片上传失败', icon: 'none' });
+    }
   }, [images.length]);
 
   const onSubmit = useCallback(async () => {
@@ -67,6 +80,7 @@ export default function Create() {
       await ensureSession();
       const task: GenerationTask = await createTask({
         prompt: prompt.trim(),
+        imageUrls: imageUrls.length ? imageUrls : undefined,
         aspectRatio: ratio,
         resolution,
         durationSec: duration,
