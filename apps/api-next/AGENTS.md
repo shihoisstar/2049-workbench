@@ -5,5 +5,6 @@
 - 显式 API_NEXT_DATABASE_URL，无.env自动加载，无旧DATABASE_URL回退。测试用注入探针或 verify:isolated。
 - 错误不回显异常、URL或数据库连接串；Nest和Fastify早期错误都走统一契约。
 - 身份从会话解析，不能信任payload/query里的userId；积分写操作不作为客户端端点公开。业务只经@wb/server入口。
+- v2/generation提供报价、幂等受理和本人查询。执行链未接通，main不打开generationAvailable；该装配参数当前仅在隔离集成测试启用。不能仅因存在供应商密钥就打开受理。报价不预留积分，响应剔除内部资产引用与上游成本。
 - 构建与测试：pnpm --filter @wb/api-next build / test；测试脚本必须 cd dist && node --test。
 - 迁移完所有业务和切换演练后，由单独工单替换旧apps/api，删除api-next过渡命名；现在不改旧部署入口。

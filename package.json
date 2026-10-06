@@ -16,6 +16,7 @@
     "client:check": "node scripts/generate-api-client.mjs --check",
     "start:api-next": "pnpm --filter @wb/api-next start",
     "verify:isolated": "node scripts/verify-isolated.mjs",
+    "verify:worker": "pnpm --filter @wb/worker... build && pnpm --filter @wb/worker verify:runtime",
     "audit:wallet": "node scripts/audit-wallet.mjs",
     "dev:api": "turbo run dev --filter=@wb/api"
   },

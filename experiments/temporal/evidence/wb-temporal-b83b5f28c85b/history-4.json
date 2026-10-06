@@ -1,0 +1,266 @@
+{
+  "events": [
+    {
+      "eventId": "1",
+      "eventTime": "2026-10-06T06:52:13.292495267Z",
+      "eventType": "EVENT_TYPE_WORKFLOW_EXECUTION_STARTED",
+      "taskId": "1048646",
+      "workflowExecutionStartedEventAttributes": {
+        "workflowType": {
+          "name": "shotWorkflow"
+        },
+        "parentWorkflowNamespace": "default",
+        "parentWorkflowNamespaceId": "01a10ffb-5f82-75f8-8000-653f7fc5f893",
+        "parentWorkflowExecution": {
+          "workflowId": "episode-c7836a6b-4e32-4a0b-92dd-2545bdd9a02c",
+          "runId": "01a10ffb-c6a7-7a07-9191-eed01777e63c"
+        },
+        "parentInitiatedEventId": "12",
+        "taskQueue": {
+          "name": "wb-spike-1fc21b6d-4766-40f3-b4af-6e595a748f74",
+          "kind": "TASK_QUEUE_KIND_NORMAL"
+        },
+        "input": {
+          "payloads": [
+            {
+              "metadata": {
+                "encoding": "anNvbi9wbGFpbg=="
+              },
+              "data": "InNob3QtYiI="
+            },
+            {
+              "metadata": {
+                "encoding": "anNvbi9wbGFpbg=="
+              },
+              "data": "MQ=="
+            }
+          ]
+        },
+        "workflowRunTimeout": "0s",
+        "workflowTaskTimeout": "10s",
+        "originalExecutionRunId": "01a10ffb-f66c-7789-8588-c5fa88e6fd31",
+        "firstExecutionRunId": "01a10ffb-f66c-7789-8588-c5fa88e6fd31",
+        "attempt": 1,
+        "firstWorkflowTaskBackoff": "0s",
+        "header": {},
+        "workflowId": "episode-c7836a6b-4e32-4a0b-92dd-2545bdd9a02c/shot-b/1",
+        "rootWorkflowExecution": {
+          "workflowId": "episode-c7836a6b-4e32-4a0b-92dd-2545bdd9a02c",
+          "runId": "01a10ffb-c6a7-7a07-9191-eed01777e63c"
+        }
+      }
+    },
+    {
+      "eventId": "2",
+      "eventTime": "2026-10-06T06:52:13.350198269Z",
+      "eventType": "EVENT_TYPE_WORKFLOW_TASK_SCHEDULED",
+      "taskId": "1048665",
+      "workflowTaskScheduledEventAttributes": {
+        "taskQueue": {
+          "name": "wb-spike-1fc21b6d-4766-40f3-b4af-6e595a748f74",
+          "kind": "TASK_QUEUE_KIND_NORMAL"
+        },
+        "startToCloseTimeout": "10s",
+        "attempt": 1
+      }
+    },
+    {
+      "eventId": "3",
+      "eventTime": "2026-10-06T06:52:13.416843842Z",
+      "eventType": "EVENT_TYPE_WORKFLOW_TASK_STARTED",
+      "taskId": "1048685",
+      "workflowTaskStartedEventAttributes": {
+        "scheduledEventId": "2",
+        "identity": "87@fe00d3a23162",
+        "requestId": "ba7c3e54-8a59-4db4-97d7-c05c020beefc",
+        "historySizeBytes": "616",
+        "workerVersion": {
+          "buildId": "@temporalio/worker@1.24.0+bc7a72dca484eebb3f170b26f1674dbb9aad8f8e226d1a5ccc89d4063ad8233b"
+        }
+      }
+    },
+    {
+      "eventId": "4",
+      "eventTime": "2026-10-06T06:52:13.459271773Z",
+      "eventType": "EVENT_TYPE_WORKFLOW_TASK_COMPLETED",
+      "taskId": "1048691",
+      "workflowTaskCompletedEventAttributes": {
+        "scheduledEventId": "2",
+        "startedEventId": "3",
+        "identity": "87@fe00d3a23162",
+        "workerVersion": {
+          "buildId": "@temporalio/worker@1.24.0+bc7a72dca484eebb3f170b26f1674dbb9aad8f8e226d1a5ccc89d4063ad8233b"
+        },
+        "sdkMetadata": {
+          "coreUsedFlags": [
+            2,
+            1,
+            3
+          ],
+          "sdkName": "temporal-typescript",
+          "sdkVersion": "1.24.0"
+        },
+        "meteringMetadata": {}
+      }
+    },
+    {
+      "eventId": "5",
+      "eventTime": "2026-10-06T06:52:13.459343165Z",
+      "eventType": "EVENT_TYPE_ACTIVITY_TASK_SCHEDULED",
+      "taskId": "1048692",
+      "activityTaskScheduledEventAttributes": {
+        "activityId": "1",
+        "activityType": {
+          "name": "renderShot"
+        },
+        "taskQueue": {
+          "name": "wb-spike-1fc21b6d-4766-40f3-b4af-6e595a748f74",
+          "kind": "TASK_QUEUE_KIND_NORMAL"
+        },
+        "header": {},
+        "input": {
+          "payloads": [
+            {
+              "metadata": {
+                "encoding": "anNvbi9wbGFpbg=="
+              },
+              "data": "InNob3QtYiI="
+            },
+            {
+              "metadata": {
+                "encoding": "anNvbi9wbGFpbg=="
+              },
+              "data": "MQ=="
+            }
+          ]
+        },
+        "scheduleToCloseTimeout": "15s",
+        "scheduleToStartTimeout": "15s",
+        "startToCloseTimeout": "5s",
+        "heartbeatTimeout": "0s",
+        "workflowTaskCompletedEventId": "4",
+        "retryPolicy": {
+          "initialInterval": "1s",
+          "backoffCoefficient": 2,
+          "maximumInterval": "100s",
+          "maximumAttempts": 1
+        },
+        "useWorkflowBuildId": true
+      }
+    },
+    {
+      "eventId": "6",
+      "eventTime": "2026-10-06T06:52:13.472145635Z",
+      "eventType": "EVENT_TYPE_ACTIVITY_TASK_STARTED",
+      "taskId": "1048715",
+      "activityTaskStartedEventAttributes": {
+        "scheduledEventId": "5",
+        "identity": "87@fe00d3a23162",
+        "requestId": "894f25db-cc40-4f5d-8b6c-fbca3ea30cb9",
+        "attempt": 1,
+        "workerVersion": {
+          "buildId": "@temporalio/worker@1.24.0+bc7a72dca484eebb3f170b26f1674dbb9aad8f8e226d1a5ccc89d4063ad8233b"
+        }
+      }
+    },
+    {
+      "eventId": "7",
+      "eventTime": "2026-10-06T06:52:13.905624224Z",
+      "eventType": "EVENT_TYPE_ACTIVITY_TASK_FAILED",
+      "taskId": "1048716",
+      "activityTaskFailedEventAttributes": {
+        "failure": {
+          "message": "Mock shot rejected; requires explicit retry",
+          "source": "TypeScriptSDK",
+          "stackTrace": "ApplicationFailure: Mock shot rejected; requires explicit retry\n    at ApplicationFailure.nonRetryable (/experiment/node_modules/@temporalio/common/lib/failure.js:209:16)\n    at renderShot (/experiment/activities.cjs:19:30)\n    at async Activity.execute (/experiment/node_modules/@temporalio/worker/lib/activity.js:104:20)\n    at async NativeConnection.withAbortSignal (/experiment/node_modules/@temporalio/worker/lib/connection.js:172:16)\n    at async Client.withAbortSignal (/experiment/node_modules/@temporalio/client/lib/base-client.js:65:16)\n    at async /experiment/node_modules/@temporalio/worker/lib/activity.js:164:32\n    at async /experiment/node_modules/@temporalio/worker/lib/worker.js:813:30",
+          "applicationFailureInfo": {
+            "type": "MockShotRejected",
+            "nonRetryable": true
+          }
+        },
+        "scheduledEventId": "5",
+        "startedEventId": "6",
+        "identity": "87@fe00d3a23162",
+        "retryState": "RETRY_STATE_NON_RETRYABLE_FAILURE"
+      }
+    },
+    {
+      "eventId": "8",
+      "eventTime": "2026-10-06T06:52:13.905688274Z",
+      "eventType": "EVENT_TYPE_WORKFLOW_TASK_SCHEDULED",
+      "taskId": "1048717",
+      "workflowTaskScheduledEventAttributes": {
+        "taskQueue": {
+          "name": "87@fe00d3a23162-39b5cf7a2e8a47de8017fb73fc256c2a",
+          "kind": "TASK_QUEUE_KIND_STICKY",
+          "normalName": "wb-spike-1fc21b6d-4766-40f3-b4af-6e595a748f74"
+        },
+        "startToCloseTimeout": "10s",
+        "attempt": 1
+      }
+    },
+    {
+      "eventId": "9",
+      "eventTime": "2026-10-06T06:52:13.924458874Z",
+      "eventType": "EVENT_TYPE_WORKFLOW_TASK_STARTED",
+      "taskId": "1048728",
+      "workflowTaskStartedEventAttributes": {
+        "scheduledEventId": "8",
+        "identity": "87@fe00d3a23162",
+        "requestId": "ce6952fb-c1f0-490d-a6be-96ac61257822",
+        "historySizeBytes": "2343",
+        "workerVersion": {
+          "buildId": "@temporalio/worker@1.24.0+bc7a72dca484eebb3f170b26f1674dbb9aad8f8e226d1a5ccc89d4063ad8233b"
+        }
+      }
+    },
+    {
+      "eventId": "10",
+      "eventTime": "2026-10-06T06:52:13.978559460Z",
+      "eventType": "EVENT_TYPE_WORKFLOW_TASK_COMPLETED",
+      "taskId": "1048747",
+      "workflowTaskCompletedEventAttributes": {
+        "scheduledEventId": "8",
+        "startedEventId": "9",
+        "identity": "87@fe00d3a23162",
+        "workerVersion": {
+          "buildId": "@temporalio/worker@1.24.0+bc7a72dca484eebb3f170b26f1674dbb9aad8f8e226d1a5ccc89d4063ad8233b"
+        },
+        "sdkMetadata": {},
+        "meteringMetadata": {}
+      }
+    },
+    {
+      "eventId": "11",
+      "eventTime": "2026-10-06T06:52:13.978692931Z",
+      "eventType": "EVENT_TYPE_WORKFLOW_EXECUTION_FAILED",
+      "taskId": "1048748",
+      "workflowExecutionFailedEventAttributes": {
+        "failure": {
+          "message": "Activity task failed",
+          "cause": {
+            "message": "Mock shot rejected; requires explicit retry",
+            "source": "TypeScriptSDK",
+            "stackTrace": "ApplicationFailure: Mock shot rejected; requires explicit retry\n    at ApplicationFailure.nonRetryable (/experiment/node_modules/@temporalio/common/lib/failure.js:209:16)\n    at renderShot (/experiment/activities.cjs:19:30)\n    at async Activity.execute (/experiment/node_modules/@temporalio/worker/lib/activity.js:104:20)\n    at async NativeConnection.withAbortSignal (/experiment/node_modules/@temporalio/worker/lib/connection.js:172:16)\n    at async Client.withAbortSignal (/experiment/node_modules/@temporalio/client/lib/base-client.js:65:16)\n    at async /experiment/node_modules/@temporalio/worker/lib/activity.js:164:32\n    at async /experiment/node_modules/@temporalio/worker/lib/worker.js:813:30",
+            "applicationFailureInfo": {
+              "type": "MockShotRejected",
+              "nonRetryable": true
+            }
+          },
+          "activityFailureInfo": {
+            "scheduledEventId": "5",
+            "startedEventId": "6",
+            "identity": "87@fe00d3a23162",
+            "activityType": {
+              "name": "renderShot"
+            },
+            "activityId": "1",
+            "retryState": "RETRY_STATE_NON_RETRYABLE_FAILURE"
+          }
+        },
+        "retryState": "RETRY_STATE_RETRY_POLICY_NOT_SET",
+        "workflowTaskCompletedEventId": "10"
+      }
+    }
+  ]
+}

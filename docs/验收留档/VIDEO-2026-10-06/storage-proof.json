@@ -1,0 +1,11 @@
+{
+  "fixtureOnly": true,
+  "paidProviderCalls": 0,
+  "anonymousStatus": 403,
+  "signedStatus": 200,
+  "rangeStatus": 206,
+  "expiredStatus": 400,
+  "sha256": "67dbc1a37f6873702e208bf9629d310cfcf0744de2da11a60f95f910736482db",
+  "byteLength": 7715,
+  "result": "passed"
+}

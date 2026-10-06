@@ -6,6 +6,8 @@
   "scripts": {
     "build:weapp": "taro build --type weapp",
     "build:h5": "taro build --type h5",
+    "build:studio:h5": "node scripts/build-studio.cjs h5",
+    "build:studio:weapp": "node scripts/build-studio.cjs weapp",
     "dev:weapp": "taro build --type weapp --watch",
     "dev:h5": "taro build --type h5 --watch",
     "build": "taro build --type weapp && taro build --type h5",

@@ -22,6 +22,16 @@
 - `pnpm verify:isolated` 在gate后执行新API真实PostgreSQL/HTTP smoke，并清理本次服务。
 - UI按认可参考图直接开发，Figma可选；[视觉实施规范](docs/specs/UI-01-参考图落地规范.md)。
 
+## 三屏交互预览
+
+运行 `pnpm --filter @wb/miniapp build:studio:h5` 后 `node scripts/preview-h5.mjs`，打开 `http://127.0.0.1:4175/#/pages/studio-preview/index`。手机切屏、桌面三列；明确是示例数据，不调用模型/不扣费。`build:studio:weapp`仅用于独立开发构建；正常发布构建不含预览页和高保真大图。截图与已验证范围见[UI验收](docs/验收留档/UI-2026-10-06/README.md)。
+
+营销页已接真实服务端报价：先运行 `pnpm --filter @wb/api-next... build`，再另开终端运行 `node scripts/dev-api-next.mjs`（需要Docker，创建独立临时PostgreSQL，API只监听127.0.0.1:3011）。关闭该进程后不能继续获取报价；异常强杀后检查日志中的wb.ui-run容器并核验所有权再清理。微信模拟器构建前设置 `TARO_APP_API_NEXT_BASE=http://127.0.0.1:3011`，导入 `apps/miniapp/dist/studio`。该地址不适用于手机真机；真实生成执行链尚未接通，默认不受理、不预留积分。
+
+常驻工作流入口为 `pnpm --filter @wb/worker start`，显式配置要求见[worker说明](apps/worker/README.md)。`pnpm verify:worker`创建独占PG/Temporal环境验证重投、进程恢复与history replay并清理；不调用付费模型。媒体/资产/标识尚待接入，现阶段工作流停在awaiting_media，不能据此开放公开生成。
+
+Temporal技术实验位于[experiments/temporal](experiments/temporal/RESULTS.md)，不属于主工作区依赖，也不是生产worker。原子任务受理接口为服务端内部能力，说明见[GENERATION.md](packages/server/GENERATION.md)。
+
 ## 文档索引(docs/)
 
 | 文档 | 用途 |

@@ -1,0 +1,11 @@
+{"kind":"start","shot":"shot-c","generation":1,"time":1791269369197,"workflowId":"episode-7cc16038-eff1-4c53-bade-19c0cdcf9d82/shot-c/1","activityAttempt":1,"processId":87}
+{"kind":"start","shot":"shot-a","generation":1,"time":1791269369306,"workflowId":"episode-7cc16038-eff1-4c53-bade-19c0cdcf9d82/shot-a/1","activityAttempt":1,"processId":87}
+{"kind":"start","shot":"shot-b","generation":1,"time":1791269369352,"workflowId":"episode-7cc16038-eff1-4c53-bade-19c0cdcf9d82/shot-b/1","activityAttempt":1,"processId":87}
+{"kind":"complete","shot":"shot-c","generation":1,"time":1791269369612,"workflowId":"episode-7cc16038-eff1-4c53-bade-19c0cdcf9d82/shot-c/1","activityAttempt":1,"processId":87}
+{"kind":"complete","shot":"shot-a","generation":1,"time":1791269369715,"workflowId":"episode-7cc16038-eff1-4c53-bade-19c0cdcf9d82/shot-a/1","activityAttempt":1,"processId":87}
+{"kind":"rejected","shot":"shot-b","generation":1,"time":1791269369759,"workflowId":"episode-7cc16038-eff1-4c53-bade-19c0cdcf9d82/shot-b/1","activityAttempt":1,"processId":87}
+{"kind":"start","shot":"shot-b","generation":2,"time":1791269370099,"workflowId":"episode-7cc16038-eff1-4c53-bade-19c0cdcf9d82/shot-b/2","activityAttempt":1,"processId":87}
+{"kind":"complete","shot":"shot-b","generation":2,"time":1791269370504,"workflowId":"episode-7cc16038-eff1-4c53-bade-19c0cdcf9d82/shot-b/2","activityAttempt":1,"processId":87}
+{"kind":"fault","mode":"non-retryable","time":1791269370690,"workflowId":"non-retryable-2f454d25-6266-4093-9cf1-61fde43f67ab","activityAttempt":1,"processId":87}
+{"kind":"fault","mode":"timeout","time":1791269370875,"workflowId":"timeout-065e77d3-f426-488d-8406-9f161e095c4b","activityAttempt":1,"processId":87}
+{"kind":"fault","mode":"timeout","time":1791269372697,"workflowId":"timeout-065e77d3-f426-488d-8406-9f161e095c4b","activityAttempt":2,"processId":87}

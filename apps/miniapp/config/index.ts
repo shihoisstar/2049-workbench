@@ -6,15 +6,18 @@ import { defineConfig, type UserConfigExport } from '@tarojs/cli';
 // .env 为基底,.env.[mode] 覆盖;变量在业务代码以 process.env.TARO_APP_* 使用(编译期替换)。
 function loadAppEnv(): Record<string, string> {
   const mode = process.env.NODE_ENV === 'production' ? 'production' : 'development';
-  const out: Record<string, string> = {};
+  const out: Record<string, string> = { TARO_APP_API_BASE: '', TARO_APP_API_NEXT_BASE: '', TARO_APP_STUDIO_PREVIEW: '0' };
   for (const f of ['.env', `.env.${mode}`]) {
     try {
-      for (const line of readFileSync(resolve(__dirname, f), 'utf8').split('\n')) {
+      for (const line of readFileSync(resolve(__dirname, '..', f), 'utf8').split('\n')) {
         const m = line.match(/^(TARO_APP_[A-Z_]+)=(.*)$/);
         if (m) out[m[1]] = m[2].trim();
       }
     } catch { /* 文件不存在跳过 */ }
   }
+  if (process.env.TARO_APP_API_BASE !== undefined) out.TARO_APP_API_BASE = process.env.TARO_APP_API_BASE;
+  if (process.env.TARO_APP_API_NEXT_BASE !== undefined) out.TARO_APP_API_NEXT_BASE = process.env.TARO_APP_API_NEXT_BASE;
+  out.TARO_APP_STUDIO_PREVIEW = process.env.TARO_APP_STUDIO_PREVIEW === '1' ? '1' : '0';
   return out;
 }
 const APP_ENV = loadAppEnv();
@@ -35,7 +38,7 @@ export default defineConfig<'webpack5'>(async (merge) => {
       375: 1,
     },
     sourceRoot: 'src',
-    outputRoot: process.env.TARO_ENV === 'h5' ? 'dist/h5' : 'dist/weapp',
+    outputRoot: `${APP_ENV.TARO_APP_STUDIO_PREVIEW === '1' ? 'dist/studio' : 'dist'}/${process.env.TARO_ENV === 'h5' ? 'h5' : 'weapp'}`,
     plugins: [],
     framework: 'react',
     compiler: 'webpack5',

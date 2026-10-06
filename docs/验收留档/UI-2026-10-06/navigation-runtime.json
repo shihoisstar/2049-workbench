@@ -1,0 +1,17 @@
+{
+  "paidCalls": 0,
+  "result": "passed",
+  "project": "D:\\2049-workbench\\apps\\miniapp\\dist\\studio",
+  "checks": [
+    "Script mode enforces 20000-character input",
+    "Script choice navigates with mode=script",
+    "Native back returns to the single home page",
+    "Returning does not retain the modal",
+    "Close dismisses the modal",
+    "Idea mode enforces 1000-character input",
+    "Idea choice navigates with mode=idea",
+    "Native back returns to the single home page"
+  ],
+  "checkedAtUtc": "2026-10-06T13:24:09.5850253Z",
+  "assertions": 8
+}

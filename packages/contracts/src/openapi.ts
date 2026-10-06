@@ -12,6 +12,7 @@ import { PolishRequest, PolishResult } from './polish';
 import { UploadResult } from './uploads';
 import { WalletSummary } from './wallet';
 import { API_VERSION } from './version';
+import { GenerationSettings, GenerationQuote, SubmitGeneration, GenerationView, MediaAccess } from './generation';
 
 /**
  * OpenAPI 文档唯一生成处:T0.3 契约 = health + 统一错误码 + 鉴权骨架。
@@ -30,6 +31,59 @@ export function buildOpenApiDocument() {
     },
     servers: [{ url: '/', description: '相对路径,按部署环境替换' }],
     paths: {
+      '/v2/generation/{id}/media': {
+        get: {
+          summary: '仅本人已发布成片的短时私有访问链接', security: [{ opaqueSession: [] }],
+          parameters: [{ ...idParameter, schema: { type: 'string', format: 'uuid' } }],
+          responses: {
+            '200': { description: '有效期不超过10分钟且不超过资产到期时间', content: { 'application/json': { schema: ref('MediaAccess') } } },
+            '400': { description: '非法ID', content: { 'application/json': { schema: ref('ErrorBody') } } },
+            '401': { description: '未登录', content: { 'application/json': { schema: ref('ErrorBody') } } },
+            '404': { description: '无本人已发布资产', content: { 'application/json': { schema: ref('ErrorBody') } } },
+            '410': { description: '资产已过期', content: { 'application/json': { schema: ref('ErrorBody') } } },
+            '503': { description: '存储不可用', content: { 'application/json': { schema: ref('ErrorBody') } } },
+          },
+        },
+      },
+      '/v2/generation/quote': {
+        post: {
+          summary: '服务端营销视频报价；不创建任务、不预留积分',
+          requestBody: { required: true, content: { 'application/json': { schema: ref('GenerationSettings') } } },
+          responses: {
+            '200': { description: '当前报价和受理能力', content: { 'application/json': { schema: ref('GenerationQuote') } } },
+            '400': { description: '参数错误', content: { 'application/json': { schema: ref('ErrorBody') } } },
+          },
+        },
+      },
+      '/v2/generation': {
+        post: {
+          summary: '幂等受理营销视频；执行链未就绪时拒绝且不预留积分',
+          security: [{ opaqueSession: [] }],
+          requestBody: { required: true, content: { 'application/json': { schema: ref('SubmitGeneration') } } },
+          responses: {
+            '200': { description: '新受理或原请求重放', content: { 'application/json': { schema: ref('GenerationView') } } },
+            '400': { description: '无效参数', content: { 'application/json': { schema: ref('ErrorBody') } } },
+            '402': { description: '余额不足', content: { 'application/json': { schema: ref('ErrorBody') } } },
+            '401': { description: '会话无效', content: { 'application/json': { schema: ref('ErrorBody') } } },
+            '403': { description: '账户停用', content: { 'application/json': { schema: ref('ErrorBody') } } },
+            '409': { description: '报价变更或幂等冲突', content: { 'application/json': { schema: ref('ErrorBody') } } },
+            '503': { description: '生成执行链不可用', content: { 'application/json': { schema: ref('ErrorBody') } } },
+          },
+        },
+      },
+      '/v2/generation/{id}': {
+        get: {
+          summary: '仅查询本人任务；内部资产引用不作为下载地址返回',
+          security: [{ opaqueSession: [] }],
+          parameters: [{ ...idParameter, schema: { type: 'string', format: 'uuid' } }],
+          responses: {
+            '200': { description: '任务状态', content: { 'application/json': { schema: ref('GenerationView') } } },
+            '400': { description: '无效ID', content: { 'application/json': { schema: ref('ErrorBody') } } },
+            '401': { description: '会话无效', content: { 'application/json': { schema: ref('ErrorBody') } } },
+            '404': { description: '任务不存在或不属于本人', content: { 'application/json': { schema: ref('ErrorBody') } } },
+          },
+        },
+      },
       '/healthz': {
         get: {
           summary: '存活探测(LB / CI)',
@@ -337,6 +391,11 @@ export function buildOpenApiDocument() {
         opaqueSession: { type: 'http', scheme: 'bearer', description: 'V2服务端存储哈希的不透明会话，非JWT' },
       },
       schemas: {
+        MediaAccess: zodToJsonSchema(MediaAccess, { target: 'openApi3' }),
+        GenerationSettings: zodToJsonSchema(GenerationSettings, { target: 'openApi3' }),
+        GenerationQuote: zodToJsonSchema(GenerationQuote, { target: 'openApi3' }),
+        SubmitGeneration: zodToJsonSchema(SubmitGeneration, { target: 'openApi3' }),
+        GenerationView: zodToJsonSchema(GenerationView, { target: 'openApi3' }),
         GenerateImageRequest: zodToJsonSchema(GenerateImageRequest, { target: 'openApi3' }),
         GenerateImageResult: zodToJsonSchema(GenerateImageResult, { target: 'openApi3' }),
         PolishRequest: zodToJsonSchema(PolishRequest, { target: 'openApi3' }),

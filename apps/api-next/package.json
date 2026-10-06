@@ -18,6 +18,7 @@
     "@nestjs/platform-fastify": "12.1.2",
     "@wb/contracts": "workspace:*",
     "@wb/server": "workspace:*",
+    "@wb/media": "workspace:*",
     "fastify": "5.12.5",
     "postgres": "3.4.9",
     "reflect-metadata": "0.2.2",

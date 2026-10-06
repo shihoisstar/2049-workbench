@@ -1,6 +1,7 @@
 export interface ApiConfig {
   port: number;
   databaseUrl: string;
+  corsOrigins?: string[];
 }
 
 export function readConfig(env: NodeJS.ProcessEnv = process.env): ApiConfig {

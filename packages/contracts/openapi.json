@@ -12,6 +12,281 @@
     }
   ],
   "paths": {
+    "/v2/generation/{id}/media": {
+      "get": {
+        "summary": "仅本人已发布成片的短时私有访问链接",
+        "security": [
+          {
+            "opaqueSession": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "有效期不超过10分钟且不超过资产到期时间",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MediaAccess"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "非法ID",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "未登录",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "无本人已发布资产",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "资产已过期",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "存储不可用",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/generation/quote": {
+      "post": {
+        "summary": "服务端营销视频报价；不创建任务、不预留积分",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GenerationSettings"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "当前报价和受理能力",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenerationQuote"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "参数错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/generation": {
+      "post": {
+        "summary": "幂等受理营销视频；执行链未就绪时拒绝且不预留积分",
+        "security": [
+          {
+            "opaqueSession": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SubmitGeneration"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "新受理或原请求重放",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenerationView"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "无效参数",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "会话无效",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "余额不足",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "账户停用",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "报价变更或幂等冲突",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "生成执行链不可用",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/generation/{id}": {
+      "get": {
+        "summary": "仅查询本人任务；内部资产引用不作为下载地址返回",
+        "security": [
+          {
+            "opaqueSession": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "任务状态",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenerationView"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "无效ID",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "会话无效",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "任务不存在或不属于本人",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/healthz": {
       "get": {
         "summary": "存活探测(LB / CI)",
@@ -680,6 +955,271 @@
       }
     },
     "schemas": {
+      "MediaAccess": {
+        "type": "object",
+        "properties": {
+          "assetId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "jobId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "url": {
+            "type": "string",
+            "format": "uri"
+          },
+          "urlExpiresAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "sha256": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "byteLength": {
+            "type": "integer",
+            "exclusiveMinimum": true,
+            "minimum": 0
+          },
+          "width": {
+            "type": "integer",
+            "exclusiveMinimum": true,
+            "minimum": 0
+          },
+          "height": {
+            "type": "integer",
+            "exclusiveMinimum": true,
+            "minimum": 0
+          },
+          "durationMs": {
+            "type": "integer",
+            "exclusiveMinimum": true,
+            "minimum": 0
+          }
+        },
+        "required": [
+          "assetId",
+          "jobId",
+          "url",
+          "urlExpiresAt",
+          "expiresAt",
+          "sha256",
+          "byteLength",
+          "width",
+          "height",
+          "durationMs"
+        ],
+        "additionalProperties": false
+      },
+      "GenerationSettings": {
+        "type": "object",
+        "properties": {
+          "resolution": {
+            "type": "string",
+            "enum": [
+              "480p",
+              "720p"
+            ]
+          },
+          "aspectRatio": {
+            "type": "string",
+            "enum": [
+              "9:16",
+              "16:9",
+              "1:1"
+            ]
+          },
+          "durationSec": {
+            "type": "number",
+            "enum": [
+              5
+            ]
+          }
+        },
+        "required": [
+          "resolution",
+          "aspectRatio",
+          "durationSec"
+        ],
+        "additionalProperties": false
+      },
+      "GenerationQuote": {
+        "type": "object",
+        "properties": {
+          "resolution": {
+            "type": "string",
+            "enum": [
+              "480p",
+              "720p"
+            ]
+          },
+          "aspectRatio": {
+            "type": "string",
+            "enum": [
+              "9:16",
+              "16:9",
+              "1:1"
+            ]
+          },
+          "durationSec": {
+            "type": "number",
+            "enum": [
+              5
+            ]
+          },
+          "version": {
+            "type": "string"
+          },
+          "credits": {
+            "type": "integer",
+            "exclusiveMinimum": true,
+            "minimum": 0
+          },
+          "available": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "resolution",
+          "aspectRatio",
+          "durationSec",
+          "version",
+          "credits",
+          "available"
+        ],
+        "additionalProperties": false
+      },
+      "SubmitGeneration": {
+        "type": "object",
+        "properties": {
+          "resolution": {
+            "type": "string",
+            "enum": [
+              "480p",
+              "720p"
+            ]
+          },
+          "aspectRatio": {
+            "type": "string",
+            "enum": [
+              "9:16",
+              "16:9",
+              "1:1"
+            ]
+          },
+          "durationSec": {
+            "type": "number",
+            "enum": [
+              5
+            ]
+          },
+          "requestKey": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "quoteVersion": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "prompt": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 3000
+          }
+        },
+        "required": [
+          "resolution",
+          "aspectRatio",
+          "durationSec",
+          "requestKey",
+          "quoteVersion",
+          "prompt"
+        ],
+        "additionalProperties": false
+      },
+      "GenerationView": {
+        "type": "object",
+        "properties": {
+          "resolution": {
+            "type": "string",
+            "enum": [
+              "480p",
+              "720p"
+            ]
+          },
+          "aspectRatio": {
+            "type": "string",
+            "enum": [
+              "9:16",
+              "16:9",
+              "1:1"
+            ]
+          },
+          "durationSec": {
+            "type": "number",
+            "enum": [
+              5
+            ]
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "requestKey": {
+            "type": "string"
+          },
+          "prompt": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "accepted",
+              "succeeded",
+              "failed"
+            ]
+          },
+          "reservedCredits": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "actualCredits": {
+            "type": "integer",
+            "minimum": 0,
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "finishedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        },
+        "required": [
+          "resolution",
+          "aspectRatio",
+          "durationSec",
+          "id",
+          "requestKey",
+          "prompt",
+          "status",
+          "reservedCredits",
+          "actualCredits",
+          "createdAt",
+          "finishedAt"
+        ],
+        "additionalProperties": false
+      },
       "GenerateImageRequest": {
         "type": "object",
         "properties": {
@@ -1322,8 +1862,11 @@
               4001,
               4002,
               4003,
+              4004,
+              4005,
               5001,
-              5002
+              5002,
+              6001
             ]
           },
           "message": {

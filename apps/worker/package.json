@@ -1,0 +1,29 @@
+{
+  "name": "@wb/worker",
+  "version": "0.1.0",
+  "private": true,
+  "main": "dist/video-submission.js",
+  "types": "dist/video-submission.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "eslint .",
+    "test": "cd dist && node --test",
+    "start": "node dist/main.js",
+    "verify:runtime": "node scripts/verify-runtime.cjs"
+  },
+  "dependencies": {
+    "@temporalio/client": "1.24.0",
+    "@temporalio/common": "1.24.0",
+    "@temporalio/worker": "1.24.0",
+    "@temporalio/workflow": "1.24.0",
+    "@wb/model-gateway": "workspace:*",
+    "@wb/server": "workspace:*",
+    "protobufjs": "8.8.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "postgres": "3.4.9",
+    "typescript": "^5.6.0"
+  }
+}

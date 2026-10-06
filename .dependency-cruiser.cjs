@@ -11,7 +11,7 @@ module.exports = {
     {
       name: 'no-client-to-server', severity: 'error',
       from: { path: '^(apps/(miniapp|admin)|packages/(api-client|contracts|domain))/' },
-      to: { path: '^(apps/(api|api-next|worker|media-worker)|packages/(server|model-gateway))/|^@wb/(api|api-next|worker|media-worker|server|model-gateway)(/|$)' },
+      to: { path: '^(apps/(api|api-next|worker|media-worker)|packages/(server|model-gateway|media))/|^@wb/(api|api-next|worker|media-worker|server|model-gateway|media)(/|$)' },
     },
     {
       name: 'portable-no-node', severity: 'error',

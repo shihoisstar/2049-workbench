@@ -8,6 +8,7 @@ import './app.scss';
 
 function App({ children }: PropsWithChildren) {
   useLaunch(() => {
+    if (process.env.TARO_APP_STUDIO_PREVIEW === '1') return;
     // 游客静默登录(登录授权屏):失败不阻塞 UI,各屏按需重试
     ensureSession().catch((e: unknown) => {
       console.warn('guest session failed:', (e as Error).message);

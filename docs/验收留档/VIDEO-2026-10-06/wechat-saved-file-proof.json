@@ -1,0 +1,23 @@
+{
+  "ok": true,
+  "tool": "automation_evaluate",
+  "clientName": "Codex",
+  "result": {
+    "success": true,
+    "result": {
+      "result": {
+        "receipt": {
+          "jobId": "5903130a-88f4-4724-bbc1-66a4a15c0d2f",
+          "filePath": "http://store/YJMx57WLhJTJ4537962de301b7d4bcb993d927637cfc.mp4",
+          "size": 469596,
+          "md5": "4537962de301b7d4bcb993d927637cfc"
+        },
+        "actual": {
+          "errMsg": "getFileInfo:ok",
+          "size": 469596,
+          "digest": "4537962de301b7d4bcb993d927637cfc"
+        }
+      }
+    }
+  }
+}

@@ -7,6 +7,7 @@
     "test": { "dependsOn": ["build"] },
     "@wb/server#test": { "dependsOn": ["build"], "cache": false, "env": ["WB_NEXT_TEST_DATABASE_URL"] },
     "@wb/api-next#test": { "dependsOn": ["build"], "cache": false, "env": ["WB_NEXT_TEST_DATABASE_URL"] },
+    "@wb/worker#test": { "dependsOn": ["build"], "cache": false, "env": ["WB_NEXT_TEST_DATABASE_URL"] },
     "contract-diff": { "dependsOn": ["build"] },
     "dev": { "cache": false, "persistent": true }
   }

@@ -1,0 +1,21 @@
+{
+  "kind": "mock",
+  "jobId": "14acf5ab-f3d5-494b-beb1-05f7f8409e43",
+  "status": "failed",
+  "providerTaskId": "mock-0654942c-0b17-41dc-b740-58627fc4ca6b",
+  "reservedCredits": 77,
+  "actualCredits": null,
+  "balance": 80,
+  "entries": [
+    {
+      "kind": "hold",
+      "amount": "-77"
+    },
+    {
+      "kind": "refund",
+      "amount": "77"
+    }
+  ],
+  "checkedAtUtc": "2026-10-06T15:02:29.146Z",
+  "paidProviderCalls": 0
+}

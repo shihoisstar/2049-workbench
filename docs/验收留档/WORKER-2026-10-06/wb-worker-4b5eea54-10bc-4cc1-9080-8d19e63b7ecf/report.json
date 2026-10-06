@@ -1,0 +1,15 @@
+{
+  "runId": "wb-worker-4b5eea54-10bc-4cc1-9080-8d19e63b7ecf",
+  "paidProviderCalls": 0,
+  "workflowId": "generation:5b02689d-9c5a-499d-853d-876d563d7ab9",
+  "runIdBeforeRestart": "01a1114c-96aa-71b5-a6c2-5e1f80ffbc32",
+  "redeliverySameRun": true,
+  "runIdAfterRestart": "01a1114c-96aa-71b5-a6c2-5e1f80ffbc32",
+  "mockSubmissions": 1,
+  "closedWorkflowNotRestarted": true,
+  "foreignWorkflowRejected": true,
+  "replayAccepted": true,
+  "historyEvents": 39,
+  "status": "passed",
+  "remainingContainers": []
+}

@@ -1,0 +1,29 @@
+{
+  "command": "pnpm verify:isolated",
+  "exitCode": 0,
+  "tasks": 53,
+  "cached": 0,
+  "tests": 161,
+  "failed": 0,
+  "httpRequests": 14,
+  "architecture": {
+    "modules": 238,
+    "dependencies": 601,
+    "violations": 0
+  },
+  "warnings": "H5保留8项样式弃用/体积警告",
+  "worker": {
+    "command": "pnpm verify:worker",
+    "exitCode": 0,
+    "historyEvents": 39,
+    "mockSubmissions": 1,
+    "paidProviderCalls": 0
+  },
+  "unverified": [
+    "手机真机相册",
+    "H5真实播放下载",
+    "生产部署与存储生命周期",
+    "漫剧核心闭环"
+  ],
+  "checkedAtUtc": "2026-10-06T15:29:43.989Z"
+}

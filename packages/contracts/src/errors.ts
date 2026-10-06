@@ -23,9 +23,12 @@ export const ErrorCode = {
   TASK_NOT_FOUND: 4001,
   TASK_ILLEGAL_TRANSITION: 4002,
   QUEUE_FULL: 4003,
+  GENERATION_UNAVAILABLE: 4004,
+  QUOTE_CHANGED: 4005,
 
   CONTENT_BLOCKED: 5001,
   BANNED_WORD_HIT: 5002,
+  ASSET_EXPIRED: 6001,
 } as const;
 
 export type ErrorCodeValue = (typeof ErrorCode)[keyof typeof ErrorCode];

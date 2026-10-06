@@ -1,5 +1,296 @@
 // Generated from @wb/contracts OpenAPI. Do not edit.
 export interface paths {
+    "/v2/generation/{id}/media": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 仅本人已发布成片的短时私有访问链接 */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description 有效期不超过10分钟且不超过资产到期时间 */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["MediaAccess"];
+                    };
+                };
+                /** @description 非法ID */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description 未登录 */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description 无本人已发布资产 */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description 资产已过期 */
+                410: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description 存储不可用 */
+                503: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v2/generation/quote": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** 服务端营销视频报价；不创建任务、不预留积分 */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["GenerationSettings"];
+                };
+            };
+            responses: {
+                /** @description 当前报价和受理能力 */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["GenerationQuote"];
+                    };
+                };
+                /** @description 参数错误 */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v2/generation": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** 幂等受理营销视频；执行链未就绪时拒绝且不预留积分 */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["SubmitGeneration"];
+                };
+            };
+            responses: {
+                /** @description 新受理或原请求重放 */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["GenerationView"];
+                    };
+                };
+                /** @description 无效参数 */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description 会话无效 */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description 余额不足 */
+                402: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description 账户停用 */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description 报价变更或幂等冲突 */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description 生成执行链不可用 */
+                503: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v2/generation/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 仅查询本人任务；内部资产引用不作为下载地址返回 */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description 任务状态 */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["GenerationView"];
+                    };
+                };
+                /** @description 无效ID */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description 会话无效 */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description 任务不存在或不属于本人 */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/healthz": {
         parameters: {
             query?: never;
@@ -873,6 +1164,74 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        MediaAccess: {
+            /** Format: uuid */
+            assetId: string;
+            /** Format: uuid */
+            jobId: string;
+            /** Format: uri */
+            url: string;
+            /** Format: date-time */
+            urlExpiresAt: string;
+            /** Format: date-time */
+            expiresAt: string;
+            sha256: string;
+            byteLength: number;
+            width: number;
+            height: number;
+            durationMs: number;
+        };
+        GenerationSettings: {
+            /** @enum {string} */
+            resolution: "480p" | "720p";
+            /** @enum {string} */
+            aspectRatio: "9:16" | "16:9" | "1:1";
+            /** @enum {number} */
+            durationSec: 5;
+        };
+        GenerationQuote: {
+            /** @enum {string} */
+            resolution: "480p" | "720p";
+            /** @enum {string} */
+            aspectRatio: "9:16" | "16:9" | "1:1";
+            /** @enum {number} */
+            durationSec: 5;
+            version: string;
+            credits: number;
+            available: boolean;
+        };
+        SubmitGeneration: {
+            /** @enum {string} */
+            resolution: "480p" | "720p";
+            /** @enum {string} */
+            aspectRatio: "9:16" | "16:9" | "1:1";
+            /** @enum {number} */
+            durationSec: 5;
+            /** Format: uuid */
+            requestKey: string;
+            quoteVersion: string;
+            prompt: string;
+        };
+        GenerationView: {
+            /** @enum {string} */
+            resolution: "480p" | "720p";
+            /** @enum {string} */
+            aspectRatio: "9:16" | "16:9" | "1:1";
+            /** @enum {number} */
+            durationSec: 5;
+            /** Format: uuid */
+            id: string;
+            requestKey: string;
+            prompt: string;
+            /** @enum {string} */
+            status: "accepted" | "succeeded" | "failed";
+            reservedCredits: number;
+            actualCredits: number | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            finishedAt: string | null;
+        };
         GenerateImageRequest: {
             prompt: string;
             imageUrls?: string[];
@@ -1019,7 +1378,7 @@ export interface components {
         };
         ErrorBody: {
             /** @enum {number} */
-            code: 1000 | 1001 | 1002 | 1003 | 2001 | 2002 | 2003 | 3001 | 3002 | 3003 | 3004 | 4001 | 4002 | 4003 | 5001 | 5002;
+            code: 1000 | 1001 | 1002 | 1003 | 2001 | 2002 | 2003 | 3001 | 3002 | 3003 | 3004 | 4001 | 4002 | 4003 | 4004 | 4005 | 5001 | 5002 | 6001;
             message: string;
             requestId?: string;
             details?: unknown;

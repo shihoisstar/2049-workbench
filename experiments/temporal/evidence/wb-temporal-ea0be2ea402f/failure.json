@@ -1,0 +1,14 @@
+{
+  "sdk": "1.24.0",
+  "node": "v24.15.0",
+  "startedAt": "2026-10-06T06:50:54.590Z",
+  "assertions": [
+    "Worker SIGKILL confirmed; approval signal accepted and in real server history while no worker exists",
+    "Replacement process recovered the same workflow run and retained two successful child results",
+    "3 child activities overlapped; only failed shot-b ran generation 2; successful shot-a/shot-c ran once",
+    "Non-retryable activity ran once; one-second timeout activity ran exactly twice then failed"
+  ],
+  "histories": [],
+  "error": "Error: .google.protobuf.Timestamp: expected timestamp string: {\"seconds\":\"1791269454\",\"nanos\":666719468}",
+  "stack": "Error: .google.protobuf.Timestamp: expected timestamp string: {\"seconds\":\"1791269454\",\"nanos\":666719468}\n    at invalid (/experiment/node_modules/protobufjs/ext/protojson.js:91:12)\n    at WKT_FROM..google.protobuf.Timestamp (/experiment/node_modules/protobufjs/ext/protojson.js:576:15)\n    at readMessage (/experiment/node_modules/protobufjs/ext/protojson.js:354:16)\n    at readSingular (/experiment/node_modules/protobufjs/ext/protojson.js:321:16)\n    at readField (/experiment/node_modules/protobufjs/ext/protojson.js:316:12)\n    at readMessage (/experiment/node_modules/protobufjs/ext/protojson.js:386:26)\n    at readSingular (/experiment/node_modules/protobufjs/ext/protojson.js:321:16)\n    at readField (/experiment/node_modules/protobufjs/ext/protojson.js:310:22)\n    at readMessage (/experiment/node_modules/protobufjs/ext/protojson.js:386:26)\n    at fromJson (/experiment/node_modules/protobufjs/ext/protojson.js:867:24)"
+}

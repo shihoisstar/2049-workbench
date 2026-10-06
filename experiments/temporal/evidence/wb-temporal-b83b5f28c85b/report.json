@@ -1,0 +1,62 @@
+{
+  "sdk": "1.24.0",
+  "node": "v24.15.0",
+  "startedAt": "2026-10-06T06:52:00.990Z",
+  "assertions": [
+    "Worker SIGKILL confirmed; approval signal accepted and in real server history while no worker exists",
+    "Replacement process recovered the same workflow run and retained two successful child results",
+    "3 child activities overlapped; only failed shot-b ran generation 2; successful shot-a/shot-c ran once",
+    "Non-retryable activity ran once; one-second timeout activity ran exactly twice then failed",
+    "All 7 exported history files replayed from disk with no live activity worker"
+  ],
+  "histories": [
+    {
+      "workflowId": "episode-c7836a6b-4e32-4a0b-92dd-2545bdd9a02c",
+      "file": "history-0.json",
+      "events": 39,
+      "replay": "accepted"
+    },
+    {
+      "workflowId": "non-retryable-3762cfe8-2847-4268-b9ab-ba509de68ad2",
+      "file": "history-1.json",
+      "events": 11,
+      "replay": "accepted"
+    },
+    {
+      "workflowId": "timeout-4e13b8ea-c194-4d11-aba9-3a624913d24b",
+      "file": "history-2.json",
+      "events": 11,
+      "replay": "accepted"
+    },
+    {
+      "workflowId": "episode-c7836a6b-4e32-4a0b-92dd-2545bdd9a02c/shot-a/1",
+      "file": "history-3.json",
+      "events": 11,
+      "replay": "accepted"
+    },
+    {
+      "workflowId": "episode-c7836a6b-4e32-4a0b-92dd-2545bdd9a02c/shot-b/1",
+      "file": "history-4.json",
+      "events": 11,
+      "replay": "accepted"
+    },
+    {
+      "workflowId": "episode-c7836a6b-4e32-4a0b-92dd-2545bdd9a02c/shot-c/1",
+      "file": "history-5.json",
+      "events": 11,
+      "replay": "accepted"
+    },
+    {
+      "workflowId": "episode-c7836a6b-4e32-4a0b-92dd-2545bdd9a02c/shot-b/2",
+      "file": "history-6.json",
+      "events": 11,
+      "replay": "accepted"
+    }
+  ],
+  "activityCounts": {
+    "shots": 4,
+    "nonRetryable": 1,
+    "timedOut": 2
+  },
+  "completedAt": "2026-10-06T06:52:19.853Z"
+}

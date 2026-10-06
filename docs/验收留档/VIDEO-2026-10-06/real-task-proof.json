@@ -1,0 +1,31 @@
+{
+  "kind": "real",
+  "jobId": "5903130a-88f4-4724-bbc1-66a4a15c0d2f",
+  "status": "succeeded",
+  "providerTaskId": "0e0c9caddc8f42a48ae93a0e58001df8",
+  "reservedCredits": 77,
+  "actualCredits": 77,
+  "balance": 3,
+  "entries": [
+    {
+      "kind": "hold",
+      "amount": "-77"
+    },
+    {
+      "kind": "settle",
+      "amount": "0"
+    }
+  ],
+  "checkedAtUtc": "2026-10-06T15:22:14.103Z",
+  "asset": {
+    "id": "8a7f2fbf-4cfa-43fe-a3de-cb7321d9a6d8",
+    "sha256": "26a295a31ccbc6f54018b9d4032ee110372647aa20e5a4c55bba54aaef3f3bf6",
+    "md5": "4537962de301b7d4bcb993d927637cfc",
+    "byteLength": 469596,
+    "width": 480,
+    "height": 836,
+    "durationMs": 5088
+  },
+  "unauthenticatedStatus": 401,
+  "otherAccountStatus": 404
+}

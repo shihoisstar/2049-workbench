@@ -1,0 +1,7 @@
+{
+  "name": "@wb/media", "version": "0.1.0", "private": true,
+  "main": "dist/index.js", "types": "dist/index.d.ts",
+  "scripts": { "build": "tsc -p tsconfig.json", "typecheck": "tsc -p tsconfig.json --noEmit", "lint": "eslint .", "test": "cd dist && node --test" },
+  "dependencies": { "@aws-sdk/client-s3": "3.1146.0", "@aws-sdk/s3-request-presigner": "3.1146.0", "ipaddr.js": "2.5.0" },
+  "devDependencies": { "typescript": "^5.6.0", "@types/node": "^22.0.0" }
+}
