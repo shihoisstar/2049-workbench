@@ -29,6 +29,33 @@
         }
       }
     },
+    "/readyz": {
+      "get": {
+        "summary": "新 API 数据库就绪探测",
+        "responses": {
+          "200": {
+            "description": "可受理请求",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "依赖服务不可用",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/auth/guest": {
       "post": {
         "summary": "游客登录(实现:T1.1 Fastify)",
@@ -55,6 +82,130 @@
           },
           "400": {
             "description": "参数校验失败",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/auth/guest": {
+      "post": {
+        "summary": "使用游客秘密凭据创建或恢复身份；注册赠送只发放一次",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GuestBootstrapRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "不透明会话",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GuestSession"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "凭据格式错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "账户已注销",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/auth/deactivate": {
+      "post": {
+        "summary": "注销当前账户并撤销全部会话",
+        "security": [
+          {
+            "opaqueSession": []
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "已注销"
+          },
+          "401": {
+            "description": "无效或已过期会话",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "账户已注销",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/wallet": {
+      "get": {
+        "summary": "当前会话账户的余额和最近20条流水；不接受账户ID参数",
+        "security": [
+          {
+            "opaqueSession": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "钱包概览",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WalletSummary"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "无效或已过期会话",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "账户已注销",
             "content": {
               "application/json": {
                 "schema": {
@@ -245,6 +396,16 @@
     },
     "/v1/store/orders/{id}/dev-pay": {
       "post": {
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "summary": "DEV-ONLY:模拟支付回调(NODE_ENV=production 时 404;真实微信回调随商户号)",
         "security": [
           {
@@ -442,6 +603,16 @@
     },
     "/v1/tasks/{id}": {
       "get": {
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "summary": "任务详情(进度轮询)",
         "security": [
           {
@@ -464,6 +635,16 @@
     },
     "/v1/tasks/{id}/cancel": {
       "post": {
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "summary": "取消任务(失败/取消全额退积分)",
         "security": [
           {
@@ -491,6 +672,11 @@
         "type": "http",
         "scheme": "bearer",
         "bearerFormat": "JWT"
+      },
+      "opaqueSession": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "V2服务端存储哈希的不透明会话，非JWT"
       }
     },
     "schemas": {
@@ -1165,6 +1351,19 @@
         },
         "required": [
           "deviceId"
+        ],
+        "additionalProperties": false
+      },
+      "GuestBootstrapRequest": {
+        "type": "object",
+        "properties": {
+          "credential": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          }
+        },
+        "required": [
+          "credential"
         ],
         "additionalProperties": false
       },

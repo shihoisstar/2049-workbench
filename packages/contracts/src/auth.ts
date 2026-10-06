@@ -6,6 +6,12 @@ export const GuestLoginRequest = z.object({
 });
 export type GuestLoginRequest = z.infer<typeof GuestLoginRequest>;
 
+/** V2 guest proof: a client-held cryptographically random 256-bit secret, never a device identifier. */
+export const GuestBootstrapRequest = z.object({
+  credential: z.string().regex(/^[a-f0-9]{64}$/),
+}).strict();
+export type GuestBootstrapRequest = z.infer<typeof GuestBootstrapRequest>;
+
 /** POST /v1/auth/guest 响应 —— 会话签发。 */
 export const GuestSession = z.object({
   token: z.string().min(1),

@@ -1,0 +1,506 @@
+{
+  "id": "be26d00c-2b05-4c7b-8a39-1ca81e9e5d51",
+  "prevId": "00000000-0000-0000-0000-000000000000",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "wb_next.ledger": {
+      "name": "ledger",
+      "schema": "wb_next",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "bigserial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "billing_key": {
+          "name": "billing_key",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "kind": {
+          "name": "kind",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "amount": {
+          "name": "amount",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "remark": {
+          "name": "remark",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "reservation_key": {
+          "name": "reservation_key",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "ledger_operation_uq": {
+          "name": "ledger_operation_uq",
+          "columns": [
+            {
+              "expression": "user_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "billing_key",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "kind",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "ledger_terminal_uq": {
+          "name": "ledger_terminal_uq",
+          "columns": [
+            {
+              "expression": "user_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "billing_key",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "where": "\"wb_next\".\"ledger\".\"kind\" in ('settle', 'refund')",
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "ledger_user_history_idx": {
+          "name": "ledger_user_history_idx",
+          "columns": [
+            {
+              "expression": "user_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "ledger_user_id_wallets_user_id_fk": {
+          "name": "ledger_user_id_wallets_user_id_fk",
+          "tableFrom": "ledger",
+          "tableTo": "wallets",
+          "schemaTo": "wb_next",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "user_id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "ledger_user_id_reservation_key_reservations_user_id_billing_key_fk": {
+          "name": "ledger_user_id_reservation_key_reservations_user_id_billing_key_fk",
+          "tableFrom": "ledger",
+          "tableTo": "reservations",
+          "schemaTo": "wb_next",
+          "columnsFrom": [
+            "user_id",
+            "reservation_key"
+          ],
+          "columnsTo": [
+            "user_id",
+            "billing_key"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "ledger_key": {
+          "name": "ledger_key",
+          "value": "length(btrim(\"wb_next\".\"ledger\".\"billing_key\")) between 1 and 200 and length(\"wb_next\".\"ledger\".\"billing_key\") <= 200"
+        },
+        "ledger_amount_range": {
+          "name": "ledger_amount_range",
+          "value": "\"wb_next\".\"ledger\".\"amount\" between -9007199254740991 and 9007199254740991"
+        },
+        "ledger_kind_amount": {
+          "name": "ledger_kind_amount",
+          "value": "(\"wb_next\".\"ledger\".\"kind\" = 'grant' and \"wb_next\".\"ledger\".\"amount\" > 0) or (\"wb_next\".\"ledger\".\"kind\" = 'hold' and \"wb_next\".\"ledger\".\"amount\" < 0) or (\"wb_next\".\"ledger\".\"kind\" = 'settle' and \"wb_next\".\"ledger\".\"amount\" >= 0) or (\"wb_next\".\"ledger\".\"kind\" = 'refund' and \"wb_next\".\"ledger\".\"amount\" > 0)"
+        },
+        "ledger_reservation": {
+          "name": "ledger_reservation",
+          "value": "(\"wb_next\".\"ledger\".\"kind\" = 'grant' and \"wb_next\".\"ledger\".\"reservation_key\" is null) or (\"wb_next\".\"ledger\".\"kind\" <> 'grant' and \"wb_next\".\"ledger\".\"reservation_key\" is not null and \"wb_next\".\"ledger\".\"reservation_key\" = \"wb_next\".\"ledger\".\"billing_key\")"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "wb_next.reservations": {
+      "name": "reservations",
+      "schema": "wb_next",
+      "columns": {
+        "user_id": {
+          "name": "user_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "billing_key": {
+          "name": "billing_key",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "estimate": {
+          "name": "estimate",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "model": {
+          "name": "model",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "estimated_cost_cents": {
+          "name": "estimated_cost_cents",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'held'"
+        },
+        "actual": {
+          "name": "actual",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "actual_cost_cents": {
+          "name": "actual_cost_cents",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "finished_at": {
+          "name": "finished_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "reservations_user_id_wallets_user_id_fk": {
+          "name": "reservations_user_id_wallets_user_id_fk",
+          "tableFrom": "reservations",
+          "tableTo": "wallets",
+          "schemaTo": "wb_next",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "user_id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "reservations_user_id_billing_key_pk": {
+          "name": "reservations_user_id_billing_key_pk",
+          "columns": [
+            "user_id",
+            "billing_key"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "reservation_key": {
+          "name": "reservation_key",
+          "value": "length(btrim(\"wb_next\".\"reservations\".\"billing_key\")) between 1 and 200 and length(\"wb_next\".\"reservations\".\"billing_key\") <= 200"
+        },
+        "reservation_model": {
+          "name": "reservation_model",
+          "value": "length(btrim(\"wb_next\".\"reservations\".\"model\")) between 1 and 200 and length(\"wb_next\".\"reservations\".\"model\") <= 200"
+        },
+        "reservation_amounts": {
+          "name": "reservation_amounts",
+          "value": "\"wb_next\".\"reservations\".\"estimate\" between 1 and 9007199254740991 and \"wb_next\".\"reservations\".\"estimated_cost_cents\" between 0 and 9007199254740991 and (\"wb_next\".\"reservations\".\"actual_cost_cents\" is null or \"wb_next\".\"reservations\".\"actual_cost_cents\" between 0 and 9007199254740991)"
+        },
+        "reservation_state": {
+          "name": "reservation_state",
+          "value": "(\"wb_next\".\"reservations\".\"status\" = 'held' and \"wb_next\".\"reservations\".\"actual\" is null and \"wb_next\".\"reservations\".\"finished_at\" is null) or (\"wb_next\".\"reservations\".\"status\" = 'settled' and \"wb_next\".\"reservations\".\"actual\" is not null and \"wb_next\".\"reservations\".\"actual\" between 0 and \"wb_next\".\"reservations\".\"estimate\" and \"wb_next\".\"reservations\".\"finished_at\" is not null) or (\"wb_next\".\"reservations\".\"status\" = 'refunded' and \"wb_next\".\"reservations\".\"actual\" is null and \"wb_next\".\"reservations\".\"finished_at\" is not null)"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "wb_next.sessions": {
+      "name": "sessions",
+      "schema": "wb_next",
+      "columns": {
+        "token_hash": {
+          "name": "token_hash",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "expires_at": {
+          "name": "expires_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "sessions_user_idx": {
+          "name": "sessions_user_idx",
+          "columns": [
+            {
+              "expression": "user_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "sessions_user_id_users_id_fk": {
+          "name": "sessions_user_id_users_id_fk",
+          "tableFrom": "sessions",
+          "tableTo": "users",
+          "schemaTo": "wb_next",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "sessions_hash": {
+          "name": "sessions_hash",
+          "value": "\"wb_next\".\"sessions\".\"token_hash\" ~ '^[a-f0-9]{64}$'"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "wb_next.users": {
+      "name": "users",
+      "schema": "wb_next",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "credential_hash": {
+          "name": "credential_hash",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'active'"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "deactivated_at": {
+          "name": "deactivated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "users_credential_hash_unique": {
+          "name": "users_credential_hash_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "credential_hash"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {
+        "users_hash": {
+          "name": "users_hash",
+          "value": "\"wb_next\".\"users\".\"credential_hash\" ~ '^[a-f0-9]{64}$'"
+        },
+        "users_status": {
+          "name": "users_status",
+          "value": "(\"wb_next\".\"users\".\"status\" = 'active' and \"wb_next\".\"users\".\"deactivated_at\" is null) or (\"wb_next\".\"users\".\"status\" = 'deactivated' and \"wb_next\".\"users\".\"deactivated_at\" is not null)"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "wb_next.wallets": {
+      "name": "wallets",
+      "schema": "wb_next",
+      "columns": {
+        "user_id": {
+          "name": "user_id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "balance": {
+          "name": "balance",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "wallets_user_id_users_id_fk": {
+          "name": "wallets_user_id_users_id_fk",
+          "tableFrom": "wallets",
+          "tableTo": "users",
+          "schemaTo": "wb_next",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "wallet_balance_range": {
+          "name": "wallet_balance_range",
+          "value": "\"wb_next\".\"wallets\".\"balance\" between 0 and 9007199254740991"
+        }
+      },
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {},
+  "schemas": {
+    "wb_next": "wb_next"
+  },
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}

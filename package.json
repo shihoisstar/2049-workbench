@@ -10,15 +10,23 @@
     "typecheck": "turbo run typecheck",
     "lint": "turbo run lint",
     "test": "turbo run test",
-    "gate": "node scripts/check-secrets.mjs && turbo run lint typecheck test contract-diff",
+    "gate": "node scripts/assert-test-environment.mjs && node scripts/verify-isolated.test.mjs && node scripts/check-secrets.mjs && turbo run lint typecheck test contract-diff && pnpm check:architecture && pnpm client:check",
+    "check:architecture": "node scripts/check-boundaries.test.mjs && depcruise --config .dependency-cruiser.cjs --output-type err apps packages",
+    "client:generate": "pnpm --filter @wb/contracts build && pnpm --filter @wb/contracts openapi && node scripts/generate-api-client.mjs",
+    "client:check": "node scripts/generate-api-client.mjs --check",
+    "start:api-next": "pnpm --filter @wb/api-next start",
+    "verify:isolated": "node scripts/verify-isolated.mjs",
+    "audit:wallet": "node scripts/audit-wallet.mjs",
     "dev:api": "turbo run dev --filter=@wb/api"
   },
   "devDependencies": {
+    "@eslint/js": "^9.0.0",
+    "@types/node": "^22.0.0",
+    "dependency-cruiser": "18.5.0",
+    "eslint": "^9.39.5",
+    "openapi-typescript": "7.13.0",
     "turbo": "^2.3.0",
     "typescript": "^5.6.0",
-    "@types/node": "^22.0.0",
-    "eslint": "^9.39.5",
-    "@eslint/js": "^9.0.0",
     "typescript-eslint": "^8.0.0"
   }
 }

@@ -1,6 +1,6 @@
 import { zodToJsonSchema } from 'zod-to-json-schema';
 
-import { GuestLoginRequest, GuestSession } from './auth';
+import { GuestLoginRequest, GuestBootstrapRequest, GuestSession } from './auth';
 import { ErrorBody } from './errors';
 import { HealthResponse } from './health';
 import { CreateOrderRequest, StoreOrder, StoreOrders, StorePackages } from './store';
@@ -18,6 +18,7 @@ import { API_VERSION } from './version';
  * 新端点流程:加 Zod schema → 注册进 paths → contract:snapshot 重签 → 前端经 @wb/contracts 取类型,零手写。
  */
 const ref = (name: string) => ({ $ref: `#/components/schemas/${name}` });
+const idParameter = { name: 'id', in: 'path', required: true, schema: { type: 'string' } };
 
 export function buildOpenApiDocument() {
   return {
@@ -40,6 +41,21 @@ export function buildOpenApiDocument() {
           },
         },
       },
+      '/readyz': {
+        get: {
+          summary: '新 API 数据库就绪探测',
+          responses: {
+            '200': {
+              description: '可受理请求',
+              content: { 'application/json': { schema: ref('HealthResponse') } },
+            },
+            '503': {
+              description: '依赖服务不可用',
+              content: { 'application/json': { schema: ref('ErrorBody') } },
+            },
+          },
+        },
+      },
       '/v1/auth/guest': {
         post: {
           summary: '游客登录(实现:T1.1 Fastify)',
@@ -56,6 +72,39 @@ export function buildOpenApiDocument() {
               description: '参数校验失败',
               content: { 'application/json': { schema: ref('ErrorBody') } },
             },
+          },
+        },
+      },
+      '/v2/auth/guest': {
+        post: {
+          summary: '使用游客秘密凭据创建或恢复身份；注册赠送只发放一次',
+          requestBody: { required: true, content: { 'application/json': { schema: ref('GuestBootstrapRequest') } } },
+          responses: {
+            '200': { description: '不透明会话', content: { 'application/json': { schema: ref('GuestSession') } } },
+            '400': { description: '凭据格式错误', content: { 'application/json': { schema: ref('ErrorBody') } } },
+            '403': { description: '账户已注销', content: { 'application/json': { schema: ref('ErrorBody') } } },
+          },
+        },
+      },
+      '/v2/auth/deactivate': {
+        post: {
+          summary: '注销当前账户并撤销全部会话',
+          security: [{ opaqueSession: [] }],
+          responses: {
+            '204': { description: '已注销' },
+            '401': { description: '无效或已过期会话', content: { 'application/json': { schema: ref('ErrorBody') } } },
+            '403': { description: '账户已注销', content: { 'application/json': { schema: ref('ErrorBody') } } },
+          },
+        },
+      },
+      '/v2/wallet': {
+        get: {
+          summary: '当前会话账户的余额和最近20条流水；不接受账户ID参数',
+          security: [{ opaqueSession: [] }],
+          responses: {
+            '200': { description: '钱包概览', content: { 'application/json': { schema: ref('WalletSummary') } } },
+            '401': { description: '无效或已过期会话', content: { 'application/json': { schema: ref('ErrorBody') } } },
+            '403': { description: '账户已注销', content: { 'application/json': { schema: ref('ErrorBody') } } },
           },
         },
       },
@@ -155,6 +204,7 @@ export function buildOpenApiDocument() {
       },
       '/v1/store/orders/{id}/dev-pay': {
         post: {
+          parameters: [idParameter],
           summary: 'DEV-ONLY:模拟支付回调(NODE_ENV=production 时 404;真实微信回调随商户号)',
           security: [{ bearerAuth: [] }],
           responses: {
@@ -256,6 +306,7 @@ export function buildOpenApiDocument() {
       },
       '/v1/tasks/{id}': {
         get: {
+          parameters: [idParameter],
           summary: '任务详情(进度轮询)',
           security: [{ bearerAuth: [] }],
           responses: {
@@ -268,6 +319,7 @@ export function buildOpenApiDocument() {
       },
       '/v1/tasks/{id}/cancel': {
         post: {
+          parameters: [idParameter],
           summary: '取消任务(失败/取消全额退积分)',
           security: [{ bearerAuth: [] }],
           responses: {
@@ -282,6 +334,7 @@ export function buildOpenApiDocument() {
     components: {
       securitySchemes: {
         bearerAuth: { type: 'http', scheme: 'bearer', bearerFormat: 'JWT' },
+        opaqueSession: { type: 'http', scheme: 'bearer', description: 'V2服务端存储哈希的不透明会话，非JWT' },
       },
       schemas: {
         GenerateImageRequest: zodToJsonSchema(GenerateImageRequest, { target: 'openApi3' }),
@@ -303,6 +356,7 @@ export function buildOpenApiDocument() {
         HealthResponse: zodToJsonSchema(HealthResponse, { target: 'openApi3' }),
         ErrorBody: zodToJsonSchema(ErrorBody, { target: 'openApi3' }),
         GuestLoginRequest: zodToJsonSchema(GuestLoginRequest, { target: 'openApi3' }),
+        GuestBootstrapRequest: zodToJsonSchema(GuestBootstrapRequest, { target: 'openApi3' }),
         GuestSession: zodToJsonSchema(GuestSession, { target: 'openApi3' }),
       },
     },

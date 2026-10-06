@@ -1,0 +1,14 @@
+{
+  "name": "@wb/api-client",
+  "version": "0.1.0",
+  "private": true,
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.platform.json",
+    "lint": "eslint .",
+    "test": "pnpm build && cd dist && node --test"
+  },
+  "devDependencies": { "@types/node": "^24.0.0", "typescript": "^5.6.0" }
+}

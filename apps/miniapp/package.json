@@ -30,6 +30,7 @@
     "@tarojs/shared": "4.3.0",
     "@tarojs/taro": "4.3.0",
     "@wb/contracts": "workspace:*",
+    "@wb/api-client": "workspace:*",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },

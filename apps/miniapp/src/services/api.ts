@@ -1,12 +1,14 @@
 import Taro from '@tarojs/taro';
 
 import type { GenerationTask, GuestSession, StoreOrder, StorePackage, Template, WalletSummary } from '@wb/contracts';
+import { createMiniappApiClient } from './taro-transport';
 
 /** API 基址(T3.5 部署解耦):
  * - H5 生产:同源(空串),由 Caddy 反代 /v1 → api;
  * - 本地开发:.env.development 设 TARO_APP_API_BASE=http://localhost:3010;
  * - weapp 构建:.env.production 设 https://正式域名(需小程序后台配置合法域名)。 */
 export const BASE_URL = process.env.TARO_APP_API_BASE ?? '';
+const publicApi = createMiniappApiClient(BASE_URL);
 const TOKEN_KEY = 'wb_token';
 const USER_KEY = 'wb_user_id';
 const DEVICE_KEY = 'wb_device_id';
@@ -110,7 +112,7 @@ export async function deactivate(): Promise<void> {
 
 /** 充值档位列表(T1.5 充值页数据源)。 */
 export async function getPackages(): Promise<StorePackage[]> {
-  const res = await call<{ packages: StorePackage[] }>('GET', '/v1/store/packages');
+  const res = await publicApi.request('get', '/v1/store/packages');
   return res.packages;
 }
 
@@ -156,7 +158,7 @@ export async function submitFeedback(content: string, contact?: string): Promise
 
 /** 模板 feed(T3.2 首页)。 */
 export async function getTemplates(): Promise<Template[]> {
-  const res = await call<{ templates?: Template[] } | undefined>('GET', '/v1/templates');
+  const res = await publicApi.request('get', '/v1/templates');
   return res?.templates ?? [];
 }
 

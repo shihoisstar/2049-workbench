@@ -1,1 +1,1416 @@
-{"apiVersion":"v1","authRequestFields":["deviceId"],"authSessionFields":["expiresInSec","token","userId"],"endpoints":["GET /healthz","GET /v1/store/orders","GET /v1/store/packages","GET /v1/tasks","GET /v1/tasks/{id}","GET /v1/templates","GET /v1/wallet","POST /v1/auth/deactivate","POST /v1/auth/guest","POST /v1/feedback","POST /v1/images/generate","POST /v1/polish","POST /v1/store/orders","POST /v1/store/orders/{id}/dev-pay","POST /v1/tasks","POST /v1/tasks/{id}/cancel","POST /v1/uploads"],"errorBodyFields":["code","details","message","requestId"],"errorCodes":{"ACCOUNT_DEACTIVATED":2003,"BANNED_WORD_HIT":5002,"CONTENT_BLOCKED":5001,"CREDENTIAL_EXPIRED":2002,"HOLD_CONFLICT":3002,"INSUFFICIENT_CREDITS":3001,"INTERNAL":1000,"LEDGER_INCONSISTENT":3003,"NOT_FOUND":1002,"PAYMENT_STATE_CONFLICT":3004,"QUEUE_FULL":4003,"RATE_LIMITED":1003,"TASK_ILLEGAL_TRANSITION":4002,"TASK_NOT_FOUND":4001,"UNAUTHORIZED":2001,"VALIDATION":1001},"healthFields":["apiVersion","status","uptimeSec"],"healthStatuses":["ok","degraded"]}
+{
+  "errorCodes": {
+    "ACCOUNT_DEACTIVATED": 2003,
+    "BANNED_WORD_HIT": 5002,
+    "CONTENT_BLOCKED": 5001,
+    "CREDENTIAL_EXPIRED": 2002,
+    "HOLD_CONFLICT": 3002,
+    "INSUFFICIENT_CREDITS": 3001,
+    "INTERNAL": 1000,
+    "LEDGER_INCONSISTENT": 3003,
+    "NOT_FOUND": 1002,
+    "PAYMENT_STATE_CONFLICT": 3004,
+    "QUEUE_FULL": 4003,
+    "RATE_LIMITED": 1003,
+    "TASK_ILLEGAL_TRANSITION": 4002,
+    "TASK_NOT_FOUND": 4001,
+    "UNAUTHORIZED": 2001,
+    "VALIDATION": 1001
+  },
+  "openapi": {
+    "components": {
+      "schemas": {
+        "CreateFeedbackRequest": {
+          "additionalProperties": false,
+          "properties": {
+            "contact": {
+              "maxLength": 100,
+              "type": "string"
+            },
+            "content": {
+              "maxLength": 1000,
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          "required": [
+            "content"
+          ],
+          "type": "object"
+        },
+        "CreateOrderRequest": {
+          "additionalProperties": false,
+          "properties": {
+            "packageId": {
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          "required": [
+            "packageId"
+          ],
+          "type": "object"
+        },
+        "CreateTaskRequest": {
+          "additionalProperties": false,
+          "properties": {
+            "aspectRatio": {
+              "default": "9:16",
+              "enum": [
+                "16:9",
+                "9:16",
+                "1:1"
+              ],
+              "type": "string"
+            },
+            "durationSec": {
+              "default": 5,
+              "maximum": 15,
+              "minimum": 3,
+              "type": "integer"
+            },
+            "imageUrls": {
+              "items": {
+                "format": "uri",
+                "type": "string"
+              },
+              "maxItems": 3,
+              "type": "array"
+            },
+            "prompt": {
+              "maxLength": 3000,
+              "minLength": 1,
+              "type": "string"
+            },
+            "resolution": {
+              "default": "480p",
+              "enum": [
+                "480p",
+                "720p",
+                "1080p"
+              ],
+              "type": "string"
+            }
+          },
+          "required": [
+            "prompt"
+          ],
+          "type": "object"
+        },
+        "ErrorBody": {
+          "additionalProperties": false,
+          "properties": {
+            "code": {
+              "enum": [
+                1000,
+                1001,
+                1002,
+                1003,
+                2001,
+                2002,
+                2003,
+                3001,
+                3002,
+                3003,
+                3004,
+                4001,
+                4002,
+                4003,
+                5001,
+                5002
+              ],
+              "type": "number"
+            },
+            "details": {},
+            "message": {
+              "type": "string"
+            },
+            "requestId": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "code",
+            "message"
+          ],
+          "type": "object"
+        },
+        "FeedbackCreated": {
+          "additionalProperties": false,
+          "properties": {
+            "id": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "id"
+          ],
+          "type": "object"
+        },
+        "GenerateImageRequest": {
+          "additionalProperties": false,
+          "properties": {
+            "aspectRatio": {
+              "default": "1:1",
+              "enum": [
+                "1:1",
+                "16:9",
+                "9:16",
+                "3:4",
+                "4:3"
+              ],
+              "type": "string"
+            },
+            "imageUrls": {
+              "items": {
+                "format": "uri",
+                "type": "string"
+              },
+              "maxItems": 3,
+              "type": "array"
+            },
+            "prompt": {
+              "maxLength": 1000,
+              "minLength": 2,
+              "type": "string"
+            }
+          },
+          "required": [
+            "prompt"
+          ],
+          "type": "object"
+        },
+        "GenerateImageResult": {
+          "additionalProperties": false,
+          "properties": {
+            "imageUrl": {
+              "format": "uri",
+              "type": "string"
+            }
+          },
+          "required": [
+            "imageUrl"
+          ],
+          "type": "object"
+        },
+        "GenerationTask": {
+          "additionalProperties": false,
+          "properties": {
+            "aspectRatio": {
+              "type": "string"
+            },
+            "attempts": {
+              "minimum": 0,
+              "type": "integer"
+            },
+            "createdAt": {
+              "type": "string"
+            },
+            "durationSec": {
+              "type": "integer"
+            },
+            "errorCode": {
+              "nullable": true,
+              "type": "integer"
+            },
+            "errorMessage": {
+              "nullable": true,
+              "type": "string"
+            },
+            "estimateCredits": {
+              "exclusiveMinimum": true,
+              "minimum": 0,
+              "type": "integer"
+            },
+            "finishedAt": {
+              "nullable": true,
+              "type": "string"
+            },
+            "id": {
+              "type": "string"
+            },
+            "imageUrls": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "prompt": {
+              "type": "string"
+            },
+            "resolution": {
+              "type": "string"
+            },
+            "status": {
+              "enum": [
+                "created",
+                "queued",
+                "running",
+                "succeeded",
+                "failed",
+                "canceled"
+              ],
+              "type": "string"
+            },
+            "updatedAt": {
+              "type": "string"
+            },
+            "videoUrl": {
+              "nullable": true,
+              "type": "string"
+            }
+          },
+          "required": [
+            "id",
+            "status",
+            "prompt",
+            "imageUrls",
+            "aspectRatio",
+            "resolution",
+            "durationSec",
+            "estimateCredits",
+            "attempts",
+            "videoUrl",
+            "errorCode",
+            "errorMessage",
+            "createdAt",
+            "updatedAt",
+            "finishedAt"
+          ],
+          "type": "object"
+        },
+        "GenerationTasks": {
+          "additionalProperties": false,
+          "properties": {
+            "tasks": {
+              "items": {
+                "additionalProperties": false,
+                "properties": {
+                  "aspectRatio": {
+                    "type": "string"
+                  },
+                  "attempts": {
+                    "minimum": 0,
+                    "type": "integer"
+                  },
+                  "createdAt": {
+                    "type": "string"
+                  },
+                  "durationSec": {
+                    "type": "integer"
+                  },
+                  "errorCode": {
+                    "nullable": true,
+                    "type": "integer"
+                  },
+                  "errorMessage": {
+                    "nullable": true,
+                    "type": "string"
+                  },
+                  "estimateCredits": {
+                    "exclusiveMinimum": true,
+                    "minimum": 0,
+                    "type": "integer"
+                  },
+                  "finishedAt": {
+                    "nullable": true,
+                    "type": "string"
+                  },
+                  "id": {
+                    "type": "string"
+                  },
+                  "imageUrls": {
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
+                  },
+                  "prompt": {
+                    "type": "string"
+                  },
+                  "resolution": {
+                    "type": "string"
+                  },
+                  "status": {
+                    "enum": [
+                      "created",
+                      "queued",
+                      "running",
+                      "succeeded",
+                      "failed",
+                      "canceled"
+                    ],
+                    "type": "string"
+                  },
+                  "updatedAt": {
+                    "type": "string"
+                  },
+                  "videoUrl": {
+                    "nullable": true,
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "id",
+                  "status",
+                  "prompt",
+                  "imageUrls",
+                  "aspectRatio",
+                  "resolution",
+                  "durationSec",
+                  "estimateCredits",
+                  "attempts",
+                  "videoUrl",
+                  "errorCode",
+                  "errorMessage",
+                  "createdAt",
+                  "updatedAt",
+                  "finishedAt"
+                ],
+                "type": "object"
+              },
+              "type": "array"
+            }
+          },
+          "required": [
+            "tasks"
+          ],
+          "type": "object"
+        },
+        "GuestBootstrapRequest": {
+          "additionalProperties": false,
+          "properties": {
+            "credential": {
+              "pattern": "^[a-f0-9]{64}$",
+              "type": "string"
+            }
+          },
+          "required": [
+            "credential"
+          ],
+          "type": "object"
+        },
+        "GuestLoginRequest": {
+          "additionalProperties": false,
+          "properties": {
+            "deviceId": {
+              "maxLength": 64,
+              "minLength": 8,
+              "type": "string"
+            }
+          },
+          "required": [
+            "deviceId"
+          ],
+          "type": "object"
+        },
+        "GuestSession": {
+          "additionalProperties": false,
+          "properties": {
+            "expiresInSec": {
+              "exclusiveMinimum": true,
+              "minimum": 0,
+              "type": "integer"
+            },
+            "token": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "userId": {
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          "required": [
+            "token",
+            "userId",
+            "expiresInSec"
+          ],
+          "type": "object"
+        },
+        "HealthResponse": {
+          "additionalProperties": false,
+          "properties": {
+            "apiVersion": {
+              "enum": [
+                "v1"
+              ],
+              "type": "string"
+            },
+            "status": {
+              "enum": [
+                "ok",
+                "degraded"
+              ],
+              "type": "string"
+            },
+            "uptimeSec": {
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          "required": [
+            "status",
+            "apiVersion",
+            "uptimeSec"
+          ],
+          "type": "object"
+        },
+        "PolishRequest": {
+          "additionalProperties": false,
+          "properties": {
+            "text": {
+              "maxLength": 1000,
+              "minLength": 2,
+              "type": "string"
+            }
+          },
+          "required": [
+            "text"
+          ],
+          "type": "object"
+        },
+        "PolishResult": {
+          "additionalProperties": false,
+          "properties": {
+            "text": {
+              "maxLength": 3000,
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          "required": [
+            "text"
+          ],
+          "type": "object"
+        },
+        "StoreOrder": {
+          "additionalProperties": false,
+          "properties": {
+            "createdAt": {
+              "type": "string"
+            },
+            "credits": {
+              "exclusiveMinimum": true,
+              "minimum": 0,
+              "type": "integer"
+            },
+            "id": {
+              "type": "string"
+            },
+            "packageId": {
+              "type": "string"
+            },
+            "priceCents": {
+              "exclusiveMinimum": true,
+              "minimum": 0,
+              "type": "integer"
+            },
+            "status": {
+              "enum": [
+                "created",
+                "paid",
+                "closed"
+              ],
+              "type": "string"
+            }
+          },
+          "required": [
+            "id",
+            "packageId",
+            "credits",
+            "priceCents",
+            "status",
+            "createdAt"
+          ],
+          "type": "object"
+        },
+        "StoreOrders": {
+          "additionalProperties": false,
+          "properties": {
+            "orders": {
+              "items": {
+                "additionalProperties": false,
+                "properties": {
+                  "createdAt": {
+                    "type": "string"
+                  },
+                  "credits": {
+                    "exclusiveMinimum": true,
+                    "minimum": 0,
+                    "type": "integer"
+                  },
+                  "id": {
+                    "type": "string"
+                  },
+                  "packageId": {
+                    "type": "string"
+                  },
+                  "priceCents": {
+                    "exclusiveMinimum": true,
+                    "minimum": 0,
+                    "type": "integer"
+                  },
+                  "status": {
+                    "enum": [
+                      "created",
+                      "paid",
+                      "closed"
+                    ],
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "id",
+                  "packageId",
+                  "credits",
+                  "priceCents",
+                  "status",
+                  "createdAt"
+                ],
+                "type": "object"
+              },
+              "type": "array"
+            }
+          },
+          "required": [
+            "orders"
+          ],
+          "type": "object"
+        },
+        "StorePackages": {
+          "additionalProperties": false,
+          "properties": {
+            "packages": {
+              "items": {
+                "additionalProperties": false,
+                "properties": {
+                  "credits": {
+                    "exclusiveMinimum": true,
+                    "minimum": 0,
+                    "type": "integer"
+                  },
+                  "id": {
+                    "type": "string"
+                  },
+                  "label": {
+                    "type": "string"
+                  },
+                  "priceCents": {
+                    "exclusiveMinimum": true,
+                    "minimum": 0,
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "id",
+                  "label",
+                  "credits",
+                  "priceCents"
+                ],
+                "type": "object"
+              },
+              "type": "array"
+            }
+          },
+          "required": [
+            "packages"
+          ],
+          "type": "object"
+        },
+        "Templates": {
+          "additionalProperties": false,
+          "properties": {
+            "templates": {
+              "items": {
+                "additionalProperties": false,
+                "properties": {
+                  "category": {
+                    "type": "string"
+                  },
+                  "coverGradient": {
+                    "type": "string"
+                  },
+                  "coverMark": {
+                    "type": "string"
+                  },
+                  "heat": {
+                    "type": "string"
+                  },
+                  "id": {
+                    "type": "string"
+                  },
+                  "promptTemplate": {
+                    "type": "string"
+                  },
+                  "title": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "id",
+                  "title",
+                  "category",
+                  "coverGradient",
+                  "coverMark",
+                  "heat",
+                  "promptTemplate"
+                ],
+                "type": "object"
+              },
+              "type": "array"
+            }
+          },
+          "required": [
+            "templates"
+          ],
+          "type": "object"
+        },
+        "UploadResult": {
+          "additionalProperties": false,
+          "properties": {
+            "url": {
+              "format": "uri",
+              "type": "string"
+            }
+          },
+          "required": [
+            "url"
+          ],
+          "type": "object"
+        },
+        "WalletSummary": {
+          "additionalProperties": false,
+          "properties": {
+            "balance": {
+              "minimum": 0,
+              "type": "integer"
+            },
+            "entries": {
+              "items": {
+                "additionalProperties": false,
+                "properties": {
+                  "amount": {
+                    "type": "integer"
+                  },
+                  "billingKey": {
+                    "type": "string"
+                  },
+                  "createdAt": {
+                    "type": "string"
+                  },
+                  "remark": {
+                    "nullable": true,
+                    "type": "string"
+                  },
+                  "type": {
+                    "enum": [
+                      "hold",
+                      "settle",
+                      "refund",
+                      "grant"
+                    ],
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "billingKey",
+                  "type",
+                  "amount",
+                  "remark",
+                  "createdAt"
+                ],
+                "type": "object"
+              },
+              "type": "array"
+            }
+          },
+          "required": [
+            "balance",
+            "entries"
+          ],
+          "type": "object"
+        }
+      },
+      "securitySchemes": {
+        "bearerAuth": {
+          "bearerFormat": "JWT",
+          "scheme": "bearer",
+          "type": "http"
+        },
+        "opaqueSession": {
+          "description": "V2服务端存储哈希的不透明会话，非JWT",
+          "scheme": "bearer",
+          "type": "http"
+        }
+      }
+    },
+    "info": {
+      "description": "契约唯一事实源 @wb/contracts 生成;禁止手改 openapi.json。",
+      "title": "2049出片 API",
+      "version": "v1"
+    },
+    "openapi": "3.1.0",
+    "paths": {
+      "/healthz": {
+        "get": {
+          "responses": {
+            "200": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HealthResponse"
+                  }
+                }
+              },
+              "description": "健康"
+            }
+          },
+          "summary": "存活探测(LB / CI)"
+        }
+      },
+      "/readyz": {
+        "get": {
+          "responses": {
+            "200": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HealthResponse"
+                  }
+                }
+              },
+              "description": "可受理请求"
+            },
+            "503": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/ErrorBody"
+                  }
+                }
+              },
+              "description": "依赖服务不可用"
+            }
+          },
+          "summary": "新 API 数据库就绪探测"
+        }
+      },
+      "/v1/auth/deactivate": {
+        "post": {
+          "responses": {
+            "204": {
+              "description": "已注销"
+            },
+            "401": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/ErrorBody"
+                  }
+                }
+              },
+              "description": "未登录/凭证失效"
+            }
+          },
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ],
+          "summary": "账号注销(软删除;实现:T1.1)"
+        }
+      },
+      "/v1/auth/guest": {
+        "post": {
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GuestLoginRequest"
+                }
+              }
+            },
+            "required": true
+          },
+          "responses": {
+            "200": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/GuestSession"
+                  }
+                }
+              },
+              "description": "会话签发"
+            },
+            "400": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/ErrorBody"
+                  }
+                }
+              },
+              "description": "参数校验失败"
+            }
+          },
+          "summary": "游客登录(实现:T1.1 Fastify)"
+        }
+      },
+      "/v1/feedback": {
+        "post": {
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateFeedbackRequest"
+                }
+              }
+            },
+            "required": true
+          },
+          "responses": {
+            "201": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/FeedbackCreated"
+                  }
+                }
+              },
+              "description": "已受理"
+            }
+          },
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ],
+          "summary": "提交用户反馈(OPS-01;落库后运营可见)"
+        }
+      },
+      "/v1/images/generate": {
+        "post": {
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenerateImageRequest"
+                }
+              }
+            },
+            "required": true
+          },
+          "responses": {
+            "200": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/GenerateImageResult"
+                  }
+                }
+              },
+              "description": "生成结果图"
+            }
+          },
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ],
+          "summary": "AI 绘画/改图(V1;改图传 imageUrls;每用户每小时 5 次)"
+        }
+      },
+      "/v1/polish": {
+        "post": {
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PolishRequest"
+                }
+              }
+            },
+            "required": true
+          },
+          "responses": {
+            "200": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/PolishResult"
+                  }
+                }
+              },
+              "description": "优化后的文案"
+            }
+          },
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ],
+          "summary": "AI 文案优化(一句卖点 → 结构化口播稿;V0 免费不计费)"
+        }
+      },
+      "/v1/store/orders": {
+        "get": {
+          "responses": {
+            "200": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/StoreOrders"
+                  }
+                }
+              },
+              "description": "订单"
+            }
+          },
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ],
+          "summary": "我的订单列表(T1.4)"
+        },
+        "post": {
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateOrderRequest"
+                }
+              }
+            },
+            "required": true
+          },
+          "responses": {
+            "201": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/StoreOrder"
+                  }
+                }
+              },
+              "description": "订单已创建"
+            },
+            "401": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/ErrorBody"
+                  }
+                }
+              },
+              "description": "未登录"
+            }
+          },
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ],
+          "summary": "创建充值订单(T1.4;微信支付参数随商户号接入,当前阻塞墙)"
+        }
+      },
+      "/v1/store/orders/{id}/dev-pay": {
+        "post": {
+          "parameters": [
+            {
+              "in": "path",
+              "name": "id",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/StoreOrder"
+                  }
+                }
+              },
+              "description": "订单已支付并入账"
+            }
+          },
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ],
+          "summary": "DEV-ONLY:模拟支付回调(NODE_ENV=production 时 404;真实微信回调随商户号)"
+        }
+      },
+      "/v1/store/packages": {
+        "get": {
+          "responses": {
+            "200": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/StorePackages"
+                  }
+                }
+              },
+              "description": "档位"
+            }
+          },
+          "summary": "充值档位列表(T1.4)"
+        }
+      },
+      "/v1/tasks": {
+        "get": {
+          "responses": {
+            "200": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/GenerationTasks"
+                  }
+                }
+              },
+              "description": "任务列表"
+            }
+          },
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ],
+          "summary": "我的任务列表"
+        },
+        "post": {
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateTaskRequest"
+                }
+              }
+            },
+            "required": true
+          },
+          "responses": {
+            "202": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/GenerationTask"
+                  }
+                }
+              },
+              "description": "任务已受理"
+            },
+            "402": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/ErrorBody"
+                  }
+                }
+              },
+              "description": "积分不足"
+            }
+          },
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ],
+          "summary": "创建生成任务(冻结估算积分并入队;实现:T2.2)"
+        }
+      },
+      "/v1/tasks/{id}": {
+        "get": {
+          "parameters": [
+            {
+              "in": "path",
+              "name": "id",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/GenerationTask"
+                  }
+                }
+              },
+              "description": "任务"
+            }
+          },
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ],
+          "summary": "任务详情(进度轮询)"
+        }
+      },
+      "/v1/tasks/{id}/cancel": {
+        "post": {
+          "parameters": [
+            {
+              "in": "path",
+              "name": "id",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/GenerationTask"
+                  }
+                }
+              },
+              "description": "取消后的任务"
+            }
+          },
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ],
+          "summary": "取消任务(失败/取消全额退积分)"
+        }
+      },
+      "/v1/templates": {
+        "get": {
+          "responses": {
+            "200": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Templates"
+                  }
+                }
+              },
+              "description": "模板列表"
+            }
+          },
+          "summary": "模板 feed(T3.2 首页;生成同款→预填创作表单)"
+        }
+      },
+      "/v1/uploads": {
+        "post": {
+          "requestBody": {
+            "content": {
+              "multipart/form-data": {
+                "schema": {
+                  "properties": {
+                    "file": {
+                      "format": "binary",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "file"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "required": true
+          },
+          "responses": {
+            "201": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/UploadResult"
+                  }
+                }
+              },
+              "description": "上传完成"
+            }
+          },
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ],
+          "summary": "上传参考图(V1 传图生成;multipart 字段 file,≤10M,jpg/png/webp)"
+        }
+      },
+      "/v1/wallet": {
+        "get": {
+          "responses": {
+            "200": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/WalletSummary"
+                  }
+                }
+              },
+              "description": "余额与流水"
+            },
+            "401": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/ErrorBody"
+                  }
+                }
+              },
+              "description": "未登录"
+            }
+          },
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ],
+          "summary": "钱包概览:余额+最近流水(实现:T1.2)"
+        }
+      },
+      "/v2/auth/deactivate": {
+        "post": {
+          "responses": {
+            "204": {
+              "description": "已注销"
+            },
+            "401": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/ErrorBody"
+                  }
+                }
+              },
+              "description": "无效或已过期会话"
+            },
+            "403": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/ErrorBody"
+                  }
+                }
+              },
+              "description": "账户已注销"
+            }
+          },
+          "security": [
+            {
+              "opaqueSession": []
+            }
+          ],
+          "summary": "注销当前账户并撤销全部会话"
+        }
+      },
+      "/v2/auth/guest": {
+        "post": {
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GuestBootstrapRequest"
+                }
+              }
+            },
+            "required": true
+          },
+          "responses": {
+            "200": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/GuestSession"
+                  }
+                }
+              },
+              "description": "不透明会话"
+            },
+            "400": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/ErrorBody"
+                  }
+                }
+              },
+              "description": "凭据格式错误"
+            },
+            "403": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/ErrorBody"
+                  }
+                }
+              },
+              "description": "账户已注销"
+            }
+          },
+          "summary": "使用游客秘密凭据创建或恢复身份；注册赠送只发放一次"
+        }
+      },
+      "/v2/wallet": {
+        "get": {
+          "responses": {
+            "200": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/WalletSummary"
+                  }
+                }
+              },
+              "description": "钱包概览"
+            },
+            "401": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/ErrorBody"
+                  }
+                }
+              },
+              "description": "无效或已过期会话"
+            },
+            "403": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/ErrorBody"
+                  }
+                }
+              },
+              "description": "账户已注销"
+            }
+          },
+          "security": [
+            {
+              "opaqueSession": []
+            }
+          ],
+          "summary": "当前会话账户的余额和最近20条流水；不接受账户ID参数"
+        }
+      }
+    },
+    "servers": [
+      {
+        "description": "相对路径,按部署环境替换",
+        "url": "/"
+      }
+    ]
+  }
+}

@@ -5,12 +5,12 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "build": "tsc -p tsconfig.json",
+    "build": "node scripts/build.cjs",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "lint": "eslint .",
     "test": "cd dist && node --test",
-    "contract-diff": "node dist/contract-diff.js",
-    "contract:snapshot": "tsc -p tsconfig.json && node dist/contract-diff.js --write",
+    "contract-diff": "node scripts/check-contract.cjs",
+    "contract:snapshot": "pnpm build && node scripts/check-contract.cjs --write",
     "openapi": "node scripts/write-openapi.cjs"
   },
   "dependencies": {
