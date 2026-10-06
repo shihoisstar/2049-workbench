@@ -1,6 +1,6 @@
 import { and, desc, eq } from 'drizzle-orm';
 import { randomUUID } from 'node:crypto';
-import { ErrorCode, type GenerationTask, type TaskStatus } from '@wb/contracts';
+import { ErrorCode, estimateCreditsFor, type GenerationTask, type TaskStatus } from '@wb/contracts';
 import { isStuck, isTerminal, refundOnTerminal, transition } from '@wb/domain';
 
 import type { Db } from './db';
@@ -9,8 +9,10 @@ import type { WalletService } from './wallet';
 
 type TaskRow = typeof generationTasks.$inferSelect;
 
-/** V0 估算:1 条 480P 预览 = 10 积分(placeholder,随 BIZ 定价校准);结算封顶于估算。 */
-export const ESTIMATE_CREDITS = 10;
+/** V1 估算:按分辨率矩阵(contracts/pricing,方案 A 拍板);结算封顶于估算。 */
+export function estimateFor(resolution: string): number {
+  return estimateCreditsFor(resolution);
+}
 
 /** 卡单超时:running/queued 超过此时长由 sweep 自动取消退款(INF-03 D4)。 */
 export const TASK_STUCK_TIMEOUT_MS = 10 * 60_000;
@@ -59,9 +61,10 @@ export class TaskService {
   /** 创建:created → (冻结) → enqueue 由调用方完成;余额不足抛 402/3001。 */
   async create(userId: string, input: CreateTaskInput): Promise<{ task: GenerationTask; billingKey: string }> {
     const billingKey = `gen:${randomUUID()}`;
-    await this.wallet.hold(userId, billingKey, ESTIMATE_CREDITS, {
+    const estimate = estimateFor(input.resolution);
+    await this.wallet.hold(userId, billingKey, estimate, {
       model: input.model,
-      estimatedCostCents: ESTIMATE_CREDITS,
+      estimatedCostCents: estimate,
     });
     const row = (
       await this.db
@@ -76,7 +79,7 @@ export class TaskService {
           resolution: input.resolution,
           durationSec: input.durationSec,
           model: input.model,
-          estimateCredits: ESTIMATE_CREDITS,
+          estimateCredits: estimateFor(input.resolution),
         })
         .returning()
     )[0];

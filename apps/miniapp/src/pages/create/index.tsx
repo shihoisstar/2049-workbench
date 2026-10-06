@@ -4,13 +4,13 @@ import { Tag } from '@nutui/nutui-react-taro';
 import Taro from '@tarojs/taro';
 
 import type { GenerationTask } from '@wb/contracts';
+import { estimateCreditsFor } from '@wb/contracts';
 
 import { ApiError, createTask, ensureSession, generateImage, polishCopy, uploadImage } from '../../services/api';
 
 import './index.scss';
 
-/** 与 apps/api ESTIMATE_CREDITS 对齐(V0 常量;T1.4 定价时改为估算端点)。 */
-const ESTIMATE_CREDITS = 10;
+// 估算走 contracts 定价矩阵(方案 A:480P=77/720P=368,与后端冻结同一事实源)
 const MAX_IMAGES = 3;
 const MAX_IMAGE_BYTES = 10 * 1024 * 1024;
 
@@ -273,7 +273,7 @@ export default function Create() {
         {mode === 'paint' ? (
           <Text className="create-estimate-value">免费体验</Text>
         ) : (
-          <Text className="create-estimate-value">{ESTIMATE_CREDITS} 积分</Text>
+          <Text className="create-estimate-value">{estimateCreditsFor(resolution)} 积分</Text>
         )}
         <Text className="create-estimate-note">
           {mode === 'paint' ? 'V1 体验期免费,正式定价随 BIZ 档位' : '生成前冻结,失败即时退 · 不多扣一分'}

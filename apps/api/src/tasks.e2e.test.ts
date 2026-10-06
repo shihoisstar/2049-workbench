@@ -158,7 +158,7 @@ test('端到端成功:受理→轮询→结算,视频 URL 与余额正确', asyn
 
   const final = await waitForTask(task.id, ['succeeded']);
   assert.match(final.videoUrl ?? '', /^https:\/\/mock\.cdn\//);
-  await waitForBalance(uid, 90, '100 - 10(足额结算)');
+  await waitForBalance(uid, 23, '100(测试发放) - 77(480P 结算);mkUser 不走登录无注册赠送');
   // 结算流水与余额同事务,但 summary 查询有毫秒级视图延迟 → 轮询兜底
   const deadline = Date.now() + 3000;
   let settleFound = false;
@@ -219,7 +219,7 @@ test('内容拒绝:即时失败退款', async () => {
 });
 
 test('TTL 清理:超 7 天成片删文件+URL 置空,未过期不动', async () => {
-  const uid = await mkUser('ttl');
+  const uid = await mkUser('ttl', 250);
   const key = `ttl-verify/${Date.now()}.mp4`;
   const url = await deps.storage.put(key, Buffer.from('ttl-video-bytes'));
   const { task } = await tasks.create(uid, { prompt: 'x', aspectRatio: '9:16', resolution: '480p', durationSec: 5, model: 'mock-video' });

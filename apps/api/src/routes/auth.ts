@@ -1,6 +1,6 @@
 import type { FastifyInstance } from 'fastify';
 import { eq } from 'drizzle-orm';
-import { ErrorCode, GuestLoginRequest, type GuestSession } from '@wb/contracts';
+import { ErrorCode, GuestLoginRequest, SIGNUP_GRANT_CREDITS, type GuestSession } from '@wb/contracts';
 
 import type { Db } from '../db';
 import { users } from '../schema';
@@ -11,7 +11,7 @@ import type { WalletService } from '../wallet';
 const SESSION_TTL_SEC = 7 * 24 * 3600;
 
 /** 注册赠送积分(BIZ-05「新用户 1 条 480P」的额度形态;换算随 T1.4 定价校准)。 */
-const SIGNUP_GRANT = 10;
+const SIGNUP_GRANT = SIGNUP_GRANT_CREDITS;
 
 export { requireAuth } from './auth-route-shared';
 import { requireAuth } from './auth-route-shared';

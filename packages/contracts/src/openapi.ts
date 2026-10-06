@@ -1,5 +1,3 @@
-import { writeFileSync } from 'node:fs';
-import { join } from 'node:path';
 import { zodToJsonSchema } from 'zod-to-json-schema';
 
 import { GuestLoginRequest, GuestSession } from './auth';
@@ -318,8 +316,3 @@ export function endpointList(doc = buildOpenApiDocument()): string[] {
     .sort();
 }
 
-if (require.main === module) {
-  const file = join(__dirname, '..', 'openapi.json');
-  writeFileSync(file, JSON.stringify(buildOpenApiDocument(), null, 2) + '\n', 'utf8');
-  console.log(`openapi written: ${file}`);
-}

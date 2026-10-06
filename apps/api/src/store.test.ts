@@ -50,7 +50,7 @@ test('下单→开发态支付→积分入账+流水;重复支付幂等', async 
   });
   token = login.json().token;
   userId = login.json().userId;
-  const before = (await wallet.summary(userId)).balance; // 含注册赠送 10
+  const before = (await wallet.summary(userId)).balance; // 含注册赠送 80
 
   const created = await app.inject({
     method: 'POST',

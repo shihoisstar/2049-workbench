@@ -11,8 +11,14 @@
     "test": "cd dist && node --test",
     "contract-diff": "node dist/contract-diff.js",
     "contract:snapshot": "tsc -p tsconfig.json && node dist/contract-diff.js --write",
-    "openapi": "tsc -p tsconfig.json && node dist/openapi.js"
+    "openapi": "node scripts/write-openapi.cjs"
   },
-  "dependencies": { "zod": "^3.25.76", "zod-to-json-schema": "^3.23.0" },
-  "devDependencies": { "typescript": "^5.6.0", "@types/node": "^22.0.0" }
+  "dependencies": {
+    "zod": "^3.25.76",
+    "zod-to-json-schema": "^3.23.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.0",
+    "@types/node": "^22.0.0"
+  }
 }

@@ -37,9 +37,14 @@ export const atlasVideoAdapter: VideoAdapter = {
       imageUrls?: string[];
     };
     if (!p.prompt) throw Object.assign(new Error('prompt 必填'), { status: 400 });
-    // 传图生成 → i2v 模型(config.modelI2v);纯文生 → t2v(config.model)
+    // 模型选择:有图 → i2v(config.modelI2v);纯文生 → 按分辨率(480P=Mini/720P=Fast,定价矩阵)
     const hasImages = Boolean(p.imageUrls?.length);
-    const model = String(hasImages ? channel.config.modelI2v ?? channel.config.model ?? req.modelName : channel.config.model ?? req.modelName);
+    const videoModels = (channel.config.videoModels ?? {}) as Record<string, string>;
+    const model = String(
+      hasImages
+        ? channel.config.modelI2v ?? req.modelName
+        : videoModels[p.resolution ?? '480p'] ?? channel.config.model ?? req.modelName,
+    );
     const body: Record<string, unknown> = {
       model,
       prompt: p.prompt,

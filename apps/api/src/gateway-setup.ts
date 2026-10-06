@@ -18,7 +18,7 @@ import {
 import { mockVideoAdapter } from './mock-adapter';
 
 export type GatewayEnv = Partial<
-  Record<'ATLAS_API_KEY' | 'ATLAS_BASE_URL' | 'ATLAS_MODEL' | 'ATLAS_MODEL_I2V' | 'ATLAS_CHAT_MODEL' | 'ATLAS_MODEL_IMAGE_T2I' | 'ATLAS_MODEL_IMAGE_EDIT' | 'MOCK_CHANNEL' | 'VOLC_ARK_API_KEY' | 'VOLC_ARK_BASE_URL' | 'VOLC_RPM_LIMIT' | 'VOLC_SEEDANCE_MODEL' | 'NODE_ENV', string>
+  Record<'ATLAS_API_KEY' | 'ATLAS_BASE_URL' | 'ATLAS_MODEL' | 'ATLAS_MODEL_I2V' | 'ATLAS_CHAT_MODEL' | 'ATLAS_MODEL_IMAGE_T2I' | 'ATLAS_MODEL_IMAGE_EDIT' | 'ATLAS_MODEL_FAST' | 'MOCK_CHANNEL' | 'VOLC_ARK_API_KEY' | 'VOLC_ARK_BASE_URL' | 'VOLC_RPM_LIMIT' | 'VOLC_SEEDANCE_MODEL' | 'NODE_ENV', string>
 >;
 
 export function buildGatewayRouterFromEnv(env: GatewayEnv = process.env): GatewayRouter {
@@ -61,6 +61,11 @@ export function buildGatewayRouterFromEnv(env: GatewayEnv = process.env): Gatewa
           chatModel: env.ATLAS_CHAT_MODEL ?? 'deepseek-ai/deepseek-v4.1-flash',
           modelImageT2i: env.ATLAS_MODEL_IMAGE_T2I ?? 'bytedance/seedream-v4.7/text-to-image',
           modelImageEdit: env.ATLAS_MODEL_IMAGE_EDIT ?? 'bytedance/seedream-v4.7/edit',
+          // 视频模型按分辨率选(定价矩阵 contracts/pricing):480P=Mini(便宜),720P/1080P=Fast
+          videoModels: {
+            '480p': env.ATLAS_MODEL ?? 'bytedance/seedance-2.0-mini/text-to-video',
+            '720p': env.ATLAS_MODEL_FAST ?? 'bytedance/seedance-2.0-fast/text-to-video',
+          },
         }
       : {},
   });

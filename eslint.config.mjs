@@ -4,7 +4,7 @@ import js from '@eslint/js';
 import tseslint from 'typescript-eslint';
 
 export default tseslint.config(
-  { ignores: ['**/dist/**', '**/node_modules/**', '**/*.mjs'] },
+  { ignores: ['**/dist/**', '**/node_modules/**', '**/*.mjs', '**/scripts/**'] }, // scripts/ = Node CLI/运维脚本(CJS require 正常写法)
   js.configs.recommended,
   ...tseslint.configs.recommended,
   {
