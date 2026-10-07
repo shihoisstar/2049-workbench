@@ -13,3 +13,5 @@
 - 流水不可UPDATE/DELETE，修正用追加业务记录。测试不清库，仅使用独立随机用户。
 - `pnpm verify:isolated`执行真实DB测试。单独test需要显式WB_NEXT_TEST_DATABASE_URL，缺失应失败，不可skip；执行形式cd dist && node --test。
 - 旧API的钱包并未因新模块落地而自动修复，切换与数据迁移另行验收。
+
+- 2026-10-07：generation.list按本人归属与(created_at,id)倒序分页，每页20项；游标SQL保留数据库时间精度，新任务插入不改变后续页。

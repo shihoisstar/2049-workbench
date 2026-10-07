@@ -81,7 +81,7 @@ export function SectionTitle({
     </View>
   );
 }
-export function BottomNav({ onNavigate }: { onNavigate: (screen: StudioScreen) => void }) {
+export function BottomNav({ onNavigate, active = '首页' }: { onNavigate: (screen: StudioScreen) => void; active?: string }) {
   return (
     <View className="studio-bottom-nav">
       {(
@@ -94,8 +94,9 @@ export function BottomNav({ onNavigate }: { onNavigate: (screen: StudioScreen) =
       ).map(([icon, label], i) => (
         <Button
           key={label}
-          className={`studio-nav-item ${i === 0 ? 'is-active' : ''}`}
-          onClick={() => (i < 2 ? onNavigate(i === 0 ? 'home' : 'marketing') : previewNotice())}
+          className={`studio-nav-item ${label === active ? 'is-active' : ''}`}
+          id={i === 2 ? 'studio-nav-works' : undefined}
+          onClick={() => { if (i < 2) onNavigate(i === 0 ? 'home' : 'marketing'); else if (i === 2 && active !== '作品') void Taro.navigateTo({ url: '/pages/studio-works/index' }); else if (i === 3) previewNotice(); }}
         >
           <Icon name={icon} />
           <Text>{label}</Text>

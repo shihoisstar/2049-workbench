@@ -13,3 +13,5 @@
 - 接口形状一律从 @wb/contracts 引用(T0.3 已通);请求层在 `src/services/api.ts`(Taro.request 封装 + token/deviceId 存储)。
 - 本地联调:先起 api(`apps/api`:postgres 5433 + `pnpm start`,**端口 3010**——3000 被参考项目容器占用)与 worker(`pnpm start:worker`),再 `build:weapp` 后开发者工具导入(urlCheck 已关);H5 直连 3010(CORS 已开)。
 - 微信 appid 已配正式号(wxb8b20703…,project.config.json);上线前需在小程序后台配置 request 合法域名并恢复 urlCheck。
+
+- 2026-10-07：studio营销与成片已真实接通；studio-works从v2本人分页接口读取，首页最近任务也来自后端，不依赖last-job本机缓存。其余演示入口仍需逐项替换。

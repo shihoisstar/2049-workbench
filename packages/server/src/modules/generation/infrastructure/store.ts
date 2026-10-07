@@ -49,6 +49,15 @@ export function createGenerationStore(tx: postgres.TransactionSql) {
 
   return {
     get,
+    async list(input: { userId: string; cursor?: string }) {
+      if (input.cursor) await get({ userId: input.userId, jobId: input.cursor });
+      const rows = input.cursor
+        ? await tx<JobRow[]>`select * from wb_next.generation_jobs where user_id = ${input.userId}
+            and (created_at, id) < (select created_at, id from wb_next.generation_jobs where id = ${input.cursor} and user_id = ${input.userId})
+            order by created_at desc, id desc limit 21`
+        : await tx<JobRow[]>`select * from wb_next.generation_jobs where user_id = ${input.userId} order by created_at desc, id desc limit 21`;
+      return { items: rows.slice(0, 20).map(job), nextCursor: rows.length > 20 ? rows[19].id : null };
+    },
     async findRequest(input: CreateGenerationInput): Promise<GenerationJob | null> {
       text(input.requestKey, 'requestKey', 200);
       text(input.prompt, 'prompt', 3000);

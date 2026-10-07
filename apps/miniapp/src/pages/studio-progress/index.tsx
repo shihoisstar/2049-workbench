@@ -79,6 +79,7 @@ export default function StudioProgress() {
         <View className="studio-preview-feedback">已消耗 {job?.actualCredits} 积分{balance !== null ? ` · 可用 ${balance} 积分` : ''}。视频含 AI 标识，请在7天内保存。</View>
       </>}
       {message && <View className="studio-preview-feedback">{message}<Button onClick={() => setRetry(value => value + 1)}>重新读取</Button></View>}
+      <Button className="studio-text-button" id="view-all-works" onClick={() => { void Taro.navigateTo({ url: '/pages/studio-works/index' }); }}>查看全部作品 →</Button>
       {saved && <View id="video-save-state" className="studio-preview-feedback">{saved}</View>}
     </View>
     <View className="studio-bottom-action"><Text className="studio-small">{media ? `${media.width} × ${media.height} · ${(media.durationMs / 1000).toFixed(1)}秒` : '任务状态会自动更新'}</Text>

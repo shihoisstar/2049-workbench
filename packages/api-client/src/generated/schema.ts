@@ -139,7 +139,56 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get?: never;
+        /** 本人视频任务列表，按创建时间倒序，每页20条 */
+        get: {
+            parameters: {
+                query?: {
+                    cursor?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description 任务列表 */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["GenerationList"];
+                    };
+                };
+                /** @description 参数错误 */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description 未登录 */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description 游标不可用 */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+            };
+        };
         put?: never;
         /** 幂等受理营销视频；执行链未就绪时拒绝且不预留积分 */
         post: {
@@ -1211,6 +1260,30 @@ export interface components {
             requestKey: string;
             quoteVersion: string;
             prompt: string;
+        };
+        GenerationList: {
+            items: {
+                /** @enum {string} */
+                resolution: "480p" | "720p";
+                /** @enum {string} */
+                aspectRatio: "9:16" | "16:9" | "1:1";
+                /** @enum {number} */
+                durationSec: 5;
+                /** Format: uuid */
+                id: string;
+                requestKey: string;
+                prompt: string;
+                /** @enum {string} */
+                status: "accepted" | "succeeded" | "failed";
+                reservedCredits: number;
+                actualCredits: number | null;
+                /** Format: date-time */
+                createdAt: string;
+                /** Format: date-time */
+                finishedAt: string | null;
+            }[];
+            /** Format: uuid */
+            nextCursor: string | null;
         };
         GenerationView: {
             /** @enum {string} */

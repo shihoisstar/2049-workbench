@@ -45,6 +45,7 @@ export interface CompleteGenerationInput extends GenerationLocator {
 export interface FailGenerationInput extends GenerationLocator { failureCode: string }
 
 export interface GenerationService {
+  list(input: { userId: string; cursor?: string }): Promise<{ items: GenerationJob[]; nextCursor: string | null }>;
   create(input: CreateGenerationInput): Promise<GenerationJob>;
   get(input: GenerationLocator): Promise<GenerationJob>;
   complete(input: CompleteGenerationInput): Promise<GenerationJob>;

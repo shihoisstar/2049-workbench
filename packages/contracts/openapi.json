@@ -133,6 +133,67 @@
       }
     },
     "/v2/generation": {
+      "get": {
+        "summary": "本人视频任务列表，按创建时间倒序，每页20条",
+        "security": [
+          {
+            "opaqueSession": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "任务列表",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenerationList"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "参数错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "未登录",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "游标不可用",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          }
+        }
+      },
       "post": {
         "summary": "幂等受理营销视频；执行链未就绪时拒绝且不预留积分",
         "security": [
@@ -1141,6 +1202,100 @@
           "requestKey",
           "quoteVersion",
           "prompt"
+        ],
+        "additionalProperties": false
+      },
+      "GenerationList": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "resolution": {
+                  "type": "string",
+                  "enum": [
+                    "480p",
+                    "720p"
+                  ]
+                },
+                "aspectRatio": {
+                  "type": "string",
+                  "enum": [
+                    "9:16",
+                    "16:9",
+                    "1:1"
+                  ]
+                },
+                "durationSec": {
+                  "type": "number",
+                  "enum": [
+                    5
+                  ]
+                },
+                "id": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "requestKey": {
+                  "type": "string"
+                },
+                "prompt": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "string",
+                  "enum": [
+                    "accepted",
+                    "succeeded",
+                    "failed"
+                  ]
+                },
+                "reservedCredits": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "actualCredits": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "nullable": true
+                },
+                "createdAt": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "finishedAt": {
+                  "type": "string",
+                  "format": "date-time",
+                  "nullable": true
+                }
+              },
+              "required": [
+                "resolution",
+                "aspectRatio",
+                "durationSec",
+                "id",
+                "requestKey",
+                "prompt",
+                "status",
+                "reservedCredits",
+                "actualCredits",
+                "createdAt",
+                "finishedAt"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "nextCursor": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          }
+        },
+        "required": [
+          "items",
+          "nextCursor"
         ],
         "additionalProperties": false
       },

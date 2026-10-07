@@ -74,6 +74,7 @@ export function createServices(databaseUrl: string): Services {
       summary: userId => connection.begin('isolation level repeatable read read only', tx => createBillingStore(tx).summary(userId)),
     },
     generation: {
+      list: input => connection.begin('read only', tx => createGenerationStore(tx).list(input)),
       create: input => connection.begin(async tx => {
         await createIdentityStore(tx).assertActive(input.userId);
         const store = createGenerationStore(tx);

@@ -244,3 +244,15 @@
   .studio-micro { display: none; }
   .studio-tool { gap: 7px; }
 }
+.studio-works { box-sizing: border-box; padding: 24px 16px 100px; }
+.studio-works-heading { display: flex; flex-direction: column; gap: 10px; margin-bottom: 28px; }
+.studio-works-toolbar { display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #e9e5df; padding-bottom: 12px; }
+.studio-preview .studio-work-card { display: flex; align-items: center; gap: 12px; width: 100%; padding: 18px 0; background: transparent; text-align: left; border-radius: 0; border-bottom: 1px solid #e9e5df; }
+.studio-work-symbol { flex-shrink: 0; width: 46px; height: 62px; display: flex; align-items: center; justify-content: center; border-radius: 8px; background: #f1ece4; color: #847968; }
+.studio-work-symbol--succeeded { background: #252526; color: #fff; }
+.studio-work-symbol--accepted { background: #fbe9e9; color: #d91b36; }
+.studio-work-copy { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 6px; }
+.studio-work-prompt { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 15px; font-weight: 600; }
+.studio-work-status { flex-shrink: 0; font-size: 11px; color: #857d77; }
+.studio-works-empty { display: flex; flex-direction: column; align-items: center; gap: 20px; padding: 64px 0; text-align: center; }
+.studio-works-footer { display: block; text-align: center; padding: 22px 0; color: #857d77; font-size: 12px; }

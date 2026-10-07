@@ -2,12 +2,12 @@ import 'reflect-metadata';
 import { randomUUID } from 'node:crypto';
 import {
   BadRequestException, Body, Controller, Get, Headers, HttpCode, Inject, Injectable, Module, OnApplicationShutdown,
-  Param, Post, ServiceUnavailableException,
+  Param, Post, Query, ServiceUnavailableException,
 } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify';
 import { API_VERSION, ErrorCode, GuestBootstrapRequest, GuestSession, HealthResponse, WalletSummary,
-  GenerationSettings, GenerationQuote, GenerationView, MediaAccess, SubmitGeneration, generationQuoteVersion, VIDEO_PRICING } from '@wb/contracts';
+  GenerationList, GenerationListQuery, GenerationSettings, GenerationQuote, GenerationView, MediaAccess, SubmitGeneration, generationQuoteVersion, VIDEO_PRICING } from '@wb/contracts';
 import type { ObjectStore } from '@wb/media';
 import { createServices, DomainError } from '@wb/server';
 import type { Services } from '@wb/server';
@@ -120,6 +120,14 @@ class GenerationController {
       throw new DomainError(409, ErrorCode.QUOTE_CHANGED, 'Refresh generation quote');
     }
     return GenerationView.parse(await this.services.generation.create({ ...input, userId }));
+  }
+
+  @Get()
+  async list(@Headers('authorization') authorization: string | undefined, @Query() query: unknown): Promise<GenerationList> {
+    const { userId } = await principal(this.services, authorization);
+    const parsed = GenerationListQuery.safeParse(query);
+    if (!parsed.success) throw new BadRequestException();
+    return GenerationList.parse(await this.services.generation.list({ userId, ...parsed.data }));
   }
 
   @Get('/:id')

@@ -1,6 +1,6 @@
 import { Button, Text, View } from '@tarojs/components';
 import Taro, { useDidShow } from '@tarojs/taro';
-import { generationWallet } from '../../services/generation';
+import { generationWallet, listGenerations } from '../../services/generation';
 import { useState } from 'react';
 import {
   art,
@@ -16,11 +16,12 @@ export function HomeScreen({ onNavigate }: { onNavigate: (screen: StudioScreen) 
   const [chooseDrama, setChooseDrama] = useState(false);
   const [balance, setBalance] = useState<number | null>(null);
   const [lastJob, setLastJob] = useState('');
+  const [jobsMessage, setJobsMessage] = useState('正在读取任务…');
   async function refreshAccount() {
     try { setBalance((await generationWallet()).balance); }
     catch { setBalance(null); }
-    const id: unknown = Taro.getStorageSync('wb_v2_last_job');
-    setLastJob(typeof id === 'string' && /^[a-f0-9-]{36}$/.test(id) ? id : '');
+    try { setLastJob((await listGenerations()).items[0]?.id ?? ''); setJobsMessage('还没有视频任务，从上方入口开始创作。'); }
+    catch { setLastJob(''); setJobsMessage('暂时无法读取任务，请进入作品页重试。'); }
   }
   useDidShow(() => { void refreshAccount(); });
   async function createDrama(mode: 'idea' | 'script') {
@@ -107,12 +108,12 @@ export function HomeScreen({ onNavigate }: { onNavigate: (screen: StudioScreen) 
             </Button>
           ))}
         </View>
-        <SectionTitle>
+        <SectionTitle detail="全部作品" onClick={() => { void Taro.navigateTo({ url: '/pages/studio-works/index' }); }}>
           继续创作
         </SectionTitle>
         {lastJob ? <Button id="last-generated-video" className="studio-project" onClick={() => { void Taro.navigateTo({ url: `/pages/studio-progress/index?id=${lastJob}` }); }}>
           <Icon name="play" /><View className="studio-project-copy"><Text className="studio-tool-title">我的视频任务</Text><Text className="studio-small">查看进度、成片与保存</Text></View><Icon name="arrow" />
-        </Button> : <Text className="studio-small">还没有视频任务，从上方入口开始创作。</Text>}
+        </Button> : <Text className="studio-small">{jobsMessage}</Text>}
         <SectionTitle>漫剧功能预览</SectionTitle>
         <Button className="studio-project" onClick={() => onNavigate('storyboard')}>
           <Cover src={art.rain} />

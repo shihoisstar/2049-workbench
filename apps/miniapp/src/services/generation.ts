@@ -1,6 +1,6 @@
 import Taro from '@tarojs/taro';
 import { ApiError } from '@wb/api-client';
-import { GenerationQuote, GenerationSettings, GenerationView, GuestSession, MediaAccess, SubmitGeneration, WalletSummary } from '@wb/contracts';
+import { GenerationList, GenerationQuote, GenerationSettings, GenerationView, GuestSession, MediaAccess, SubmitGeneration, WalletSummary } from '@wb/contracts';
 import { createMiniappApiClient } from './taro-transport';
 
 const client = createMiniappApiClient(process.env.TARO_APP_API_NEXT_BASE ?? '');
@@ -76,4 +76,8 @@ export async function quoteGeneration(input: unknown): Promise<GenerationQuote> 
   return GenerationQuote.parse(await client.request('post', '/v2/generation/quote', {
     body: GenerationSettings.parse(input),
   }));
+}
+
+export async function listGenerations(cursor?: string) {
+  return GenerationList.parse(await authorized(headers => client.request('get', '/v2/generation', { headers, query: cursor ? { cursor } : {} })));
 }

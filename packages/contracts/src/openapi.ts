@@ -12,7 +12,7 @@ import { PolishRequest, PolishResult } from './polish';
 import { UploadResult } from './uploads';
 import { WalletSummary } from './wallet';
 import { API_VERSION } from './version';
-import { GenerationSettings, GenerationQuote, SubmitGeneration, GenerationView, MediaAccess } from './generation';
+import { GenerationList, GenerationSettings, GenerationQuote, SubmitGeneration, GenerationView, MediaAccess } from './generation';
 
 /**
  * OpenAPI 文档唯一生成处:T0.3 契约 = health + 统一错误码 + 鉴权骨架。
@@ -56,6 +56,16 @@ export function buildOpenApiDocument() {
         },
       },
       '/v2/generation': {
+        get: {
+          summary: '本人视频任务列表，按创建时间倒序，每页20条', security: [{ opaqueSession: [] }],
+          parameters: [{ name: 'cursor', in: 'query', required: false, schema: { type: 'string', format: 'uuid' } }],
+          responses: {
+            '200': { description: '任务列表', content: { 'application/json': { schema: ref('GenerationList') } } },
+            '400': { description: '参数错误', content: { 'application/json': { schema: ref('ErrorBody') } } },
+            '401': { description: '未登录', content: { 'application/json': { schema: ref('ErrorBody') } } },
+            '404': { description: '游标不可用', content: { 'application/json': { schema: ref('ErrorBody') } } },
+          },
+        },
         post: {
           summary: '幂等受理营销视频；执行链未就绪时拒绝且不预留积分',
           security: [{ opaqueSession: [] }],
@@ -395,6 +405,7 @@ export function buildOpenApiDocument() {
         GenerationSettings: zodToJsonSchema(GenerationSettings, { target: 'openApi3' }),
         GenerationQuote: zodToJsonSchema(GenerationQuote, { target: 'openApi3' }),
         SubmitGeneration: zodToJsonSchema(SubmitGeneration, { target: 'openApi3' }),
+        GenerationList: zodToJsonSchema(GenerationList, { target: 'openApi3' }),
         GenerationView: zodToJsonSchema(GenerationView, { target: 'openApi3' }),
         GenerateImageRequest: zodToJsonSchema(GenerateImageRequest, { target: 'openApi3' }),
         GenerateImageResult: zodToJsonSchema(GenerateImageResult, { target: 'openApi3' }),

@@ -47,3 +47,7 @@ export const MediaAccess = z.object({
   width: z.number().int().positive(), height: z.number().int().positive(), durationMs: z.number().int().positive(),
 });
 export type MediaAccess = z.infer<typeof MediaAccess>;
+
+export const GenerationListQuery = z.object({ cursor: z.string().uuid().optional() }).strict();
+export const GenerationList = z.object({ items: z.array(GenerationView), nextCursor: z.string().uuid().nullable() });
+export type GenerationList = z.infer<typeof GenerationList>;

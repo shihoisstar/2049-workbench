@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { after, before, test } from 'node:test';
 import { randomBytes, randomUUID } from 'node:crypto';
-import { ErrorCode, GenerationQuote, GenerationView, GuestSession, generationQuoteVersion } from '@wb/contracts';
+import { ErrorCode, GenerationList, GenerationQuote, GenerationView, GuestSession, generationQuoteVersion } from '@wb/contracts';
 import { createServices } from '@wb/server';
 import { createApplication } from './application';
 import type { ObjectStore } from '@wb/media';
@@ -23,6 +23,32 @@ before(async () => {
 after(async () => { await (await appPromise).close(); });
 const settings = { resolution: '480p', aspectRatio: '9:16', durationSec: 5 } as const;
 const input = () => ({ ...settings, requestKey: randomUUID(), prompt: '清晨咖啡店的暖光', quoteVersion: generationQuoteVersion(settings) });
+
+test('owner-only paginated works survive new inserts and exclude internal fields', async () => {
+  const app = await appPromise;
+  const a = await login(); const b = await login();
+  const list = (suffix = '', headers = a.headers) => app.inject({ method: 'GET', url: `/v2/generation${suffix}`, headers });
+  assert.equal((await app.inject({ method: 'GET', url: '/v2/generation' })).statusCode, 401);
+  assert.deepEqual(GenerationList.parse((await list()).json()), { items: [], nextCursor: null });
+  const ids = new Set<string>();
+  for (let i = 0; i < 22; i++) {
+    const job = await services.generation.create({ ...settings, requestKey: randomUUID(), prompt: `作品 ${i}`, userId: a.userId });
+    ids.add(job.id);
+    await services.generation.fail({ userId: a.userId, jobId: job.id, failureCode: 'TEST_FAILURE' });
+  }
+  const firstResponse = await list(); assert.equal(firstResponse.statusCode, 200);
+  const first = GenerationList.parse(firstResponse.json());
+  assert.equal(first.items.length, 20); assert.ok(first.nextCursor);
+  assert.equal('userId' in firstResponse.json().items[0], false);
+  assert.equal('outputRef' in firstResponse.json().items[0], false);
+  await services.generation.create({ ...settings, requestKey: randomUUID(), prompt: '分页期间的新任务', userId: a.userId });
+  const second = GenerationList.parse((await list(`?cursor=${first.nextCursor}`)).json());
+  assert.equal(second.items.length, 2); assert.equal(second.nextCursor, null);
+  assert.deepEqual(new Set([...first.items, ...second.items].map(item => item.id)), ids);
+  assert.equal((await list(`?cursor=${first.nextCursor}`, b.headers)).statusCode, 404);
+  assert.equal(GenerationList.parse((await list('', b.headers)).json()).items.length, 0);
+  for (const query of ['?cursor=bad', `?userId=${b.userId}`, '?limit=999']) assert.equal((await list(query)).statusCode, 400);
+});
 async function login() {
   const app = await appPromise;
   const response = await app.inject({ method: 'POST', url: '/v2/auth/guest', payload: { credential: randomBytes(32).toString('hex') } });

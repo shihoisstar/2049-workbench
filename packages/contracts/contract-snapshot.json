@@ -199,6 +199,100 @@
           ],
           "type": "object"
         },
+        "GenerationList": {
+          "additionalProperties": false,
+          "properties": {
+            "items": {
+              "items": {
+                "additionalProperties": false,
+                "properties": {
+                  "actualCredits": {
+                    "minimum": 0,
+                    "nullable": true,
+                    "type": "integer"
+                  },
+                  "aspectRatio": {
+                    "enum": [
+                      "9:16",
+                      "16:9",
+                      "1:1"
+                    ],
+                    "type": "string"
+                  },
+                  "createdAt": {
+                    "format": "date-time",
+                    "type": "string"
+                  },
+                  "durationSec": {
+                    "enum": [
+                      5
+                    ],
+                    "type": "number"
+                  },
+                  "finishedAt": {
+                    "format": "date-time",
+                    "nullable": true,
+                    "type": "string"
+                  },
+                  "id": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "prompt": {
+                    "type": "string"
+                  },
+                  "requestKey": {
+                    "type": "string"
+                  },
+                  "reservedCredits": {
+                    "minimum": 0,
+                    "type": "integer"
+                  },
+                  "resolution": {
+                    "enum": [
+                      "480p",
+                      "720p"
+                    ],
+                    "type": "string"
+                  },
+                  "status": {
+                    "enum": [
+                      "accepted",
+                      "succeeded",
+                      "failed"
+                    ],
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "resolution",
+                  "aspectRatio",
+                  "durationSec",
+                  "id",
+                  "requestKey",
+                  "prompt",
+                  "status",
+                  "reservedCredits",
+                  "actualCredits",
+                  "createdAt",
+                  "finishedAt"
+                ],
+                "type": "object"
+              },
+              "type": "array"
+            },
+            "nextCursor": {
+              "format": "uuid",
+              "nullable": true,
+              "type": "string"
+            }
+          },
+          "required": [
+            "items",
+            "nextCursor"
+          ],
+          "type": "object"
+        },
         "GenerationQuote": {
           "additionalProperties": false,
           "properties": {
@@ -1635,6 +1729,67 @@
         }
       },
       "/v2/generation": {
+        "get": {
+          "parameters": [
+            {
+              "in": "query",
+              "name": "cursor",
+              "required": false,
+              "schema": {
+                "format": "uuid",
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/GenerationList"
+                  }
+                }
+              },
+              "description": "任务列表"
+            },
+            "400": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/ErrorBody"
+                  }
+                }
+              },
+              "description": "参数错误"
+            },
+            "401": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/ErrorBody"
+                  }
+                }
+              },
+              "description": "未登录"
+            },
+            "404": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/ErrorBody"
+                  }
+                }
+              },
+              "description": "游标不可用"
+            }
+          },
+          "security": [
+            {
+              "opaqueSession": []
+            }
+          ],
+          "summary": "本人视频任务列表，按创建时间倒序，每页20条"
+        },
         "post": {
           "requestBody": {
             "content": {
