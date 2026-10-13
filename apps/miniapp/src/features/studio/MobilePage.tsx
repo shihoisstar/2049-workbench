@@ -3,9 +3,10 @@ import Taro from '@tarojs/taro';
 import type { PropsWithChildren } from 'react';
 import type { StudioScreen } from './shared';
 import './studio.scss';
+import './ui-v2.scss';
 
 const pages: Record<StudioScreen, string> = {
-  home: '/pages/studio-home/index',
+  home: process.env.TARO_APP_MARKETING_PILOT === '1' ? '/pages/studio-marketing/index' : '/pages/studio-home/index',
   marketing: '/pages/studio-marketing/index',
   storyboard: '/pages/studio-storyboard/index',
 };
@@ -23,9 +24,9 @@ export function backToStudio() {
   else void Taro.reLaunch({ url: pages.home });
 }
 
-export function MobilePage({ children, notice = '开发联调 · 示例作品，暂不生成或扣费' }: PropsWithChildren<{ notice?: string }>) {
-  return <View className="studio-preview studio-mobile-page">
-    <Text className="studio-integration-notice">{notice}</Text>
+export function MobilePage({ children, notice = '开发联调 · 仅展示已接入的真实能力' }: PropsWithChildren<{ notice?: string }>) {
+  return <View className={`studio-preview studio-mobile-page ${process.env.TARO_APP_MARKETING_PILOT === '1' ? 'ui-v2' : ''}`}>
+    <Text className="studio-integration-notice">{process.env.TARO_APP_MARKETING_PILOT === '1' ? '营销试用版 · 积分仅用于内测' : notice}</Text>
     {children}
   </View>;
 }

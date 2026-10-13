@@ -1,0 +1,13 @@
+const assert = require('node:assert/strict'); const {samplePlan} = require('./short-sample-plan.cjs'); const {reserveSampleCall} = require('./short-sample-budget.cjs');
+const plan = samplePlan(); const fresh = () => ({attempts:[],outputs:Object.fromEntries(plan.frames.map(frame=>[frame.id,{image:{url:'https://images.invalid/frame.png'}}]))});
+function payload(frame,operation){return operation==='speech'?{model:plan.speechModel,text:frame.narration,voice:plan.speechVoice,language_boost:'Chinese',speed:1,format:'wav'}:operation==='image'?{model:frame.imageModel,prompt:frame.imagePrompt,aspect_ratio:'9:16',resolution:'1k',output_format:'png',...(frame.reference?{images:['data:image/png;base64,fixture']}:{})}:{model:plan.videoModel,prompt:frame.videoPrompt,aspect_ratio:'9:16',resolution:'720p',duration:5,image:'https://images.invalid/frame.png'};}
+const report=fresh();
+for(const operation of ['speech','image','video'])for(const frame of plan.frames){const row=reserveSampleCall(plan,report,frame.id,operation,payload(frame,operation));assert.equal(row.status,'pending');row.status='received';}
+assert.equal(report.attempts.length,12);assert.equal(Math.round(report.attempts.reduce((sum,row)=>sum+row.maximumUsd,0)*1e6),1560000);
+assert.throws(()=>reserveSampleCall(plan,report,'drama-1','speech',payload(plan.frames[0],'speech')));
+const pending=fresh();reserveSampleCall(plan,pending,'drama-1','speech',payload(plan.frames[0],'speech'));assert.throws(()=>reserveSampleCall(plan,pending,'drama-2','speech',payload(plan.frames[1],'speech')));pending.attempts[0].status='unknown';assert.throws(()=>reserveSampleCall(plan,pending,'drama-2','speech',payload(plan.frames[1],'speech')));
+pending.attempts[0].status='received';assert.throws(()=>reserveSampleCall(plan,pending,'drama-1','speech',payload(plan.frames[0],'speech')));
+assert.throws(()=>reserveSampleCall({...plan,conservativeUsdCap:0.01},fresh(),'drama-1','speech',payload(plan.frames[0],'speech')));
+for(const change of [{model:'expensive-model'},{resolution:'1080p'},{duration:10},{prompt:'changed'},{image:'https://images.invalid/changed.png'}])assert.throws(()=>reserveSampleCall(plan,fresh(),'drama-1','video',{...payload(plan.frames[0],'video'),...change}));
+assert.throws(()=>reserveSampleCall(plan,fresh(),'drama-1','image',{...payload(plan.frames[0],'image'),num_images:2}));
+console.log(JSON.stringify({checks:12,failures:0,networkCalls:0,plannedCalls:12,conservativeReservedUsd:1.56,covers:['full scope','call cap','pending stop','unknown stop','one POST','USD cap','fixed model','fixed resolution','fixed duration','fixed prompt','one image','exact reference URL']}));

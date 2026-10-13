@@ -1,0 +1,1 @@
+ALTER TABLE "wb_next"."drama_shot_video_jobs" ADD COLUMN "plan_snapshot" jsonb;

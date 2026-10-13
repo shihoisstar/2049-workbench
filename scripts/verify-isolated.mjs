@@ -149,7 +149,9 @@ export async function main(args = process.argv.slice(2)) {
       [1, 'redis:7-alpine', 6379, 'redis-cli ping', []],
     ]) {
       cleanup.push(names[index]);
-      await run('docker', ['run', '-d', '--name', names[index], '--label', `${ownershipLabel}=${runId}`, '-p', `127.0.0.1::${port}`, '--health-cmd', health, '--health-interval', '1s', '--health-timeout', '3s', '--health-retries', '60', ...extra, image], { capture: true, signal: controller.signal });
+      // The uncached gate runs multiple DB suites, each with its own 20-connection service pool.
+      await run('docker', ['run', '-d', '--name', names[index], '--label', `${ownershipLabel}=${runId}`, '-p', `127.0.0.1::${port}`, '--health-cmd', health, '--health-interval', '1s', '--health-timeout', '3s', '--health-retries', '60', ...extra, image,
+        ...(index === 0 ? ['-c', 'max_connections=500'] : [])], { capture: true, signal: controller.signal });
       await waitHealthy(names[index], controller.signal);
     }
     const pgPort = await publishedPort(names[0], 5432, controller.signal);

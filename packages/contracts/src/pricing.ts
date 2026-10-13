@@ -19,6 +19,23 @@ export type VideoResolution = keyof typeof VIDEO_PRICING;
 /** 注册赠送积分(= Mini 480P 一条 + 余量)。 */
 export const SIGNUP_GRANT_CREDITS = 80;
 
+/** R3.2b 固定参考图模型的公开单张价格 $0.08；按 USD/CNY 6.8、两倍毛利冻结。 */
+export const DRAMA_IMAGE_PRICING = {
+  credits: 110,
+  estimatedCostCents: 55,
+  model: 'google/nano-banana-2/reference-to-image',
+} as const;
+
+/**
+ * R3.4 逐镜头视频（图生视频 5s 片段）：mock 阶段锚点对齐 VIDEO_PRICING['480p'] Mini 档
+ * （$0.0567/5s × 6.8 ≈ ¥0.39 成本，售价 ×2）；真实 i2v 供应商接入后按账单校准。
+ */
+export const DRAMA_SHOT_VIDEO_PRICING = {
+  credits: 77,
+  estimatedCostCents: 39,
+  model: 'mini',
+} as const;
+
 /** 充值档位(¥ → 积分,含赠送;对应 credit_packages 种子)。 */
 export const STORE_PACKAGES = [
   { id: 'pkg-9', label: '入门档', priceCents: 990, credits: 990, bonus: 0 },

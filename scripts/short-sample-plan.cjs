@@ -1,0 +1,18 @@
+const fs = require('node:fs'); const path = require('node:path'); const {createHash} = require('node:crypto');
+const root = path.resolve(__dirname, '..');
+function samplePlan() {
+  const reference = path.join(root, 'apps/miniapp/src/assets/studio/cat-clouds.png'); const hash = createHash('sha256').update(fs.readFileSync(reference)).digest('hex');
+  const image = 'google/nano-banana-2/text-to-image'; const referenceModel = 'google/nano-banana-2/reference-to-image';
+  const shared = '竖屏9:16，干净清晰的电影构图，主体明确，禁止文字、标志、拼贴、分镜边框。';
+  return { revision: 1, provider: 'Atlas', approvalRequired: true, callsLimit: 12, budgetCny: 20, conservativeUsdCap: 2, reference: { path: path.relative(root, reference).replaceAll('\\','/'), sha256: hash },
+    videoModel: 'bytedance/seedance-v1-pro-fast/image-to-video', speechModel: 'minimax/speech-2.6-turbo', speechVoice: 'English_expressive_narrator', speechLanguage: 'Chinese', resolution: '720p', aspectRatio: '9:16', frameDurationSec: 5,
+    reservationUsd: { image: 0.08, video: 0.25, speech: 0.06 }, maximumReservedUsd: 1.56,
+    priceSources: ['https://www.atlascloud.ai/models/nanobanana-2','https://www.atlascloud.ai/models/bytedance/seedance-v1-pro-fast/image-to-video','https://www.atlascloud.ai/models/minimax'],
+    frames: [
+      { id: 'drama-1', category: 'drama', imageModel: referenceModel, reference: true, narration: '阿橘捡到一封星光信。', facts: '幻想故事；橘猫驾驶小飞船收到星光信。', imagePrompt: shared + '保持参考图橘猫的物种、橘色虎斑、白色口鼻、圆脸和大眼睛；保持小飞船和透明头盔的设计。高质量3D动画，小猫坐在飞船驾驶舱里，爪边放着一封带微弱星光的信，窗外是粉色云海。只有同一只橘猫，不出现人类。', videoPrompt: 'The same orange tabby cat pilot gently touches the glowing envelope with one paw. Pink clouds slowly drift outside the spaceship window. Subtle camera push in, stable identity, no mouth speech, no new character, no on-screen text.' },
+      { id: 'drama-2', category: 'drama', imageModel: referenceModel, reference: true, narration: '原来，是月亮在等它。', facts: '同一幻想故事；收到信后发现月亮在等待。', imagePrompt: shared + '保持参考图同一只橘猫的橘色虎斑、白色口鼻、圆脸、大眼睛、透明头盔和同一艘小飞船。高质量3D动画，橘猫坐在驾驶舱里看向前窗，爪边仍是同一封星光信，前窗外露出月亮与粉色云海。只有橘猫，不出现人类。', videoPrompt: 'The same orange tabby cat pilot looks up from the glowing envelope toward the moon outside the window. The spaceship glides gently forward through pink clouds. Stable cat face and helmet, gentle motion, no mouth speech, no new object or text.' },
+      { id: 'commerce', category: 'commerce', imageModel: image, reference: false, narration: '带上小猫，一起出门。', facts: '虚构商品资料：橘猫图案的棉布帆布袋；未提供价格、优惠、容量、销量或性能。', imagePrompt: shared + '虚构商品展示：一只奶白色棉布帆布袋，上面只有橘猫图案，没有文字或品牌。帆布袋放在木椅上，旁边是明亮的出门玄关。自然电影感光线，清楚展示袋子和猫咪图案，不出现人物，不添加宣传文字。', videoPrompt: 'A cream cotton tote bag with an orange tabby cat illustration rests on a wooden chair beside a bright doorway. Gentle breeze moves the handles slightly, slow camera push in. Preserve bag shape and printed motif, no new text, no product claims, no human.' },
+      { id: 'store_visit', category: 'store_visit', imageModel: image, reference: false, narration: '坐在窗边，歇一会儿。', facts: '虚构咖啡店资料：木桌、绿植、窗边座位；未提供店名、地址、价格、营业时间或顾客评价。', imagePrompt: shared + '虚构咖啡店环境：木桌、几盆绿植和窗边座位，暖色自然日光，干净安静的空间。电影感真实环境，镜头从室内看向窗边。没有店名、招牌、菜单、顾客、猫咪或促销文字，不增加地址或商品信息。', videoPrompt: 'A quiet cafe interior with wooden tables, green plants and window seating. Slowly glide the camera toward the window seat as daylight falls on the wood. Keep the same room layout, no customers, menu text, logos or added product claims.' },
+    ], outputs: [{ file: 'drama-short.mp4', frames: ['drama-1','drama-2'], durationSec: 10 }, { file: 'commerce-short.mp4', frames: ['commerce'], durationSec: 5 }, { file: 'store-visit-short.mp4', frames: ['store_visit'], durationSec: 5 }] };
+}
+module.exports = {samplePlan};

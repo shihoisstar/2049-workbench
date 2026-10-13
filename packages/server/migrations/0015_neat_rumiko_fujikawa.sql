@@ -1,0 +1,1 @@
+ALTER TABLE "wb_next"."drama_script_jobs" ADD COLUMN "response" jsonb;

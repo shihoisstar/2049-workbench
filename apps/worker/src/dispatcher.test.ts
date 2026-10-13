@@ -1,10 +1,72 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import type { GenerationDelivery, GenerationOutbox } from '@wb/server';
-import { dispatchGeneration } from './dispatcher';
+import { WorkflowNotFoundError } from '@temporalio/client';
+import type { Client } from '@temporalio/client';
+import type { DramaExportDelivery, DramaExportOutbox, DramaImageDelivery, DramaImageOutbox, GenerationDelivery, GenerationOutbox } from '@wb/server';
+import {
+  dispatchCandidateImage, dispatchExport, dispatchGeneration, temporalCandidateImageWorkflowStarter,
+  temporalExportWorkflowStarter, temporalWorkflowStarter,
+} from './dispatcher';
 import { readWorkerConfig } from './config';
 
 const delivery: GenerationDelivery = { id: 'event', jobId: 'job', userId: 'user', workflowId: 'generation:job', leaseToken: 'lease', type: 'generation.requested', attempt: 1 };
+const resumeDelivery: GenerationDelivery = { ...delivery, type: 'generation.resume' };
+const imageDelivery: DramaImageDelivery = { id: 'image-event', jobId: 'image-job', userId: 'user', workflowId: 'drama-image:image-job', leaseToken: 'lease', type: 'drama_image.requested', attempt: 1 };
+const exportDelivery: DramaExportDelivery = { id: 'export-event', jobId: 'export-job', userId: 'user', workflowId: 'drama-export:export-job', leaseToken: 'lease', type: 'drama_export.requested', attempt: 1 };
+function mockClient(calls: string[], overrides: { signalError?: Error } = {}): Client {
+  return {
+    workflow: {
+      getHandle: (workflowId: string) => ({
+        signal: async (name: string) => {
+          calls.push(`signal:${workflowId}:${name}`);
+          if (overrides.signalError) throw overrides.signalError;
+        },
+        describe: async () => ({ type: 'videoGeneration' }),
+      }),
+      start: async (type: string) => { calls.push(`start:${type}`); },
+    },
+  } as unknown as Client;
+}
+test('resume delivery signals the live workflow instead of starting a new one', async () => {
+  const calls: string[] = [];
+  const start = temporalWorkflowStarter(mockClient(calls), 'queue');
+  await start(resumeDelivery);
+  assert.deepEqual(calls, ['signal:generation:job:resumeVideoGeneration']);
+});
+test('resume delivery for a closed or missing workflow is treated as delivered', async () => {
+  const calls: string[] = [];
+  const missing = new WorkflowNotFoundError('not found', 'generation:job', undefined);
+  const start = temporalWorkflowStarter(mockClient(calls, { signalError: missing }), 'queue');
+  await start(resumeDelivery);
+  assert.deepEqual(calls, ['signal:generation:job:resumeVideoGeneration']);
+});
+test('resume delivery rethrows signal failures other than not-found', async () => {
+  const calls: string[] = [];
+  const failure = new Error('signal lost');
+  const start = temporalWorkflowStarter(mockClient(calls, { signalError: failure }), 'queue');
+  await assert.rejects(start(resumeDelivery), error => error === failure);
+  assert.deepEqual(calls, ['signal:generation:job:resumeVideoGeneration']);
+});
+test('candidate image resume uses its own signal and dispatcher acknowledges after acceptance', async () => {
+  const calls: string[] = [];
+  const start = temporalCandidateImageWorkflowStarter(mockClient(calls), 'queue');
+  await start({ ...imageDelivery, type: 'drama_image.resume' });
+  assert.deepEqual(calls, ['signal:drama-image:image-job:resumeCandidateImage']);
+  const outbox: DramaImageOutbox = { claim: async () => imageDelivery, ack: async () => { calls.push('ack'); }, release: async () => { calls.push('release'); } };
+  assert.equal(await dispatchCandidateImage(outbox, async () => { calls.push('start'); }), true);
+  assert.deepEqual(calls.slice(-2), ['start', 'ack']);
+});
+
+test('export resume signals the live workflow and dispatch acknowledges after acceptance', async () => {
+  const calls: string[] = [];
+  const start = temporalExportWorkflowStarter(mockClient(calls), 'queue', 'media-queue');
+  await start({ ...exportDelivery, type: 'drama_export.resume' });
+  assert.deepEqual(calls, ['signal:drama-export:export-job:resumeDramaExport']);
+  const outbox: DramaExportOutbox = { claim: async () => exportDelivery, ack: async () => { calls.push('ack'); }, release: async () => { calls.push('release'); } };
+  assert.equal(await dispatchExport(outbox, async () => { calls.push('start'); }), true);
+  assert.deepEqual(calls.slice(-2), ['start', 'ack']);
+});
+
 test('dispatcher acknowledges only after workflow acceptance', async () => {
   const calls: string[] = [];
   const outbox: GenerationOutbox = { claim: async () => delivery, ack: async () => { calls.push('ack'); }, release: async () => { calls.push('release'); } };

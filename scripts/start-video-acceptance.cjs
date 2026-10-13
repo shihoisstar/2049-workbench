@@ -47,6 +47,10 @@ function baseEnv() {
     USERPROFILE: process.env.USERPROFILE, API_NEXT_DATABASE_URL: state.databaseUrl, TEMPORAL_ADDRESS: state.temporalAddress,
     TEMPORAL_NAMESPACE: 'default', TEMPORAL_TASK_QUEUE: state.runId, TEMPORAL_MEDIA_TASK_QUEUE: `${state.runId}-media` };
 }
+function storageEnv() {
+  return { S3_ENDPOINT: state.objectStore.endpoint, S3_REGION: state.objectStore.region, S3_BUCKET: state.objectStore.bucket,
+    S3_ACCESS_KEY_ID: state.objectStore.accessKeyId, S3_SECRET_ACCESS_KEY: state.objectStore.secretAccessKey };
+}
 async function launch(role, entry, env, readyMarker) {
   const child = spawn(process.execPath, [join(root, entry)], { cwd: root, env, windowsHide: true, stdio: ['ignore', 'pipe', 'pipe'] });
   const log = createWriteStream(join(directory, `${role}.log`), { flags: 'a' });
@@ -71,7 +75,7 @@ async function switchProvider(mode) {
   if (previous && previous.exitCode === null && previous.signalCode === null) {
     const ended = new Promise(done => previous.once('exit', done)); previous.kill('SIGTERM'); await ended;
   }
-  const env = { ...baseEnv(), WORKER_PROVIDER_MODE: mode, ...(mode === 'atlas' ? provider() : {}) };
+  const env = { ...baseEnv(), ...storageEnv(), WORKER_PROVIDER_MODE: mode, ...(mode === 'atlas' ? provider() : {}) };
   await launch('generation', 'apps/worker/dist/main.js', env, 'generation_worker_started');
   state.mode = mode; accepting = true; saveState();
 }
@@ -126,8 +130,7 @@ async function main() {
   sql = postgres(state.databaseUrl, { max: 2 });
   store = createObjectStore(state.objectStore);
   await wait(() => store.probe().then(() => true));
-  const storageEnv = { S3_ENDPOINT: state.objectStore.endpoint, S3_REGION: 'garage', S3_BUCKET: 'videos', S3_ACCESS_KEY_ID: state.objectStore.accessKeyId, S3_SECRET_ACCESS_KEY: state.objectStore.secretAccessKey };
-  await launch('media', 'apps/media-worker/dist/main.js', { ...baseEnv(), ...storageEnv, MEDIA_FONT_FILE: 'C:/Windows/Fonts/msyh.ttc' }, 'media_worker_started');
+  await launch('media', 'apps/media-worker/dist/main.js', { ...baseEnv(), ...storageEnv(), MEDIA_FONT_FILE: 'C:/Windows/Fonts/msyh.ttc' }, 'media_worker_started');
   await switchProvider('mock');
   app = await createApplication({ config: { databaseUrl: state.databaseUrl, port: 0, corsOrigins: ['http://127.0.0.1:4175', 'http://localhost:4175'] }, objectStore: store, generationAvailable: () => accepting });
   const fastify = app.getHttpAdapter().getInstance();

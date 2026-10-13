@@ -1,0 +1,94 @@
+import { createHash } from 'node:crypto';
+import type { ObjectStore } from '@wb/media';
+import type { DramaShotVideoJobLocator, DramaShotVideoSubmission, Services } from '@wb/server';
+
+/** Mock 逐镜头视频源:h264 240x426 5s,无音轨;AI 标识烧录在画面与 comment 元数据中,运行时零外部依赖。 */
+export const MOCK_MP4 = Buffer.from(
+  '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' +
+  'bG9jaz0xOjA6MCBhbmFseXNlPTB4MzoweDExMyBtZT1oZXggc3VibWU9MiBwc3k9MSBwc3lfcmQ9MS4wMDowLjAwIG1peGVkX3JlZj0wIG1lX3Jh' +
+  'bmdlPTE2IGNocm9tYV9tZT0xIHRyZWxsaXM9MCA4eDhkY3Q9MSBjcW09MCBkZWFkem9uZT0yMSwxMSBmYXN0X3Bza2lwPTEgY2hyb21hX3FwX29m' +
+  'ZnNldD0wIHRocmVhZHM9MTMgbG9va2FoZWFkX3RocmVhZHM9MyBzbGljZWRfdGhyZWFkcz0wIG5yPTAgZGVjaW1hdGU9MSBpbnRlcmxhY2VkPTAg' +
+  'Ymx1cmF5X2NvbXBhdD0wIGNvbnN0cmFpbmVkX2ludHJhPTAgYmZyYW1lcz0zIGJfcHlyYW1pZD0yIGJfYWRhcHQ9MSBiX2JpYXM9MCBkaXJlY3Q9' +
+  'MSB3ZWlnaHRiPTEgb3Blbl9nb3A9MCB3ZWlnaHRwPTEga2V5aW50PTI1MCBrZXlpbnRfbWluPTEyIHNjZW5lY3V0PTQwIGludHJhX3JlZnJlc2g9' +
+  'MCByY19sb29rYWhlYWQ9MTAgcmM9Y3JmIG1idHJlZT0xIGNyZj0zOC4wIHFjb21wPTAuNjAgcXBtaW49MCBxcG1heD02OSBxcHN0ZXA9NCBpcF9y' +
+  'YXRpbz0xLjQwIGFxPTE6MS4wMACAAAACb2WIhAAQ/3yBsFCf4HknmbPfu3zINVWVrGmNA9b+dPwSfn/LkVii5qwYeAAAeoFY0kFqbBEdRyz3iAKd' +
+  'aK9l3C2q1ke9ajOIfJllU3IauE5adisvbmuFHWQFkvwZOB0Pka6+FlSTxW2UPqxQyQo0IguuHXVT7mabfexmCplBI7c0xB9LXlf6ZMOizyBGg34J' +
+  'EBeb2+Fr3KGoxMY7+DbZFJORQzzIlvCvcXK+qv0k+Ds5xNtCq+dz4NKArJfw89La6CghG9Q3Ce3+VNQlILG8gY7WyGKPPoasVOizgFflbij+1x3Y' +
+  '9t7TdKNCEFX17LKCy9rDYNrm/Qb9jeMwW3dGpi+O3PGr56IEL87BRVRkeZE6juw4EnAUoHTN3lUtaNrsPxZcz3eLggIYEYkcOCdfi84ZdzKqB+1G' +
+  'lZiwTFl0X8siBqCbrShQNKetP3bARL6I2z3oDKZfhwdtKqpuzTVqZcgGCB1gXEzVvaIcQgkvDEzDf5O1frTATTn64vkUKt7atbmQJ6BBeXWKsc19' +
+  'G0klaIOSVMtsb4O1VFNn+HuIcf17UB1tcij/rp7hMj/IEPvFSmgcVPfO1cX9mXPzriPwwKzdz51cERYGASan7X/DGpcZ2klUMPRGy8RGfQFeFB12' +
+  'G4P5AtCgNo9Qx4PxDcVORlmssV9Zv8Ke/HHcRG5l6YwmcCF7KXHlY7jtkIeKenm90C3A6d5YZ5jU9XBJRkWD1X2/gB+B3BHQI2YvUivie273b8iV' +
+  'c5MJW/cvzxrJOOyl9eDPsi3kB/DpzkjP+JrUdYoQU15jYxyy1/OE+byRsztNNEoYwAAAAwAAAwAAAwMDAAAAEkGaJBiCHwAABT6HYAK7rQwC9gAA' +
+  'AApBnkJCG/8AAImBAAAACgGeYUQz/wAAm4AAAAAKAZ5jRDP/AACbgQAAAA1Bmmg0TEEPAAADAAW1AAAADEGehkURLDf/AACJgQAAAAoBnqVEM/8A' +
+  'AJuBAAAACgGep0Qz/wAAm4AAAAANQZqsNExBDwAAAwAFtAAAAAxBnspFFSw3/wAAiYEAAAAKAZ7pRDP/AACbgAAAAAoBnutEM/8AAJuAAAAADUGa' +
+  '8DRMQQ8AAAMABbUAAAAMQZ8ORRUsN/8AAImBAAAACgGfLUQz/wAAm4EAAAAKAZ8vRDP/AACbgAAAAA1BmzQ0TEEPAAADAAW0AAAADEGfUkUVLDf/' +
+  'AACJgQAAAAoBn3FEM/8AAJuAAAAACgGfc0Qz/wAAm4AAAAANQZt4NExBDwAAAwAFtQAAAAxBn5ZFFSw3/wAAiYAAAAAKAZ+1RDP/AACbgQAAAAoB' +
+  'n7dEM/8AAJuBAAAADUGbvDRMQQ8AAAMABbQAAAAMQZ/aRRUsN/8AAImBAAAACgGf+UQz/wAAm4AAAAAKAZ/7RDP/AACbgQAAAA1Bm+A0TEEPAAAD' +
+  'AAW1AAAADEGeHkUVLDf/AACJgAAAAAoBnj1EM/8AAJuAAAAACgGeP0Qz/wAAm4EAAAANQZokNExBDwAAAwAFtAAAAAxBnkJFFSw3/wAAiYEAAAAK' +
+  'AZ5hRDP/AACbgAAAAAoBnmNEM/8AAJuBAAAADUGaaDRMQQ8AAAMABbUAAAAMQZ6GRRUsN/8AAImBAAAACgGepUQz/wAAm4EAAAAKAZ6nRDP/AACb' +
+  'gAAAAA1Bmqw0TEEPAAADAAW0AAAADEGeykUVLDf/AACJgQAAAAoBnulEM/8AAJuAAAAACgGe60Qz/wAAm4AAAAANQZrwNExBDwAAAwAFtQAAAAxB' +
+  'nw5FFSw3/wAAiYEAAAAKAZ8tRDP/AACbgQAAAAoBny9EM/8AAJuAAAAADUGbNDRMQQ8AAAMABbQAAAAMQZ9SRRUsN/8AAImBAAAACgGfcUQz/wAA' +
+  'm4AAAAAKAZ9zRDP/AACbgAAAAA1Bm3g0TEP/AAADABWxAAAADEGflkUVLDf/AACJgAAAAAoBn7VEM/8AAJuBAAAACgGft0Qz/wAAm4EAAAANQZu7' +
+  'NExDPwAAAwCkgAAAAAxBn9lFFSw3/wAAiYEAAAAKAZ/6RDP/AACbgA==',
+  'base64',
+);
+export const MOCK_MP4_PROPS = { width: 240, height: 426, durationMs: 5000 } as const;
+
+export function createShotVideoSubmissionActivity({ services }: { services: Pick<Services, 'dramaShotVideos' | 'dramaShotVideoSubmissions'> }) {
+  return async (input: DramaShotVideoJobLocator): Promise<DramaShotVideoSubmission | { status: 'terminal'; jobId: string }> => {
+    const job = await services.dramaShotVideos.get(input);
+    if (job.status !== 'accepted') return { status: 'terminal', jobId: job.id };
+    const claim = await services.dramaShotVideoSubmissions.begin({ ...input, providerKey: 'mock-shot-video:v1' });
+    if (!claim.claimed) return claim.submission;
+    return services.dramaShotVideoSubmissions.accepted({ ...input, token: claim.token, providerTaskId: `mock-shot-video:${job.id}` });
+  };
+}
+
+export function createShotVideoPublishingActivity({ services, objectStore }: {
+  services: Pick<Services, 'dramaShotVideos' | 'dramaShotVideoSubmissions' | 'dramaShotVideoAssets'>;
+  objectStore?: ObjectStore;
+}) {
+  return async (input: DramaShotVideoJobLocator): Promise<{ status: 'published' | 'terminal' | 'awaiting_receipt'; jobId: string }> => {
+    const job = await services.dramaShotVideos.get(input);
+    if (job.status !== 'accepted') return { status: 'terminal', jobId: job.id };
+    const submission = await services.dramaShotVideoSubmissions.get(input);
+    if (!submission || submission.status !== 'submitted') return { status: 'awaiting_receipt', jobId: job.id };
+    if (submission.providerKey !== 'mock-shot-video:v1') throw new Error('Shot video provider configuration changed');
+    if (!objectStore) throw new Error('Object store unavailable for shot video publication');
+    const sha256 = createHash('sha256').update(MOCK_MP4).digest('hex');
+    const objectKey = `drama-shot-video-jobs/${job.id}/${sha256}.mp4`;
+    await objectStore.put(objectKey, MOCK_MP4, sha256, 'video/mp4');
+    await services.dramaShotVideoAssets.publish({ ...input, objectKey, sha256, byteLength: MOCK_MP4.length, ...MOCK_MP4_PROPS });
+    return { status: 'published', jobId: job.id };
+  };
+}
+
+/** Only accepted jobs are failed; a settled job is left untouched so refunds never double-apply. */
+export function createShotVideoFailActivity({ services }: { services: Pick<Services, 'dramaShotVideos'> }) {
+  return async (input: DramaShotVideoJobLocator): Promise<void> => {
+    if ((await services.dramaShotVideos.get(input)).status === 'accepted') {
+      await services.dramaShotVideos.fail({ ...input, failureCode: 'SHOT_VIDEO_PUBLISH_FAILED' });
+    }
+  };
+}

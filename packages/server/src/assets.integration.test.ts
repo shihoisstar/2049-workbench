@@ -15,7 +15,7 @@ const sql = postgres(databaseUrl, { max: 2 });
 after(async () => { await services.close(); await sql.end(); });
 async function fixture() {
   const { userId } = await services.identity.bootstrapGuest(randomBytes(32).toString('hex'));
-  const job = await services.generation.create({ userId, requestKey: randomUUID(), prompt: 'Media fixture', resolution: '480p', aspectRatio: '9:16', durationSec: 5 });
+  const job = await services.generation.create({ userId, requestKey: randomUUID(), prompt: 'Media fixture', resolution: '480p', aspectRatio: '9:16', durationSec: 5, materialIds: [] });
   const sha256 = 'a'.repeat(64);
   return { userId, jobId: job.id, sha256, objectKey: `jobs/${job.id}/${sha256}.mp4`, byteLength: 2048, width: 480, height: 854, durationMs: 5000 };
 }

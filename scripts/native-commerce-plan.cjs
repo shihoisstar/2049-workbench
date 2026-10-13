@@ -1,0 +1,10 @@
+const fs=require('node:fs');const path=require('node:path');const assert=require('node:assert/strict');const{createHash}=require('node:crypto');
+const plan={revision:1,category:'commerce',fictional:true,provider:'Atlas',model:'bytedance/seedance-2.0-fast/reference-to-video',durationSec:10,resolution:'720p',aspectRatio:'9:16',generateAudio:true,bitrateMode:'high',callsLimit:1,budgetCny:10,conservativeUsdCap:1,
+  reference:{path:'docs/验收留档/NATIVE-COMMERCE-2026-10-11/product-reference.png',sha256:'f94e6f4ad5d471b482f33634180a092a95c16ec245e3f598adef71623280a404',width:768,height:1376,origin:'Previously generated fictional product image; no new image call'},
+  facts:'虚构商品：奶白色帆布袋，正面一只橘色虎斑猫图案，浅色提带；没有品牌、价格、优惠、承重、销量或性能承诺。',
+  lines:['哎，出门又拿一堆东西！','原来你在这儿！','装好！带上小猫，一起出门。'],
+  shots:[{from:0,to:3,action:'成年女主在明亮玄关准备出门，手拿手机和钥匙，略显忙乱地说第一句。商品袋在木椅上可见。'},{from:3,to:6,action:'她发现木椅上的同款袋子，眼神一亮并说第二句；切到提起袋子的正面特写，猫咪图案清楚。'},{from:6,to:10,action:'她把手机钥匙放进包，提起包走向门口、回头笑着说第三句；商品正面在画面内。'}],
+  prompt:'以image 1的帆布袋为唯一商品参考，制作10秒竖屏真人质感剧情带货短片。严格保持奶白袋身、橘色虎斑猫印花的位置和外观、浅色提带及袋子形状，图案不可变成活猫。明亮温暖的玄关、木椅，同一位成年年轻女性，简洁休闲衣着。0–3秒：她准备出门，手拿手机和钥匙有点忙乱，自然说“哎，出门又拿一堆东西！”。3–6秒：她发现木椅上的商品袋，眼神一亮说“原来你在这儿！”，切正面近景，她提起同款袋子，猫咪图案清楚。6–10秒：她将手机钥匙放入袋子，提包走向门口，回头笑着说“装好！带上小猫，一起出门。”。同一女声用标准普通话，有忙乱到轻松的情绪转折，像真人随口分享，避免播报和叫卖；说话时口型与表情同步。动作自然、手指和袋子不变形，人物服装和空间连续，物品数量不增减，不夸大容量。只有三句台词，清楚女声加轻微环境音，不加背景音乐。画面不生成字幕、商标、价格或广告文字，字幕在后期按实际语音添加。',
+  priceSource:'https://www.atlascloud.ai/models/bytedance/seedance-2.0-fast/reference-to-video',observedUsdPerSecond:0.027,observedComparableSampleUsd:0.5830272,subtitleMethod:'Local faster-whisper word timing and shared ASS; differences remain reviewable, no silent plan substitution'};
+function referenceDataUrl(){const bytes=fs.readFileSync(path.resolve(__dirname,'..',plan.reference.path));assert.equal(createHash('sha256').update(bytes).digest('hex'),plan.reference.sha256,'Product reference changed');assert.ok(bytes.length>0&&bytes.length<30*1024*1024);assert.equal(bytes.subarray(0,8).toString('hex'),'89504e470d0a1a0a');return `data:image/png;base64,${bytes.toString('base64')}`;}
+module.exports={plan,referenceDataUrl};

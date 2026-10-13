@@ -17,6 +17,8 @@
     "@temporalio/common": "1.24.0",
     "@temporalio/worker": "1.24.0",
     "@temporalio/workflow": "1.24.0",
+    "@wb/contracts": "workspace:*",
+    "@wb/media": "workspace:*",
     "@wb/model-gateway": "workspace:*",
     "@wb/server": "workspace:*",
     "protobufjs": "8.8.0"

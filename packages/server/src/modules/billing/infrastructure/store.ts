@@ -1,4 +1,4 @@
-import { ErrorCode, WalletSummary } from '@wb/contracts';
+import { ErrorCode, WalletEntryList, WalletSummary } from '@wb/contracts';
 import type postgres from 'postgres';
 import { DomainError } from '../../../errors';
 import type { BillingStore } from '../public';
@@ -6,7 +6,7 @@ import type { BillingStore } from '../public';
 interface ReservationRow {
   estimate: string;
   model: string;
-  estimated_cost_cents: string;
+  estimated_cost_cents: string | null;
   status: 'held' | 'settled' | 'refunded';
   actual: string | null;
   actual_cost_cents: string | null;
@@ -34,6 +34,29 @@ function checkKey(value: string, name = 'billingKey'): void {
 
 function conflict(): never {
   throw new DomainError(409, ErrorCode.HOLD_CONFLICT, 'Billing key conflicts with an existing operation');
+}
+
+interface LedgerRow {
+  id: string;
+  billing_key: string;
+  kind: 'grant' | 'hold' | 'settle' | 'refund';
+  amount: string;
+  remark: string | null;
+  created_at: Date;
+}
+
+/** 游标为 base64url(`${createdAtISO}|${id}`),不透出账本全局自增序列,前端原样回传。 */
+function encodeCursor(row: { created_at: Date; id: string }): string {
+  return Buffer.from(`${row.created_at.toISOString()}|${row.id}`, 'utf8').toString('base64url');
+}
+
+function decodeCursor(cursor: string): string {
+  const decoded = Buffer.from(cursor, 'base64url').toString('utf8');
+  const match = /^\d{4}-\d{2}-\d{2}T[^|]*\|(\d{1,15})$/.exec(decoded);
+  if (!match || !Number.isSafeInteger(Number(match[1]))) {
+    throw new DomainError(400, ErrorCode.VALIDATION, 'Invalid cursor');
+  }
+  return match[1];
 }
 
 /** Private transaction-bound adapter; its caller owns commit/rollback and isolation. */
@@ -90,7 +113,7 @@ export function createBillingStore(tx: postgres.TransactionSql): BillingStore {
       checkKey(billingKey);
       checkKey(model, 'model');
       checkAmount(estimate, 'estimate', true);
-      checkAmount(estimatedCostCents, 'estimatedCostCents');
+      if (estimatedCostCents !== null) checkAmount(estimatedCostCents, 'estimatedCostCents');
       const balance = await lockWallet(userId);
       const grants = await tx<{ billing_key: string }[]>`
         select billing_key from wb_next.ledger
@@ -100,7 +123,7 @@ export function createBillingStore(tx: postgres.TransactionSql): BillingStore {
       const existing = await reservation(userId, billingKey);
       if (existing) {
         if (safeNumber(existing.estimate) !== estimate || existing.model !== model ||
-            safeNumber(existing.estimated_cost_cents) !== estimatedCostCents) conflict();
+            (existing.estimated_cost_cents === null ? null : safeNumber(existing.estimated_cost_cents)) !== estimatedCostCents) conflict();
         return;
       }
       if (balance < estimate) {
@@ -187,6 +210,35 @@ export function createBillingStore(tx: postgres.TransactionSql): BillingStore {
           billingKey: entry.billing_key, type: entry.kind, amount: safeNumber(entry.amount),
           remark: entry.remark, createdAt: entry.created_at.toISOString(),
         })),
+      });
+    },
+
+    async entries(input) {
+      let cursorId: string | null = null;
+      if (input.cursor !== undefined) {
+        cursorId = decodeCursor(input.cursor);
+        const anchor = await tx<{ id: string }[]>`
+          select id::text as id from wb_next.ledger where id = ${cursorId} and user_id = ${input.userId}
+        `;
+        if (!anchor[0]) throw new DomainError(404, ErrorCode.NOT_FOUND, 'Cursor not found');
+      }
+      const rows = cursorId === null
+        ? await tx<LedgerRow[]>`
+            select id::text as id, billing_key, kind, amount, remark, created_at from wb_next.ledger
+            where user_id = ${input.userId} order by created_at desc, id desc limit 21
+          `
+        : await tx<LedgerRow[]>`
+            select id::text as id, billing_key, kind, amount, remark, created_at from wb_next.ledger
+            where user_id = ${input.userId}
+            and (created_at, id) < (select created_at, id from wb_next.ledger where id = ${cursorId} and user_id = ${input.userId})
+            order by created_at desc, id desc limit 21
+          `;
+      return WalletEntryList.parse({
+        entries: rows.slice(0, 20).map(row => ({
+          billingKey: row.billing_key, type: row.kind, amount: safeNumber(row.amount),
+          remark: row.remark, createdAt: row.created_at.toISOString(),
+        })),
+        nextCursor: rows.length > 20 ? encodeCursor(rows[19]) : null,
       });
     },
   };

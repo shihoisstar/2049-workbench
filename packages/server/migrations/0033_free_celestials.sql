@@ -1,0 +1,2 @@
+ALTER TABLE "wb_next"."marketing_copy_jobs" ADD COLUMN "duration_sec" integer DEFAULT 5 NOT NULL;--> statement-breakpoint
+ALTER TABLE "wb_next"."marketing_copy_jobs" ADD CONSTRAINT "copy_duration" CHECK ("wb_next"."marketing_copy_jobs"."duration_sec" in (5, 10));

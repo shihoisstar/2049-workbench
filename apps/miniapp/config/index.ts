@@ -18,6 +18,7 @@ function loadAppEnv(): Record<string, string> {
   if (process.env.TARO_APP_API_BASE !== undefined) out.TARO_APP_API_BASE = process.env.TARO_APP_API_BASE;
   if (process.env.TARO_APP_API_NEXT_BASE !== undefined) out.TARO_APP_API_NEXT_BASE = process.env.TARO_APP_API_NEXT_BASE;
   out.TARO_APP_STUDIO_PREVIEW = process.env.TARO_APP_STUDIO_PREVIEW === '1' ? '1' : '0';
+  out.TARO_APP_MARKETING_PILOT = process.env.TARO_APP_MARKETING_PILOT === '1' ? '1' : '0';
   return out;
 }
 const APP_ENV = loadAppEnv();
@@ -38,7 +39,7 @@ export default defineConfig<'webpack5'>(async (merge) => {
       375: 1,
     },
     sourceRoot: 'src',
-    outputRoot: `${APP_ENV.TARO_APP_STUDIO_PREVIEW === '1' ? 'dist/studio' : 'dist'}/${process.env.TARO_ENV === 'h5' ? 'h5' : 'weapp'}`,
+    outputRoot: `${APP_ENV.TARO_APP_MARKETING_PILOT === '1' ? 'dist/marketing-pilot' : APP_ENV.TARO_APP_STUDIO_PREVIEW === '1' ? 'dist/studio' : 'dist'}/${process.env.TARO_ENV === 'h5' ? 'h5' : 'weapp'}`,
     plugins: [],
     framework: 'react',
     compiler: 'webpack5',

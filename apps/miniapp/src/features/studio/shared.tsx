@@ -1,12 +1,6 @@
 import { Button, Image, Text, View } from '@tarojs/components';
 import Taro from '@tarojs/taro';
 import type { PropsWithChildren } from 'react';
-import rain from '../../assets/studio/hero-rain.png';
-import perfume from '../../assets/studio/perfume.png';
-import cafe from '../../assets/studio/cafe.png';
-import fantasy from '../../assets/studio/fantasy.png';
-
-export const art = { rain, perfume, cafe, fantasy };
 export type StudioScreen = 'home' | 'marketing' | 'storyboard';
 export const previewNotice = (title = '此功能将在后续页面中呈现') => {
   void Taro.showToast({ title, icon: 'none' });
@@ -57,7 +51,7 @@ export function PageHeader({
       <Text className="studio-page-title">{title}</Text>
       <Button
         className="studio-help"
-        onClick={() => previewNotice('当前为界面预览，不会生成或扣费')}
+        onClick={() => { void Taro.showModal({ title: '如何继续', content: '先核对页面内容和当前状态。有费用的制作操作会显示本次报价，由你确认后开始。已受理的视频可从作品页继续查看；字幕修改和成片合成重试不重新生成视频。', showCancel: false }); }}
       >
         {detail}
       </Button>
@@ -81,22 +75,26 @@ export function SectionTitle({
     </View>
   );
 }
-export function BottomNav({ onNavigate, active = '首页' }: { onNavigate: (screen: StudioScreen) => void; active?: string }) {
+export function BottomNav({ onNavigate, active = '漫剧' }: { onNavigate: (screen: StudioScreen) => void; active?: string }) {
+  if (process.env.TARO_APP_MARKETING_PILOT === '1') return <View className="studio-bottom-nav">{[
+    { icon: 'grid' as const, label: '创作', url: '/pages/studio-marketing/index' },
+    { icon: 'play' as const, label: '作品', url: '/pages/studio-works/index' },
+    { icon: 'user' as const, label: '我的', url: '/pages/studio-mine/index' },
+  ].map(item => <Button key={item.label} className={`studio-nav-item ${active === item.label ? 'is-active' : ''}`} onClick={() => { if (active !== item.label) void Taro.reLaunch({ url: item.url }); }}><Icon name={item.icon} /><Text>{item.label}</Text></Button>)}</View>;
   return (
     <View className="studio-bottom-nav">
       {(
         [
-          ['home', '首页'],
+          ['play', '漫剧'],
           ['grid', '创作'],
-          ['play', '作品'],
           ['user', '我的'],
         ] as const
       ).map(([icon, label], i) => (
         <Button
           key={label}
           className={`studio-nav-item ${label === active ? 'is-active' : ''}`}
-          id={i === 2 ? 'studio-nav-works' : undefined}
-          onClick={() => { if (i < 2) onNavigate(i === 0 ? 'home' : 'marketing'); else if (i === 2 && active !== '作品') void Taro.navigateTo({ url: '/pages/studio-works/index' }); else if (i === 3) previewNotice(); }}
+          id={i === 2 ? 'studio-nav-mine' : undefined}
+          onClick={() => { if (i < 2) onNavigate(i === 0 ? 'home' : 'marketing'); else if (active !== '我的') void Taro.navigateTo({ url: '/pages/studio-mine/index' }); }}
         >
           <Icon name={icon} />
           <Text>{label}</Text>

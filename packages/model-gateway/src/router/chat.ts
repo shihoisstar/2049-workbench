@@ -1,4 +1,5 @@
 import type { AdapterContext, ChannelView } from './types';
+import type { TextGenerationReceiptValue, TextGenerationUsageValue } from '@wb/contracts';
 
 export interface ChatRequest {
   modelName: string;
@@ -7,10 +8,29 @@ export interface ChatRequest {
   user: string;
   maxTokens?: number;
   timeoutMs?: number;
+  disableThinking?: boolean;
+  requireComplete?: boolean;
 }
 
 export interface ChatAdapter {
-  chat(ctx: AdapterContext, channel: ChannelView, req: ChatRequest): Promise<{ text: string; raw: unknown }>;
+  chat(ctx: AdapterContext, channel: ChannelView, req: ChatRequest): Promise<ChatResult>;
+}
+
+export interface ChatResult { text: string; raw: unknown; receipt: TextGenerationReceiptValue }
+export class ChatResponseError extends Error {
+  readonly status = 502;
+  readonly retryable = false;
+  constructor(readonly code: 'CHAT_OUTPUT_INCOMPLETE' | 'CHAT_OUTPUT_EMPTY' | 'CHAT_OUTPUT_TOO_LONG', readonly receipt: TextGenerationReceiptValue) {
+    super(code); this.name = 'ChatResponseError';
+  }
+}
+const record = (value: unknown): Record<string, unknown> | null => value !== null && typeof value === 'object' && !Array.isArray(value) ? value as Record<string, unknown> : null;
+const count = (value: unknown): number | null => typeof value === 'number' && Number.isSafeInteger(value) && value >= 0 ? value : null;
+function usage(value: unknown): TextGenerationUsageValue | null {
+  const item = record(value);
+  if (!item) return null;
+  return { inputTokens: count(item.prompt_tokens), outputTokens: count(item.completion_tokens),
+    cachedInputTokens: count(record(item.prompt_tokens_details)?.cached_tokens), reasoningTokens: count(record(item.completion_tokens_details)?.reasoning_tokens) };
 }
 
 export function buildChatMessages(req: ChatRequest): Array<{ role: string; content: string }> {
@@ -32,10 +52,13 @@ export const openAiCompatibleChatAdapter: ChatAdapter = {
       // 推理型模型(reasoning_content)会消耗 completion 配额,默认给足避免空 content
       max_tokens: req.maxTokens ?? 2000,
       stream: false,
+      ...(req.disableThinking ? { thinking: { type: 'disabled' } } : {}),
     };
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), req.timeoutMs ?? ctx.timeoutMs);
-    ctx.signal?.addEventListener('abort', () => controller.abort(), { once: true });
+    const onAbort = () => controller.abort();
+    if (ctx.signal?.aborted) controller.abort();
+    ctx.signal?.addEventListener('abort', onAbort, { once: true });
     try {
       const res = await ctx.fetchImpl(`${base}${path}`, {
         method: 'POST',
@@ -46,15 +69,24 @@ export const openAiCompatibleChatAdapter: ChatAdapter = {
       if (res.status >= 500) throw Object.assign(new Error(`chat 5xx: ${res.status}`), { status: res.status });
       if (res.status === 429) throw Object.assign(new Error('chat rate limited'), { status: 429 });
       if (res.status >= 400) throw Object.assign(new Error(`chat 4xx: ${res.status}`), { status: res.status });
-      const json = (await res.json()) as {
-        choices?: Array<{ message?: { content?: string } }>;
+      const raw: unknown = await res.json();
+      const json = (record(raw) ?? {}) as {
+        id?: unknown; usage?: unknown; choices?: Array<{ message?: { content?: unknown }; finish_reason?: unknown }>;
       };
-      const text = json.choices?.[0]?.message?.content ?? '';
-      if (!text) throw Object.assign(new Error('chat 空响应'), { status: 502 });
-      return { text, raw: json };
+      const choice = json.choices?.[0];
+      const text = typeof choice?.message?.content === 'string' ? choice.message.content : '';
+      const boundedText = text.slice(0, 64000).replace(/[\uD800-\uDBFF]$/, '');
+      const receipt: TextGenerationReceiptValue = { provider: channel.providerName, model: body.model,
+        responseId: typeof json.id === 'string' ? json.id.slice(0, 200) : null,
+        finishReason: typeof choice?.finish_reason === 'string' ? choice.finish_reason.slice(0, 100) : null,
+        text: boundedText, textTruncated: boundedText.length < text.length, usage: usage(json.usage) };
+      if (req.requireComplete && receipt.finishReason !== 'stop') throw new ChatResponseError('CHAT_OUTPUT_INCOMPLETE', receipt);
+      if (!text.trim()) throw new ChatResponseError('CHAT_OUTPUT_EMPTY', receipt);
+      if (req.requireComplete && receipt.textTruncated) throw new ChatResponseError('CHAT_OUTPUT_TOO_LONG', receipt);
+      return { text, raw, receipt };
     } finally {
       clearTimeout(timer);
-      ctx.signal?.removeEventListener('abort', () => controller.abort());
+      ctx.signal?.removeEventListener('abort', onAbort);
     }
   },
 };

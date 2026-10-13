@@ -27,6 +27,12 @@ export function createSubmissionStore(tx: postgres.TransactionSql) {
     return row;
   }
   return {
+    /** Internal ops channel: lock by job id without caller-known token. */
+    async lockForReview(jobId: string): Promise<Row> {
+      const [row] = await tx<Row[]>`select * from wb_next.provider_submissions where job_id = ${jobId} for update`;
+      if (!row) throw new DomainError(404, ErrorCode.TASK_NOT_FOUND, 'Provider submission not found');
+      return row;
+    },
     async get(input: GenerationLocator): Promise<ProviderSubmission | null> {
       const [job] = await tx`select id from wb_next.generation_jobs where id = ${input.jobId} and user_id = ${input.userId}`;
       if (!job) throw new DomainError(404, ErrorCode.TASK_NOT_FOUND, 'Generation job not found');

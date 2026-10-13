@@ -1,0 +1,10 @@
+import { z } from 'zod';
+export const NativeCaptionCue = z.object({ startMs: z.number().int().nonnegative(), endMs: z.number().int().positive(), text: z.string().trim().min(1).max(160).refine(value => !value.includes('\u0000')) }).strict().refine(cue => cue.endMs > cue.startMs, 'Caption must have positive duration');
+export const NativeCaptionCues = z.array(NativeCaptionCue).max(80).refine(cues => cues.every((cue, index) => index === 0 || cue.startMs >= cues[index - 1].endMs), 'Captions cannot overlap');
+export const ConfirmNativeCaptions = z.object({ requestKey: z.string().uuid(), revision: z.number().int().positive(), cues: NativeCaptionCues.refine(cues => cues.length > 0) }).strict();
+export const NativeCaptionReview = z.object({ jobId: z.string().uuid(), state: z.enum(['transcribing', 'review', 'ready']), revision: z.number().int().nonnegative(), durationMs: z.number().int().positive(), transcript: z.string(), cues: NativeCaptionCues, issue: z.enum(['transcription_failed', 'render_failed']).nullable(), confirmationRequestKey: z.string().uuid().nullable(), expiresAt: z.string().datetime() }).strip();
+export const ResumeNativeMedia = z.object({}).strict();
+export const NativeSourceAccess = z.object({ url: z.string().url(), urlExpiresAt: z.string().datetime(), expiresAt: z.string().datetime(), sha256: z.string().regex(/^[a-f0-9]{64}$/), width: z.number().int().positive(), height: z.number().int().positive(), durationMs: z.number().int().positive() }).strict();
+export type NativeCaptionCueValue = z.infer<typeof NativeCaptionCue>;
+export type NativeCaptionReviewValue = z.infer<typeof NativeCaptionReview>;
+export type ConfirmNativeCaptionsValue = z.infer<typeof ConfirmNativeCaptions>;

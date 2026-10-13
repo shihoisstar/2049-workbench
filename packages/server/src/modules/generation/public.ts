@@ -1,13 +1,23 @@
+import type { MarketingCategoryValue } from '@wb/contracts';
+
 export interface CreateGenerationInput {
   userId: string;
   requestKey: string;
   prompt: string;
+  category?: MarketingCategoryValue;
+  copyJobId?: string;
   resolution: '480p' | '720p';
   aspectRatio: '9:16' | '16:9' | '1:1';
-  durationSec: 5;
+  durationSec: 5 | 10;
+  materialIds: string[];
 }
 
 export interface GenerationJob extends CreateGenerationInput {
+  nativeQuoteVersion?: string;
+  nativeBinding?: string;
+  settlementPoint?: 'preview' | 'export';
+  provider?: 'mock' | 'atlas';
+  sourceFacts?: string;
   id: string;
   status: 'accepted' | 'succeeded' | 'failed';
   reservedCredits: number;
@@ -53,8 +63,9 @@ export interface GenerationService {
 }
 
 export interface GenerationDelivery {
+  nativeMarketing?: true;
   id: string;
-  type: 'generation.requested';
+  type: 'generation.requested' | 'generation.resume';
   jobId: string;
   userId: string;
   workflowId: string;

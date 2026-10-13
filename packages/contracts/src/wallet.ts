@@ -16,3 +16,18 @@ export const WalletSummary = z.object({
   entries: z.array(WalletEntry),
 });
 export type WalletSummary = z.infer<typeof WalletSummary>;
+
+/** GET /v2/wallet/entries 查询参数;游标为服务端下发的原样回传值。 */
+export const WalletEntryListQuery = z
+  .object({
+    cursor: z.string().min(1).max(200).optional(),
+  })
+  .strict();
+export type WalletEntryListQuery = z.infer<typeof WalletEntryListQuery>;
+
+/** GET /v2/wallet/entries 响应:按时间倒序的完整流水页,nextCursor 为空表示没有更多。 */
+export const WalletEntryList = z.object({
+  entries: z.array(WalletEntry),
+  nextCursor: z.string().nullable(),
+});
+export type WalletEntryList = z.infer<typeof WalletEntryList>;

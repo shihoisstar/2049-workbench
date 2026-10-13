@@ -31,6 +31,36 @@ const REQ: GatewayRequest = {
   taskOperation: 'submit',
 };
 
+test('Seedance 2.0 Fast T2V sends ratio and explicit native audio without legacy fields', async () => {
+  const calls: Array<{ url: string; init?: RequestInit }> = [];
+  const context = ctxWith({ 'https://atlas.fake/api/v1/model/generateVideo': [{ status: 200, body: { id: 'native-1' } }] }, calls);
+  const request = { ...REQ, modelName: 'bytedance/seedance-2.0-fast/text-to-video', payload: { ...REQ.payload, durationSec: 10, resolution: '720p', generateAudio: true, bitrateMode: 'high' } };
+  await atlasVideoAdapter.submit(context, { ...CHANNEL, config: {} }, request);
+  assert.deepEqual(JSON.parse(String(calls[0].init?.body)), { model: request.modelName, prompt: '测试', duration: 10, ratio: '9:16', resolution: '720p', generate_audio: true, bitrate_mode: 'high' });
+  for (const change of [{durationSec:-1}, {durationSec:16}, {durationSec:4.5}, {generateAudio:'true'}, {bitrateMode:'unknown'}, {imageUrls:['https://image.invalid/a.png']}]) {
+    await assert.rejects(atlasVideoAdapter.submit(context, { ...CHANNEL, config: {} }, {...request,payload:{...request.payload,...change}}));
+  }
+  assert.equal(calls.length, 1);
+});
+test('Seedance 2.0 Fast reference video preserves ordered image references and native audio', async () => {
+  const calls: Array<{ url: string; init?: RequestInit }> = [];
+  const context = ctxWith({ 'https://atlas.fake/api/v1/model/generateVideo': [{ status: 200, body: { id: 'reference-1' } }] }, calls);
+  const request = { ...REQ, modelName: 'bytedance/seedance-2.0-fast/reference-to-video', payload: { ...REQ.payload, durationSec: 10, resolution: '720p', generateAudio: true, bitrateMode: 'high', imageUrls: ['https://images.invalid/product.png', 'data:image/png;base64,fixture'] } };
+  await atlasVideoAdapter.submit(context, { ...CHANNEL, config: {} }, request);
+  assert.deepEqual(JSON.parse(String(calls[0].init?.body)), { model: request.modelName, prompt: '测试', duration: 10, ratio: '9:16', resolution: '720p', generate_audio: true, bitrate_mode: 'high', reference_images: request.payload.imageUrls });
+  for (const imageUrls of [undefined, [], [''], Array(10).fill('https://images.invalid/product.png')]) {
+    await assert.rejects(atlasVideoAdapter.submit(context, { ...CHANNEL, config: {} }, { ...request, payload: { ...request.payload, imageUrls } }));
+  }
+  assert.equal(calls.length, 1);
+});
+
+test('Pro Fast image-to-video uses its documented image field and accepts top-level receipts', async () => {
+  const calls: Array<{ url: string; init?: RequestInit }> = [];
+  const ctx = ctxWith({ 'https://atlas.fake/api/v1/model/generateVideo': [{ status: 200, body: { id: 'fast-1' } }] }, calls);
+  await atlasVideoAdapter.submit(ctx, { ...CHANNEL, config: {} }, { ...REQ, modelName: 'bytedance/seedance-v1-pro-fast/image-to-video', payload: { ...REQ.payload, resolution: '720p', imageUrls: ['https://images.invalid/frame.png'] } });
+  const body = JSON.parse(String(calls[0].init?.body)); assert.equal(body.image, 'https://images.invalid/frame.png'); assert.equal('image_url' in body, false); assert.equal('image_urls' in body, false);
+});
+
 test('submit:POST generateVideo,duration 为数字(真机验证结论),返回任务 id', async () => {
   const calls: Array<{ url: string; init?: RequestInit }> = [];
   const ctx = ctxWith({ 'https://atlas.fake/api/v1/model/generateVideo': [{ status: 200, body: { data: { id: 'atlas-1' } } }] }, calls);

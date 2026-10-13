@@ -1,0 +1,2 @@
+ALTER TABLE "wb_next"."generation_jobs" ADD COLUMN "category" text;--> statement-breakpoint
+ALTER TABLE "wb_next"."generation_jobs" ADD CONSTRAINT "generation_category" CHECK ("wb_next"."generation_jobs"."category" is null or "wb_next"."generation_jobs"."category" in ('commerce', 'store_visit'));

@@ -22,7 +22,7 @@ before(async () => {
 });
 after(async () => { await (await appPromise).close(); });
 const settings = { resolution: '480p', aspectRatio: '9:16', durationSec: 5 } as const;
-const input = () => ({ ...settings, requestKey: randomUUID(), prompt: '清晨咖啡店的暖光', quoteVersion: generationQuoteVersion(settings) });
+const input = () => ({ ...settings, materialIds: [], requestKey: randomUUID(), prompt: '清晨咖啡店的暖光', quoteVersion: generationQuoteVersion(settings) });
 
 test('owner-only paginated works survive new inserts and exclude internal fields', async () => {
   const app = await appPromise;
@@ -32,7 +32,7 @@ test('owner-only paginated works survive new inserts and exclude internal fields
   assert.deepEqual(GenerationList.parse((await list()).json()), { items: [], nextCursor: null });
   const ids = new Set<string>();
   for (let i = 0; i < 22; i++) {
-    const job = await services.generation.create({ ...settings, requestKey: randomUUID(), prompt: `作品 ${i}`, userId: a.userId });
+    const job = await services.generation.create({ ...settings, materialIds: [], requestKey: randomUUID(), prompt: `作品 ${i}`, userId: a.userId });
     ids.add(job.id);
     await services.generation.fail({ userId: a.userId, jobId: job.id, failureCode: 'TEST_FAILURE' });
   }
@@ -41,7 +41,7 @@ test('owner-only paginated works survive new inserts and exclude internal fields
   assert.equal(first.items.length, 20); assert.ok(first.nextCursor);
   assert.equal('userId' in firstResponse.json().items[0], false);
   assert.equal('outputRef' in firstResponse.json().items[0], false);
-  await services.generation.create({ ...settings, requestKey: randomUUID(), prompt: '分页期间的新任务', userId: a.userId });
+  await services.generation.create({ ...settings, materialIds: [], requestKey: randomUUID(), prompt: '分页期间的新任务', userId: a.userId });
   const second = GenerationList.parse((await list(`?cursor=${first.nextCursor}`)).json());
   assert.equal(second.items.length, 2); assert.equal(second.nextCursor, null);
   assert.deepEqual(new Set([...first.items, ...second.items].map(item => item.id)), ids);
@@ -145,13 +145,13 @@ test('default bootstrap rejects generation before reserving any credits', async 
   } finally { await closed.close(); }
 });
 
-test('only the owner of a published asset receives a short-lived media URL', async () => {
+test('only the owner of a published asset receives a short-lived media URL; repeat downloads re-sign without re-charging', async () => {
   const a = await login();
   const b = await login();
-  const accepted = await services.generation.create({ userId: a.userId, requestKey: randomUUID(), prompt: 'Media', ...settings });
+  const accepted = await services.generation.create({ userId: a.userId, requestKey: randomUUID(), prompt: 'Media', ...settings, materialIds: [] });
   let signed = 0;
-  const store: ObjectStore = { probe: async () => {}, put: async () => {}, remove: async () => {}, close() {},
-    access: async (_key, seconds) => { signed++; assert.ok(seconds > 0 && seconds <= 600); return 'https://private.invalid/video.mp4?signature=test'; } };
+  const store: ObjectStore = { probe: async () => {}, put: async () => {}, remove: async () => {}, read: async () => Buffer.alloc(0), close() {},
+    access: async (_key, seconds) => { signed++; assert.ok(seconds > 0 && seconds <= 600); return `https://private.invalid/video.mp4?signature=test-${signed}`; } };
   const mediaServices = createServices(databaseUrl);
   const mediaApp = await createApplication({ config: { databaseUrl, port: 3011 }, services: mediaServices, objectStore: store });
   await mediaApp.init(); await mediaApp.getHttpAdapter().getInstance().ready();
@@ -169,5 +169,15 @@ test('only the owner of a published asset receives a short-lived media URL', asy
     assert.equal(own.json().sha256, sha256);
     assert.equal(signed, 1);
     assert.equal('objectKey' in own.json(), false);
+    const entriesBefore = (await mediaServices.billing.entries({ userId: a.userId })).entries.length;
+    const repeat = await mediaApp.inject({ method: 'GET', url, headers: a.headers });
+    assert.equal(repeat.statusCode, 200);
+    assert.equal(signed, 2);
+    assert.notEqual(repeat.json().url, own.json().url, '每次下载应重新签发新 URL');
+    const third = await mediaApp.inject({ method: 'GET', url, headers: a.headers });
+    assert.equal(third.statusCode, 200);
+    assert.equal(signed, 3);
+    const entriesAfter = (await mediaServices.billing.entries({ userId: a.userId })).entries.length;
+    assert.equal(entriesAfter, entriesBefore, '重复下载不得产生新的账务流水');
   } finally { await mediaApp.close(); }
 });

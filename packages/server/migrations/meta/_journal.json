@@ -36,6 +36,209 @@
       "when": 1791294586858,
       "tag": "0004_slim_the_initiative",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1791435428456,
+      "tag": "0005_square_roughhouse",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1791451018462,
+      "tag": "0006_complete_iron_lad",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1791458610058,
+      "tag": "0007_sad_sabra",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1791459931664,
+      "tag": "0008_naive_guardian",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1791509398645,
+      "tag": "0009_big_frank_castle",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1791514426372,
+      "tag": "0010_premium_pepper_potts",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1791516506816,
+      "tag": "0011_parched_changeling",
+      "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1791518337197,
+      "tag": "0012_new_master_chief",
+      "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1791612691285,
+      "tag": "0013_late_silver_sable",
+      "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1791616846052,
+      "tag": "0014_productive_ultimo",
+      "breakpoints": true
+    },
+    {
+      "idx": 15,
+      "version": "7",
+      "when": 1791622696089,
+      "tag": "0015_neat_rumiko_fujikawa",
+      "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "7",
+      "when": 1791628167377,
+      "tag": "0016_sweet_gamma_corps",
+      "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1791629755126,
+      "tag": "0017_complex_domino",
+      "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1791632295074,
+      "tag": "0018_empty_pete_wisdom",
+      "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1791643497146,
+      "tag": "0019_yellow_skullbuster",
+      "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1791646009966,
+      "tag": "0020_bored_lilith",
+      "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1791647895873,
+      "tag": "0021_pretty_iron_monger",
+      "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "7",
+      "when": 1791649164350,
+      "tag": "0022_certain_power_man",
+      "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1791652475592,
+      "tag": "0023_free_havok",
+      "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1791678688648,
+      "tag": "0024_breezy_randall",
+      "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1791682269793,
+      "tag": "0025_tired_ironclad",
+      "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "7",
+      "when": 1791684035050,
+      "tag": "0026_true_wild_pack",
+      "breakpoints": true
+    },
+    {
+      "idx": 27,
+      "version": "7",
+      "when": 1791688439471,
+      "tag": "0027_low_wilson_fisk",
+      "breakpoints": true
+    },
+    {
+      "idx": 28,
+      "version": "7",
+      "when": 1791704670378,
+      "tag": "0028_tough_hellfire_club",
+      "breakpoints": true
+    },
+    {
+      "idx": 29,
+      "version": "7",
+      "when": 1791707520335,
+      "tag": "0029_outstanding_spyke",
+      "breakpoints": true
+    },
+    {
+      "idx": 30,
+      "version": "7",
+      "when": 1791708534873,
+      "tag": "0030_yellow_wonder_man",
+      "breakpoints": true
+    },
+    {
+      "idx": 31,
+      "version": "7",
+      "when": 1791711517128,
+      "tag": "0031_outgoing_kat_farrell",
+      "breakpoints": true
+    },
+    {
+      "idx": 32,
+      "version": "7",
+      "when": 1791713416631,
+      "tag": "0032_amazing_cammi",
+      "breakpoints": true
+    },
+    {
+      "idx": 33,
+      "version": "7",
+      "when": 1791716972329,
+      "tag": "0033_free_celestials",
+      "breakpoints": true
     }
   ]
 }

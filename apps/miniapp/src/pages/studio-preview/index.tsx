@@ -51,7 +51,7 @@ export default function StudioPreview() {
         </View>
         <View className={`studio-preview-pane ${screen === 'storyboard' ? 'is-visible' : ''}`}>
           {(wide || screen === 'storyboard') && (
-            <StoryboardScreen onBack={() => setScreen('home')} />
+            <StoryboardScreen projectId={null} onBack={() => setScreen('home')} />
           )}
         </View>
       </View>

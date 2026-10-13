@@ -1,0 +1,20 @@
+// Verify customer-facing interpretation of persisted task and wallet states. No requests.
+const fs = require('node:fs'); const path = require('node:path'); const assert = require('node:assert/strict'); const { createRequire } = require('node:module'); const { Script } = require('node:vm');
+const req = createRequire(path.resolve(__dirname, '../apps/miniapp/package.json')); const ts = req('typescript');
+const file = path.resolve(__dirname, '../apps/miniapp/src/services/marketing-presentation.ts');
+const compiled = ts.transpileModule(fs.readFileSync(file, 'utf8'), { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 } }).outputText;
+const moduleObject = { exports: {} }; new Script(`(function(module,exports){${compiled}\n})`).runInThisContext()(moduleObject, moduleObject.exports);
+const { marketingTaskState: state, marketingWorkTitle: title, walletEntryAmount: amount, studioDate: date } = moduleObject.exports;
+const job = { status: 'accepted', durationSec: 10, actualCredits: null }; const review = { state: 'review', issue: null };
+assert.equal(state(null).label, '读取中');
+assert.equal(state(job).step, 0); assert.equal(state({ ...job, durationSec: 5 }, review).step, 0);
+assert.equal(state({ ...job, actualCredits: 7 }).label, '字幕准备中');
+assert.equal(state({ ...job, actualCredits: 7 }, review).action, '核对字幕');
+assert.equal(state({ ...job, actualCredits: 7 }, { ...review, state: 'ready' }).step, 2);
+assert.equal(state({ ...job, actualCredits: 7 }, { ...review, issue: 'transcription_failed' }).action, '继续处理');
+assert.equal(state({ ...job, actualCredits: 7 }, { ...review, state: 'ready', issue: 'render_failed' }).action, '继续处理');
+assert.equal(state({ ...job, status: 'succeeded' }, review).step, 3); assert.equal(state({ ...job, status: 'failed' }).action, '查看原因');
+assert.equal(title('\n口播：手机钥匙找不到了？\n画面：玄关里翻找'), '手机钥匙找不到了？'); assert.equal(title('店铺：示例火锅店\n口播：开吃吧'), '示例火锅店');
+assert.equal(amount({ type: 'settle', amount: 0 }), '已结算'); assert.equal(amount({ type: 'settle', amount: 2 }), '+2'); assert.equal(amount({ type: 'hold', amount: -7 }), '-7');
+process.env.TZ = 'Asia/Shanghai'; assert.equal(date('2026-10-12T05:45:00Z'), '2026年10月12日 13:45');
+console.log('Marketing presentation: 16 assertions; task phases, original snippets, settlement and device-local time; paid calls 0');

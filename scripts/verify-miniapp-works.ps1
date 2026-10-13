@@ -26,7 +26,7 @@ function Check([bool]$Condition, [string]$Label) {
 if ($LASTEXITCODE -ne 0) { throw 'Automation initialization failed' }
 Invoke-IdeTool 'automation_evaluate' @('--fn-source', 'function(){wx.removeStorageSync(`wb_v2_last_job`);return true}') | Out-Null
 Invoke-IdeTool 'automation_navigate' @('--action', 'reLaunch', '--url', '/pages/studio-home/index') | Out-Null
-Tap '#studio-nav-works'
+Tap '.v2-works-link'
 $text = Read-Text '#works-list'
 Check ($text -match '已消耗 77 积分') 'Server list restores paid work without local last-job ID'
 Check ($text -match '预留积分已退还') 'Failed task displays refunded state'
@@ -37,7 +37,7 @@ Invoke-IdeTool 'automation_navigate' @('--action', 'navigateBack') | Out-Null
 Check ((Read-Text '#works-list') -match '已完成') 'Native back restores works list'
 Invoke-IdeTool 'automation_navigate' @('--action', 'reLaunch', '--url', '/pages/studio-home/index') | Out-Null
 Check ((Read-Text '#last-generated-video') -match '我的视频任务') 'Home restores latest task from server after relaunch'
-Tap '#studio-nav-works'
+Tap '.v2-works-link'
 $folder = Join-Path $workspace 'docs/验收留档/WORKS-2026-10-07'
 New-Item -ItemType Directory -Force $folder | Out-Null
 Invoke-IdeTool 'simulator_screenshot' @('--path', (Join-Path $folder 'works-list.jpg')) | Out-Null

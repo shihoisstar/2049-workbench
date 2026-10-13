@@ -43,9 +43,33 @@ after(async () => {
 });
 const guest = () => services.identity.bootstrapGuest(randomBytes(32).toString('hex'));
 const inputFor = (userId: string): CreateGenerationInput => ({
-  userId, requestKey: randomUUID(), prompt: 'A quiet shop at sunset', resolution: '480p', aspectRatio: '9:16', durationSec: 5,
+  userId, requestKey: randomUUID(), prompt: 'A quiet shop at sunset', resolution: '480p', aspectRatio: '9:16', durationSec: 5, materialIds: [],
 });
 const statusError = (status: number) => (error: unknown) => error instanceof DomainError && error.statusCode === status;
+
+test('native preview billing settles once atomically while historical jobs retain export settlement', async () => {
+  for (const historical of [false, true]) {
+    const { userId } = await guest();
+    const request = { category: 'store_visit' as const, durationSec: 10 as const, resolution: '720p' as const, aspectRatio: '9:16' as const, materialIds: [], prompt: '口播：一起开吃。' };
+    const quote = await services.nativeMarketing.quote({ userId, request, mockAvailable: true }); assert.equal(quote.settlementPoint, 'preview');
+    const created = await services.nativeMarketing.create({ userId, request: { ...request, requestKey: randomUUID(), quoteVersion: quote.version! }, mockAvailable: true }); const input = { userId, jobId: created.id };
+    if (historical) await sql`update wb_next.generation_jobs set native_billing_point=null where id=${created.id}`;
+    assert.equal((await services.generation.get(input)).settlementPoint, historical ? 'export' : 'preview');
+    const claim = await services.providerSubmissions.begin({ ...input, providerKey: 'preview-billing-fixture' }); assert.ok(claim.claimed);
+    await services.providerSubmissions.accepted({ ...input, token: claim.token, providerTaskId: `fixture-${created.id}` });
+    const sha256 = randomBytes(32).toString('hex'); const source = { ...input, sha256, objectKey: `native-marketing-source/${created.id}/${sha256}.mp4`, byteLength: 100, width: 720, height: 1280, durationMs: 10000 };
+    await assert.rejects(services.nativeMedia.capture({ ...source, durationMs: 1 }), statusError(400));
+    assert.equal((await services.generation.get(input)).actualCredits, null); assert.equal(await services.nativeMedia.get(input), null);
+    await Promise.all(Array.from({ length: 12 }, () => services.nativeMedia.capture(source)));
+    const preview = await services.generation.get(input); assert.equal(preview.status, 'accepted'); assert.equal(preview.actualCredits, historical ? null : 7);
+    assert.equal((await services.billing.summary(userId)).entries.filter(entry => entry.type === 'settle').length, historical ? 0 : 1);
+    const cues = [{ startMs: 100, endMs: 1000, text: '一起开吃。' }]; await services.nativeMedia.recognize({ ...input, sourceSha256: sha256, transcript: '一起开吃。', cues });
+    await services.nativeMedia.confirm({ ...input, request: { requestKey: randomUUID(), revision: 1, cues } });
+    const outputHash = randomBytes(32).toString('hex'); const output = { ...input, sourceSha256: sha256, revision: 2, objectKey: `jobs/${created.id}/${outputHash}.mp4`, sha256: outputHash, byteLength: 200, width: 720, height: 1280, durationMs: 10000 };
+    await services.nativeMedia.publish(output); await services.nativeMedia.publish(output);
+    const entries = (await services.billing.summary(userId)).entries; assert.equal(entries.filter(entry => entry.type === 'hold').length, 1); assert.equal(entries.filter(entry => entry.type === 'settle').length, 1); assert.equal(entries.filter(entry => entry.type === 'refund').length, 0);
+  }
+});
 
 async function counts(userId: string) {
   const [row] = await sql`select
@@ -86,6 +110,20 @@ test('changed request payload conflicts and generation lookup is owner scoped', 
   await assert.rejects(services.generation.fail({ userId: other.userId, jobId: job.id, failureCode: 'test' }), statusError(404));
   await balance(userId, 3);
   await balance(other.userId, 80);
+});
+
+test('marketing categories persist, replay once and cannot change on the same request key', async () => {
+  for (const category of ['commerce', 'store_visit'] as const) {
+    const { userId } = await guest(); const input = { ...inputFor(userId), category };
+    const job = await services.generation.create(input);
+    assert.equal(job.category, category);
+    assert.equal((await services.generation.create(input)).id, job.id);
+    assert.equal((await services.generation.get({ userId, jobId: job.id })).category, category);
+    assert.equal((await services.generation.list({ userId })).items[0].category, category);
+    await assert.rejects(services.generation.create({ ...input, category: category === 'commerce' ? 'store_visit' : 'commerce' }), statusError(409));
+    await assert.rejects(services.generation.create({ ...input, category: undefined }), statusError(409));
+    assert.deepEqual({ ...await counts(userId) }, { jobs: 1, events: 1, holds: 1, terminals: 0 });
+  }
 });
 
 test('the 720p reservation uses the existing five-second price; insufficient funds create nothing', async () => {

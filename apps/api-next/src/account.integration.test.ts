@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { after, before, test } from 'node:test';
 import { createHash, randomBytes } from 'node:crypto';
 import postgres from 'postgres';
-import { ErrorBody, ErrorCode, GuestSession, WalletSummary } from '@wb/contracts';
+import { ErrorBody, ErrorCode, GuestSession, WalletEntryList, WalletSummary } from '@wb/contracts';
 import { createServices } from '@wb/server';
 import { createApplication } from './application';
 
@@ -97,6 +97,41 @@ test('expired sessions return CREDENTIAL_EXPIRED', async () => {
   const response = await app.inject({ method: 'GET', url: '/v2/wallet', headers: headers(session.token) });
   assert.equal(response.statusCode, 401);
   assert.equal(ErrorBody.parse(response.json()).code, ErrorCode.CREDENTIAL_EXPIRED);
+});
+
+test('wallet entries paginate the full ledger without duplicates, misses, or cross-account leaks', async () => {
+  const app = await appPromise;
+  const a = await login();
+  const b = await login();
+  const keys = new Set<string>([`signup:${a.userId}`]);
+  for (let i = 0; i < 25; i++) {
+    const billingKey = `test-mine-topup-${i}`;
+    await services.billing.grant({ userId: a.userId, billingKey, amount: 1 });
+    keys.add(billingKey);
+  }
+  const list = (query = '', token = a.token) =>
+    app.inject({ method: 'GET', url: `/v2/wallet/entries${query}`, headers: headers(token) });
+
+  const firstResponse = await list();
+  assert.equal(firstResponse.statusCode, 200);
+  const first = WalletEntryList.parse(firstResponse.json());
+  assert.equal(first.entries.length, 20);
+  assert.ok(first.nextCursor);
+
+  await services.billing.grant({ userId: a.userId, billingKey: 'test-mine-topup-between', amount: 1 });
+  const refreshed = WalletEntryList.parse((await list()).json());
+  assert.equal(refreshed.entries[0].billingKey, 'test-mine-topup-between');
+
+  const second = WalletEntryList.parse((await list(`?cursor=${encodeURIComponent(first.nextCursor!)}`)).json());
+  assert.equal(second.entries.length, 6);
+  assert.equal(second.nextCursor, null);
+  assert.deepEqual(new Set([...first.entries, ...second.entries].map(entry => entry.billingKey)), keys);
+  assert.equal((await list(`?cursor=${encodeURIComponent(first.nextCursor!)}`, b.token)).statusCode, 404);
+  assert.equal(WalletEntryList.parse((await list('', b.token)).json()).entries.length, 1);
+  for (const query of ['?cursor=bad', '?cursor=', `?userId=${b.userId}`]) {
+    assert.equal((await list(query)).statusCode, 400);
+  }
+  assert.equal((await app.inject({ method: 'GET', url: '/v2/wallet/entries' })).statusCode, 401);
 });
 
 test('new login rejects deviceId and extra fields; no credit mutation endpoint is exposed', async () => {

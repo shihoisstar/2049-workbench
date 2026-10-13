@@ -10,5 +10,6 @@
     "lint": "eslint .",
     "test": "cd dist && node --test"
   },
+  "dependencies": { "@wb/contracts": "workspace:*" },
   "devDependencies": { "typescript": "^5.6.0", "@types/node": "^22.0.0" }
 }

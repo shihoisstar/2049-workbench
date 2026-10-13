@@ -1,0 +1,14 @@
+ALTER TABLE "wb_next"."user_materials" DROP CONSTRAINT "material_type_key";--> statement-breakpoint
+ALTER TABLE "wb_next"."drama_image_jobs" ALTER COLUMN "candidate_id" DROP NOT NULL;--> statement-breakpoint
+ALTER TABLE "wb_next"."drama_image_assets" ADD COLUMN "reference_material_id" uuid;--> statement-breakpoint
+ALTER TABLE "wb_next"."drama_image_jobs" ADD COLUMN "target" text DEFAULT 'candidate' NOT NULL;--> statement-breakpoint
+ALTER TABLE "wb_next"."drama_image_jobs" ADD COLUMN "project_id" uuid;--> statement-breakpoint
+ALTER TABLE "wb_next"."drama_image_jobs" ADD COLUMN "role_key" text;--> statement-breakpoint
+ALTER TABLE "wb_next"."drama_image_jobs" ADD COLUMN "portrait" jsonb;--> statement-breakpoint
+ALTER TABLE "wb_next"."drama_image_assets" ADD CONSTRAINT "drama_image_assets_reference_material_id_user_materials_id_fk" FOREIGN KEY ("reference_material_id") REFERENCES "wb_next"."user_materials"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "wb_next"."drama_image_jobs" ADD CONSTRAINT "drama_image_jobs_project_id_drama_projects_id_fk" FOREIGN KEY ("project_id") REFERENCES "wb_next"."drama_projects"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+CREATE UNIQUE INDEX "drama_portrait_active_uq" ON "wb_next"."drama_image_jobs" USING btree ("project_id","role_key") WHERE "wb_next"."drama_image_jobs"."target" = 'portrait' and "wb_next"."drama_image_jobs"."status" = 'accepted';--> statement-breakpoint
+ALTER TABLE "wb_next"."drama_image_jobs" ADD CONSTRAINT "drama_image_jobs_target" CHECK ((("wb_next"."drama_image_jobs"."target" = 'candidate' and "wb_next"."drama_image_jobs"."candidate_id" is not null and "wb_next"."drama_image_jobs"."project_id" is null and "wb_next"."drama_image_jobs"."role_key" is null and "wb_next"."drama_image_jobs"."portrait" is null) or ("wb_next"."drama_image_jobs"."target" = 'portrait' and "wb_next"."drama_image_jobs"."candidate_id" is null and "wb_next"."drama_image_jobs"."project_id" is not null and length(btrim("wb_next"."drama_image_jobs"."role_key")) between 1 and 100 and jsonb_typeof("wb_next"."drama_image_jobs"."portrait") = 'object')) is true);--> statement-breakpoint
+ALTER TABLE "wb_next"."user_materials" ADD CONSTRAINT "material_type_key" CHECK (("wb_next"."user_materials"."content_type" = 'image/jpeg' and "wb_next"."user_materials"."object_key" ~ '^materials/[a-f0-9-]{36}/[a-f0-9]{64}\.jpg$')
+    or ("wb_next"."user_materials"."content_type" = 'image/png' and "wb_next"."user_materials"."object_key" ~ '^materials/[a-f0-9-]{36}/(generated/[a-f0-9-]{36}/)?[a-f0-9]{64}\.png$')
+    or ("wb_next"."user_materials"."content_type" = 'image/webp' and "wb_next"."user_materials"."object_key" ~ '^materials/[a-f0-9-]{36}/[a-f0-9]{64}\.webp$'));

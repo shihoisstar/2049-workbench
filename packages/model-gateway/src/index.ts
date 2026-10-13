@@ -11,11 +11,12 @@ export {
 } from './router/router';
 export { ChannelPool } from './router/channel-pool';
 export { createMemoryRateLimiter, rateLimiterKey, type SyncRateLimiter } from './router/rate-limiter';
-export { openAiCompatibleChatAdapter, buildChatMessages } from './router/chat';
-export type { ChatAdapter, ChatRequest } from './router/chat';
+export { openAiCompatibleChatAdapter, buildChatMessages, ChatResponseError } from './router/chat';
+export type { ChatAdapter, ChatRequest, ChatResult } from './router/chat';
 export { volcengineSeedanceAdapter } from './router/adapters/volcengine-seedance';
 export { atlasImageAdapter } from './router/image';
 export { atlasVideoAdapter } from './router/adapters/atlas';
+export { atlasSpeechAdapter, SPEECH_MODEL, GEMINI_SPEECH_MODEL, type SpeechOptions } from './router/speech';
 export { atlasVideoStub } from './router/adapters/atlas-stub';
 export type {
   AdapterContext,

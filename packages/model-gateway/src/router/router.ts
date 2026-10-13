@@ -6,7 +6,7 @@
  */
 import { ChannelPool } from './channel-pool';
 import { createMemoryRateLimiter, rateLimiterKey, type SyncRateLimiter } from './rate-limiter';
-import type { ChatAdapter } from './chat';
+import type { ChatAdapter, ChatRequest, ChatResult } from './chat';
 import type { ImageAdapter } from './image';
 import {
   GatewayError,
@@ -64,7 +64,7 @@ const DEFAULT_SECRET_COOLDOWN_MS = 60_000;
 export interface GatewayRouter {
   dispatch(req: GatewayRequest): Promise<GatewayResponse>;
   /** 文本模型入口(chat):独立于视频任务,同渠道池/限流/冷却语义 */
-  chat(req: { modelName: string; system?: string; user: string; maxTokens?: number }): Promise<{ text: string }>;
+  chat(req: ChatRequest): Promise<ChatResult>;
   /** 图像生成入口(内部 submit+轮询至完成或超时;V1 AI 绘画/改图) */
   generateImage(req: { modelName?: string; prompt: string; imageUrls?: string[]; aspectRatio?: string }): Promise<{ imageUrl: string }>;
 }
@@ -76,7 +76,7 @@ export function createGatewayRouter(deps: GatewayRouterDeps): GatewayRouter {
   const maxAttempts = deps.maxAttempts ?? DEFAULT_MAX_ATTEMPTS;
   const defaultTimeoutMs = deps.defaultTimeoutMs ?? DEFAULT_TIMEOUT_MS;
 
-  async function chat(req: { modelName: string; system?: string; user: string; maxTokens?: number }): Promise<{ text: string }> {
+  async function chat(req: ChatRequest): Promise<ChatResult> {
     const attempts: GatewayAttempt[] = [];
     for (let i = 0; i < maxAttempts; i++) {
       const channel = pool.pick(now());
@@ -94,11 +94,13 @@ export function createGatewayRouter(deps: GatewayRouterDeps): GatewayRouter {
       const started = now();
       try {
         const ctx = { secret, fetchImpl: deps.fetchImpl ?? fetch, timeoutMs: defaultTimeoutMs };
-        const { text } = await adapter.chat(ctx, channel, req);
+        const result = await adapter.chat(ctx, channel, req);
         attempts.push({ channelId: channel.id, channelName: channel.name, ok: true, durationMs: now() - started });
-        return { text };
+        return result;
       } catch (e) {
-        const err = e as { status?: number; message?: string };
+        const err = e as { status?: number; message?: string; retryable?: boolean };
+        // A completed or uncertain billable request must not silently issue another POST.
+        if (req.requireComplete || err.retryable === false) throw e;
         // chat 失败仅 429 冷却(保护上游);其余失败不冷却——避免波及同渠道的视频任务
         if (err.status === 429) pool.cooldown(channel.id, cooldownFor(channel, 429), now());
         attempts.push({ channelId: channel.id, channelName: channel.name, ok: false, status: err.status, errorCode: 'upstream_failed', errorMessage: err.message, durationMs: 0 });

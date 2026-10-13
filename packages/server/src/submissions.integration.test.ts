@@ -16,7 +16,7 @@ const sql = postgres(databaseUrl, { max: 2 });
 after(async () => { await services.close(); await sql.end(); });
 async function job() {
   const { userId } = await services.identity.bootstrapGuest(randomBytes(32).toString('hex'));
-  const created = await services.generation.create({ userId, requestKey: randomUUID(), prompt: 'A shop', resolution: '480p', aspectRatio: '9:16', durationSec: 5 });
+  const created = await services.generation.create({ userId, requestKey: randomUUID(), prompt: 'A shop', resolution: '480p', aspectRatio: '9:16', durationSec: 5, materialIds: [] });
   return { userId, jobId: created.id, providerKey: 'test-provider:v1' };
 }
 const errorStatus = (status: number) => (error: unknown) => error instanceof DomainError && error.statusCode === status;

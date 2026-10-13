@@ -7,7 +7,7 @@
  */
 import type { AdapterContext, GatewayRequest, VideoAdapter } from '../types';
 
-async function atlasFetch(ctx: AdapterContext, url: string, init: RequestInit): Promise<{ status: number; body: Record<string, unknown> }> {
+export async function atlasFetch(ctx: AdapterContext, url: string, init: RequestInit): Promise<{ status: number; body: Record<string, unknown> }> {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), ctx.timeoutMs);
   const onAbort = () => controller.abort();
@@ -35,6 +35,8 @@ export const atlasVideoAdapter: VideoAdapter = {
       resolution?: string;
       aspectRatio?: string;
       imageUrls?: string[];
+      generateAudio?: boolean;
+      bitrateMode?: 'standard' | 'high';
     };
     if (!p.prompt) throw Object.assign(new Error('prompt 必填'), { status: 400 });
     // 模型选择:有图 → i2v(config.modelI2v);纯文生 → 按分辨率(480P=Mini/720P=Fast,定价矩阵)
@@ -53,9 +55,19 @@ export const atlasVideoAdapter: VideoAdapter = {
       aspect_ratio: p.aspectRatio ?? '9:16',
       resolution: p.resolution ?? '480p',
     };
+    const referenceVideo = model === 'bytedance/seedance-2.0-fast/reference-to-video';
+    if (model === 'bytedance/seedance-2.0-fast/text-to-video' || referenceVideo) {
+      if ((!referenceVideo && hasImages) || (referenceVideo && (!Array.isArray(p.imageUrls) || p.imageUrls.length < 1 || p.imageUrls.length > 9 || p.imageUrls.some(image => typeof image !== 'string' || !image.trim()))) || !Number.isInteger(body.duration) || Number(body.duration) < 4 || Number(body.duration) > 15 ||
+          (p.generateAudio !== undefined && typeof p.generateAudio !== 'boolean') ||
+          (p.bitrateMode !== undefined && !['standard', 'high'].includes(p.bitrateMode))) throw Object.assign(new Error('Invalid Seedance 2.0 Fast text-to-video request'), { status: 400 });
+      body.ratio = body.aspect_ratio; delete body.aspect_ratio;
+      body.generate_audio = p.generateAudio ?? true;
+      body.bitrate_mode = p.bitrateMode ?? 'standard';
+    }
     if (p.imageUrls?.length) {
-      body.image_url = p.imageUrls[0];
-      body.image_urls = p.imageUrls;
+      if (referenceVideo) body.reference_images = p.imageUrls;
+      else if (model === 'bytedance/seedance-v1-pro-fast/image-to-video') body.image = p.imageUrls[0];
+      else { body.image_url = p.imageUrls[0]; body.image_urls = p.imageUrls; }
     }
     const { status, body: resBody } = await atlasFetch(ctx, `${base}/api/v1/model/generateVideo`, {
       method: 'POST',
@@ -64,19 +76,19 @@ export const atlasVideoAdapter: VideoAdapter = {
     if (status >= 500) throw Object.assign(new Error(`atlas 5xx: ${status}`), { status });
     if (status === 429) throw Object.assign(new Error('atlas rate limited'), { status: 429 });
     if (status >= 400) throw Object.assign(new Error(`atlas 4xx: ${status}`), { status });
-    const id = (resBody as { data?: { id?: string } }).data?.id;
-    if (!id) throw Object.assign(new Error('atlas 未返回任务 id'), { status: 502 });
+    const id = (resBody as { data?: { id?: string }; id?: string }).data?.id ?? resBody.id;
+    if (typeof id !== 'string' || !id.trim() || id.length > 500) throw Object.assign(new Error('atlas 未返回任务 id'), { status: 502 });
     return { providerTaskId: id, raw: resBody };
   },
 
   async poll(ctx, channel, providerTaskId) {
     const base = channel.baseUrl ?? 'https://api.atlascloud.ai';
-    const { status, body: resBody } = await atlasFetch(ctx, `${base}/api/v1/model/prediction/${providerTaskId}`, { method: 'GET' });
+    const { status, body: resBody } = await atlasFetch(ctx, `${base}/api/v1/model/prediction/${encodeURIComponent(providerTaskId)}`, { method: 'GET' });
     if (status >= 500) throw Object.assign(new Error(`atlas 5xx: ${status}`), { status });
     if (status === 429) throw Object.assign(new Error('atlas rate limited'), { status: 429 });
     if (status >= 400) throw Object.assign(new Error(`atlas 4xx: ${status}`), { status });
 
-    const data = (resBody as { data?: { status?: string; outputs?: string[]; error?: string } }).data ?? {};
+    const data = ((resBody as { data?: { status?: string; outputs?: string[]; error?: string } }).data ?? resBody) as { status?: string; outputs?: string[]; error?: string };
     if (data.status === 'completed') {
       const videoUrl = data.outputs?.[0];
       if (!videoUrl) throw Object.assign(new Error('atlas completed 但无 outputs'), { status: 502 });

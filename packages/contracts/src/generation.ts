@@ -1,5 +1,9 @@
 import { z } from 'zod';
 import { VIDEO_PRICING } from './pricing';
+import { MaterialIds } from './materials';
+
+export const MarketingCategory = z.enum(['commerce', 'store_visit']);
+export type MarketingCategoryValue = z.infer<typeof MarketingCategory>;
 
 export const GenerationSettings = z.object({
   resolution: z.enum(['480p', '720p']),
@@ -24,17 +28,26 @@ export const SubmitGeneration = GenerationSettings.extend({
   requestKey: z.string().uuid(),
   quoteVersion: z.string().min(1).max(200),
   prompt: z.string().min(1).max(3000).refine(value => value.trim().length > 0 && !value.includes('\u0000')),
+  category: MarketingCategory.optional(),
+  copyJobId: z.string().uuid().optional(),
+  materialIds: MaterialIds.optional().default([]),
 }).strict();
 export type SubmitGeneration = z.infer<typeof SubmitGeneration>;
 
 // Do not publish internal user IDs, supplier cost, or unvalidated output references.
 export const GenerationView = GenerationSettings.extend({
+  durationSec: z.union([z.literal(5), z.literal(10)]),
+  provider: z.enum(['mock', 'atlas']).optional(),
+  settlementPoint: z.enum(['preview', 'export']).optional(),
   id: z.string().uuid(),
   requestKey: z.string(),
   prompt: z.string(),
+  category: MarketingCategory.optional(),
+  copyJobId: z.string().uuid().optional(),
   status: z.enum(['accepted', 'succeeded', 'failed']),
   reservedCredits: z.number().int().nonnegative(),
   actualCredits: z.number().int().nonnegative().nullable(),
+  materialIds: z.array(z.string().uuid()),
   createdAt: z.string().datetime(),
   finishedAt: z.string().datetime().nullable(),
 }).strip();

@@ -1,4 +1,4 @@
-import type { WalletSummary } from '@wb/contracts';
+import type { WalletEntryList, WalletSummary } from '@wb/contracts';
 
 export interface GrantInput {
   userId: string;
@@ -12,7 +12,7 @@ export interface ReserveInput {
   billingKey: string;
   estimate: number;
   model: string;
-  estimatedCostCents: number;
+  estimatedCostCents: number | null;
 }
 
 export interface SettleInput {
@@ -27,10 +27,16 @@ export interface RefundInput {
   billingKey: string;
 }
 
+export interface EntriesInput {
+  userId: string;
+  cursor?: string;
+}
+
 export interface BillingStore {
   grant(input: GrantInput): Promise<void>;
   reserve(input: ReserveInput): Promise<void>;
   settle(input: SettleInput): Promise<void>;
   refund(input: RefundInput): Promise<void>;
   summary(userId: string): Promise<WalletSummary>;
+  entries(input: EntriesInput): Promise<WalletEntryList>;
 }

@@ -8,12 +8,13 @@
     "build:h5": "taro build --type h5",
     "build:studio:h5": "node scripts/build-studio.cjs h5",
     "build:studio:weapp": "node scripts/build-studio.cjs weapp",
+    "build:pilot:weapp": "node scripts/build-studio.cjs weapp --marketing-pilot",
     "dev:weapp": "taro build --type weapp --watch",
     "dev:h5": "taro build --type h5 --watch",
     "build": "taro build --type weapp && taro build --type h5",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "lint": "eslint .",
-    "test": "echo 'miniapp: 页面测试随功能工单落地'"
+    "test": "node ../../scripts/verify-miniapp-save-cache.cjs && node ../../scripts/verify-marketing-presentation.cjs && node ../../scripts/verify-miniapp-download-link.cjs"
   },
   "browserslist": [
     "last 3 versions",
